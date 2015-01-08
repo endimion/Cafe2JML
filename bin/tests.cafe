@@ -1,0 +1,613 @@
+mod* Content{
+[cont]
+
+op _=_ : cont cont -> Bool {comm}
+
+var C1  : cont
+
+eq (C1 = C1) = true .
+
+}
+
+mod* Permission{ --sssss
+pr(Content)
+[action < perm ]
+
+ops play display print export execute : -> action
+op _=_ : action action -> Bool {comm }
+
+op <_,_> : action cont -> perm 
+
+vars A1 A2 : action
+
+eq (A1 = A1) = true .
+
+}
+
+mod* Request{
+pr(Permission + Content)
+[req]
+
+op _,_ : cont action -> req
+op null : -> req
+
+op _=_ : req req -> Bool {comm} 
+
+op belong1?(_,_) : req  perm -> Bool
+
+vars C1 C2 : cont
+vars A1 A2 : action
+var R : req 
+
+ceq belong1?((C1,A1),< A2 , C2 >) = true if (C1 = C2) and (A1 = A2) .
+
+eq (R = R) = true .
+
+}
+
+
+mod! Colors{
+[color]
+ops black white : -> color
+op _=_ : color color -> Bool {comm}
+
+eq (black = black ) = true .
+eq (white = white) = true .
+eq (black = white) = false .
+}
+
+
+mod! Label{
+[type1 , type2 ,type3 < label]
+
+op _=_ : label label -> Bool {comm}
+op _=_ : type1 type1 -> Bool {comm}
+op _=_ : type2 type2 -> Bool {comm}
+op _=_ : type3 type3 -> Bool {comm}
+
+ops simple complex  : -> type1
+ops count datetime true : -> type2
+ops once many : -> type3
+
+op _ & _ & _ : type1 type2 type3 -> label
+
+op type1?_ : label -> type1
+op type2?_ : label -> type2
+op type3?_ : label -> type3
+
+var t1 : type1
+var t2 : type2
+var t3 : type3 
+
+
+eq type1?(t1 &  t2 & t3) = t1 .
+eq type2?(t1 & t2 &  t3) = t2 .
+eq type3?(t1 & t2 &  t3) = t3 .
+
+eq (t1 = t1 ) = true .
+eq (t2 = t2 ) = true .
+eq (t3 = t3 ) = true .
+}
+
+
+-- Module that defines the parametrized datatype of a SET
+mod* SET(X :: TRIV){
+pr(NAT)
+-- Sorts
+[Elt < Set]
+-- Constructors
+op empty : -> Set
+op _,_   : Set Set -> Set {comm}
+-- Operators �
+op _/in_ : Elt Set -> Bool
+op _=_   : Set Set -> Bool {comm}
+op #_    : Set     -> Nat
+-- axioms (equations)
+var S : Set .
+var e : Elt .
+var e' : Elt .
+
+eq (e , empty) = e .
+eq (e,e) = e .
+ceq (e , S) = S if (e /in S) .
+eq (S = S ) = true .
+ceq (e /in e') = true if (e = e') .
+ceq (e /in e' , S) = true if (e = e') or (e /in S) .
+eq # e = 1 .
+eq # (e , S) = #(S) + 1 .
+}
+
+
+-- Module that specifies a constraint in OMA REL 
+mod! Constraint {
+pr(NAT)
+[cons]
+ops trueCons  interval datetime : -> cons
+op count[_] : Nat -> cons
+op timedcount[_] : Nat  -> cons
+
+op _>_ : cons cons -> Bool
+
+var n : Nat
+
+eq (trueCons > trueCons) = false .
+eq (trueCons > count[n] ) = true .
+eq (trueCons > timedcount[n] ) = true .
+eq (trueCons > interval) = true .
+eq (trueCons > datetime) = true .
+
+eq (datetime > trueCons) = false .
+eq (datetime > count[n] ) = true .
+eq (datetime > timedcount[n] ) = true .
+eq (datetime > interval) = true .
+eq (datetime > datetime) = false .
+
+eq (interval > trueCons) = false .
+eq (interval > count[n] ) = true .
+eq (interval > timedcount[n] ) = true .
+eq (interval > interval) = false .
+eq (datetime > datetime) = false .
+
+
+eq (timedcount[n] > trueCons) = false .
+eq (timedcount[n] > count[n] ) = true .
+eq (timedcount[n] > timedcount[n] ) = false .
+eq (timedcount[n] > interval) = false .
+eq (timedcount[n] > datetime) = false .
+
+
+eq (count[n] > trueCons) = false .
+eq (count[n] > count[n] ) = false .
+eq (count[n] > timedcount[n] ) = false .
+eq (count[n] > interval) = false .
+eq (count[n] > datetime) = false .
+}
+
+
+-- Module that specifies the set of constraints in OMA
+mod! ConstraintSet{
+
+pr(SET(Constraint {sort Elt -> cons})
+*{sort Set -> consSet, op empty -> emptcons})
+-- operator cons0? takes as input a constraint set and returns the best constraint based
+-- on the OMA ordering on constraints
+op cons0? : consSet -> cons
+op _=_ : consSet consSet -> Bool
+
+var C1 : cons
+var CS : consSet
+
+ceq cons0?(C1 , CS) = C1 if (C1 > cons0?(CS)) .
+eq cons0?(C1) = C1 .
+eq (C1 = C1) = true .
+
+}
+
+
+
+
+-- Module that specifies the set of permission in OMA
+mod! PermissionSET{
+
+pr(SET(Permission {sort Elt -> perm})
+*{sort Set -> permSet, op empty -> emptperm})
+pr(Request)
+
+op belong2?(_,_) : req permSet -> Bool
+op _=_ : permSet permSet -> Bool {comm}
+
+var C1 : cont
+var A1 : action
+var P1 : perm
+var PS : permSet
+
+ceq belong2?((C1,A1) , (P1 , PS) ) = true if ( belong1?((C1,A1),P1)) or (belong2?((C1,A1) , PS)) .
+eq (PS = PS) = true .
+}
+
+
+-- Specifies a Constraint Permission 
+mod! ConstraintPermission{
+pr(PermissionSET + ConstraintSet + Label )
+pr(Request)
+
+[cPerm]
+
+op _=_ : cPerm cPerm -> Bool {comm}
+op null : -> cPerm
+op _about_ : consSet permSet -> cPerm
+op labelCP?_ : cPerm -> label
+
+op cons1? : req cPerm -> cons
+
+op belong3?(_,_) : req cPerm -> Bool
+
+-- operator conPerm1? checks if a the set of constraints for a permission set holds
+
+op conPerm1?      : cPerm -> Bool 
+
+
+var R : req 
+vars C C' : consSet
+vars P P' : permSet
+
+ceq belong3?(R,C about P) = true if belong2?(R,P)  .
+eq cons1?(R , (C about P)) = cons0?(C) .
+
+
+ceq (( C about P)  = ( C' about P')) = true  if (C = C') and (P = P') .
+
+
+}
+
+
+-- Specifies a set of Constraint Permissions
+mod! SetofCP{
+pr(SET(ConstraintPermission { sort Elt -> cPerm})
+*{sort Set -> setofCP, op empty -> emptySetofCP}
+)
+
+-- operator conPerm2? checks if for all permission sets their constraints holds
+-- ------------------------------
+op conPerm2? : setofCP -> Bool .
+
+op find1 : req setofCP -> cPerm
+op belong4? : req setofCP -> Bool
+op cons2? : req setofCP -> cons
+
+var R : req
+var CPS : setofCP
+var CP : cPerm
+
+ceq find1(R , (CP , CPS)) = CP if (belong3?(R , CP)).
+ceq find1(R , (CP , CPS)) = find1(R , CPS) if not(belong3?(R,CP)) .
+ceq find1(R, CP) = null if not (belong3?(R,CP)) .
+
+ceq belong4?(R, (CP, CPS)) = true if ( (belong3?(R, CP)) or (belong4?(R, CPS)) ) .
+eq belong4?(R, CP) = belong3?(R, CP) .
+
+eq cons2?(R , CPS) = cons1?(R , find1(R , CPS)) .
+
+
+eq conPerm2?(emptySetofCP) = true .
+eq conPerm2?( CP , CPS) = ( conPerm1?(CP) and conPerm2?(CPS)) .
+
+}
+
+
+mod! Sublicense{
+pr(ConstraintPermission + SetofCP )
+
+[subLic]
+op nill : -> subLic
+op _about_ : consSet setofCP -> subLic
+
+op subCons1? : subLic -> Bool
+op subCons?  : req subLic -> Bool
+
+op label?_ : subLic -> label
+op find2 : req subLic -> cPerm
+op belong5? : req subLic -> Bool
+op cons3? : req subLic -> cons
+
+var R : req
+var CPS : setofCP
+var C : consSet
+
+eq find2(R , C about CPS) = find1(R, CPS) . 
+
+eq belong5?(R , C about CPS) = belong4?(R, CPS) .
+
+ceq cons3?(R , C about CPS) = cons0?(C) if ( cons0?(C) > cons2?(R ,CPS)) .
+ceq cons3?(R , C about CPS) = cons2?(R , CPS) if (cons2?(R , CPS) > cons0?(C)) .
+
+ceq subCons?(R , C about CPS) = true if ( subCons1?(C about CPS) 
+    	       	   	      	     and (conPerm2?( find1(R , CPS)))) .
+
+}
+
+
+mod! License{
+pr(SET(Sublicense { sort Elt -> subLic})
+*{sort Set -> lic, op empty -> emptyLic}
+)
+
+-- operator find3 takes as input a user request and a  license and returns
+-- the constraint permission set the request belongs too
+-- we assume that in a single licenses theres is only one CPerm that refers to 
+-- that request for simplicity without hurting generality 
+
+-- find4 works simirally only returns the sublicese that the right belongs to not the CPerm
+
+
+-- operator belong6? takes as input a request and a license and returns true or false
+-- depending on whether the request belongs to the license or not.
+
+op find4 : req lic -> subLic
+op find3 : req lic -> cPerm
+op belong6? : req lic -> Bool
+
+op cons4?  : req lic -> cons
+
+
+var R : req
+var L : lic
+var subL : subLic
+
+
+ceq find3(R , (subL , L)) = find2(R , subL) if not( find2(R , subL) = null ) .
+ceq find3(R , (subL , L)) = find3(R , L)   if  ( find2(R , subL) = null ) .
+eq find3(R , subL) = find2(R , subL) .
+
+
+
+ceq find4(R , (subL , L)) = subL if belong5?(R , subL) .
+ceq find4(R , (subL , L)) =  find4(R ,  L) if not  belong5?(R , subL) . 
+ceq find4(R , subL ) = subL if  belong5?(R , subL) .
+ceq find4(R , subL ) = nill if not  belong5?(R , subL) .
+
+
+eq belong6?(R , (subL , L)) = (belong5?(R , subL) or belong6?(R , L)) .
+eq belong6?(R , subL) = belong5?(R ,subL) . 
+
+eq cons4?(R , L) = cons3?(R , find4(R , L)) .
+
+}
+
+
+mod! LicSet{
+pr(SET(License { sort Elt -> lic})
+*{sort Set -> licSet, op empty -> emptyLicSet}
+)
+
+-- operator bestLic takes as input a set of licenses and a request and returns the best
+-- constraint that refers to the request based on the OMA ordering
+
+op bestLic : req licSet -> cons
+
+var L  : lic
+var LS : licSet
+var R  : req
+
+eq bestLic(R , L) = cons4?(R , L) .
+ceq bestLic( R , (L, LS)) = cons4?(R , L) if (cons4?(R , L) > bestLic(R ,LS)) .
+ceq bestLic( R , (L, LS)) = bestLic(R , LS) if ( bestLic(R ,LS) > cons4?(R ,L)) .
+}
+
+
+
+-- ----------------------------------------------------------
+-- Dummy module used just to delcare some datatype operatros
+-- ----------------------------------------------------------
+
+mod* Tools{
+pr(LicSet + Request + Colors)
+[tool]
+
+op build  : req licSet -> licSet -- builds the final lic set
+op build2 : req licSet -> licSet -- builds the startlic set
+op cond1  : req lic -> Bool
+op cond2  : req lic -> Bool
+op cond3  : req lic -> Bool
+op OMA    : req licSet -> lic
+
+
+var cp : cPerm
+var L :  lic
+var R :  req
+var LS : licSet
+
+eq cond1(R , L) = (belong6?(R , L) and  (subCons?(R , find4(R , L))) )  .
+eq cond2(R , L) = ( not ((type3?(label?(find4(R , L)) ) ) = once)) or 
+			             ((type2?(label?(find4(R , L)) ) ) = true) .
+
+eq cond3(R , L) =  not(((type3?(labelCP?(find3(R ,L))) = once )) or
+					   (type2?(labelCP?(find3(R ,L))) = true) ) .
+
+ceq build(R , (L , LS)) =  L , (build(R , LS)) 
+    	      	   	if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
+ceq build(R , (L ,LS)) = (build(R , LS)) 
+    	      	   	if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
+
+ceq build(R , L ) = L if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
+ceq build(R , L) = emptyLicSet  if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
+eq build(R , emptyLic) = emptyLicSet .
+
+
+eq OMA(R , L) = L .
+ceq OMA(R , (L , LS)) = L if (cons4?(R , L) > bestLic(R , LS)) .
+ceq OMA(R , (L , LS)) = OMA(R , LS) if ( bestLic(R , LS) > cons4?(R , L)) .
+
+
+
+ceq build2(R , (L , LS)) =  L ,( build2(R,LS))  if cond1(R,L) .
+ceq build2(R , (L , LS)) =  ( build2(R,LS))  if not( cond1(R,L)) .
+eq build2(R , emptyLic) = emptyLicSet .
+
+}
+
+
+
+
+
+mod* OTS {
+pr(Tools)
+
+*[sys]*
+
+op init : -> sys
+
+-- action operators
+bop request : req sys -> sys
+bop choose  : sys -> sys
+bop use1    : sys -> sys
+bop use2    : sys -> sys
+
+-- observer operators
+
+bop licIns : sys -> licSet
+bop useReq : sys -> req
+bop best   : sys  -> lic
+bop color  : sys cPerm ->  color
+
+
+bop /inStartlic : sys lic -> Bool
+bop /inPosslic  : sys lic -> Bool
+bop /inFinallic : sys lic -> Bool
+
+
+bop finalLic    : sys -> licSet
+
+-- variables to denote "any"
+var S : sys
+var cp : cPerm
+var L : lic
+var R : req
+
+-- constants (arbritary values to datatypes)
+ op ls : -> licSet
+
+
+
+-- Initial state
+
+eq licIns(init) = ls .
+eq useReq(init) = null . 
+eq best(init)  = emptyLic .
+
+eq color(init ,  cp) = white .
+
+
+eq /inStartlic( init , L ) = false .
+eq /inPosslic( init , L ) = false .
+eq /inFinallic(init , L ) = false .
+
+eq finalLic(init) = emptyLic .
+
+
+-- ----------------------------------------------------------------
+-- transition  request(R ,S)
+-- models what happens when the user makes an arbritary  request R
+-- -----------------------------------------------------------------
+
+
+op c-request : sys -> Bool
+eq c-request(S) = (useReq(S) = null) .
+
+eq licIns(request(R , S)) = licIns(S) .
+ceq useReq(request(R , S)) = R  if c-request(S) .
+eq best(request(R , S)) = best(S) .
+
+eq color(request(R , S) , cp) = color(S , cp) .
+
+ceq  /inStartlic(request(R , S) , L) = /inStartlic(S , L) if not c-request(S) .
+ceq  /inStartlic(request(R , S) , L) = true
+     			    if ( ( c-request(S)) and (belong6?(R , L))  ) .
+
+ceq /inPosslic(request(R , S) , L) = /inPosslic(S, L) if not c-request(S) .
+
+ceq /inPosslic(request(R , S) , L) = true 
+    			   if (      (/inStartlic(request(R , S) , L)) 
+			              and
+			             ( not ((type3?(label?(find4(R , L)) ) ) = once)) or 
+			             ((type2?(label?(find4(R , L)) ) ) = true)
+			      ) and c-request(S) .
+
+
+
+
+ceq /inFinallic(request(R , S) , L) = /inFinallic(S , L) if not c-request(S) .
+
+ceq /inFinallic(request(R , S) , L) = true 
+    			       	      if ( (/inPosslic(request(R , S) , L)) 
+				           and
+				           not(((type3?(labelCP?(find3(R ,L))) = once )) or
+					   (type2?(labelCP?(find3(R ,L))) = true) )
+					  ) and c-request(S) .
+
+
+ceq finalLic(request(R , S)) = build(R , licIns(S)) if c-request(S) .
+ceq finalLic(request(R , S)) = finalLic(S) if not c-request(S) .
+
+-- ------------------------------------------------------------------------------------
+-- TRANSITION choose(S)
+-- ------------------------------------------------------------------------------------
+
+op c-choose : sys -> Bool
+eq c-choose(S) = (not( best(S) = emptyLic)) and ( not (useReq(S) = null)) .
+
+
+ceq licIns(choose(S)) = licIns(S) if c-choose(S) .
+ceq useReq(choose(S)) = useReq(S) if  c-choose(S) . 
+
+ceq color(choose(S) ,  cp) = color(S ,  cp) if c-choose(S) .
+ceq /inStartlic(choose(S) , L ) = /inStartlic(S , L ) if c-choose(S) .
+ceq /inPosslic(choose(S) , L ) = /inPosslic( S , L ) if c-choose(S) .
+ceq /inFinallic(choose(S) , L ) = /inFinallic(S , L ) if c-choose(S) .
+ceq finalLic(choose(S)) = finalLic(S) if c-choose(S) .
+
+
+ceq best(choose(S)) = OMA(useReq(S) , finalLic(choose(S))) if (#(finalLic(choose(S))) > 1)
+    		      		      			      	and  c-choose(S) .
+
+
+ceq best(choose(S)) = OMA(useReq(S) , build2(useReq(S) , licIns(choose(S))) ) 
+    		      		      if (not(#(finalLic(choose(S))) > 1)) 
+    		      		      			     and c-choose(S) .
+
+-- ---------------------------------------------------------------------------------------------
+-- TRANSITION USE1(S)
+-- models the fact that the best license to use for this constraint 
+-- is a license in which the constraint permission  only allows one more execution of the right
+-- and thus here it will become depleted
+-- ----------------------------------------------------------------------------------------------
+
+op c-use1 : sys -> Bool
+eq c-use1(S) =  ( (not(useReq(S) = null) and (not (best(S) = emptyLic)))
+   	     	   and
+		   (type3?(labelCP?(find3(useReq(S), best(S) ))) = once )
+                ) .
+
+ceq licIns(use1(S)) = licIns(S) if c-use1(S) .
+
+ceq useReq(use1(S)) = null if  c-use1(S) . 
+
+ceq color(use1(S) ,  cp) = black if (cp = find3(useReq(S) , best(S))) and c-use1(S) .
+ceq color(use1(S) ,  cp) = color(S , cp)  if not ((cp = find3(useReq(S) , best(S))) and c-use1(S)) .
+
+
+ceq /inStartlic(use1(S) , L ) = /inStartlic(S , L ) if c-use1(S) .
+ceq /inPosslic(use1(S) , L ) = /inPosslic( S , L ) if c-use1(S) .
+ceq /inFinallic(use1(S) , L ) = /inFinallic(S , L ) if c-use1(S) .
+ceq finalLic(use1(S)) = finalLic(S) if c-choose(S) .
+
+
+
+-- ---------------------------------------------------------------------------------------------
+-- TRANSITION USE2(S)
+-- models the fact that the best license to use for this constraint 
+-- is a license in which the constraint permission  only allows more than one execution of the right
+-- and thus here it will NOT  become depleted
+-- ----------------------------------------------------------------------------------------------
+
+op c-use2 : sys -> Bool
+eq c-use2(S) =  ( (not(useReq(S) = null) and (not (best(S) = emptyLic)))
+   	     	   and
+		  not(type3?(labelCP?(find3(useReq(S), best(S) ))) = once )
+                ) .
+
+ceq licIns(use2(S)) = licIns(S) if c-use2(S) .
+
+ceq useReq(use2(S)) = null if  c-use2(S) . 
+
+ceq color(use2(S) ,  cp) = color(S , cp) if c-use2(S) .
+
+
+
+ceq /inStartlic(use2(S) , L ) = /inStartlic(S , L ) if c-use2(S) .
+ceq /inPosslic(use2(S) , L ) = /inPosslic( S , L ) if c-use2(S) .
+ceq /inFinallic(use2(S) , L ) = /inFinallic(S , L ) if c-use2(S) .
+ceq finalLic(use2(S)) = finalLic(S) if c-choose(S) .
+
+
+}
