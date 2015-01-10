@@ -12,7 +12,7 @@ public class FileHelper {
 
 	private File cafeFile ;
 	private long size ;
-	public Vector<ModuleClass> modules;
+	public Vector<Module> modules;
 	
 	/*
 	 * this constructor takes as input the path to a what should be CafeOBJ file
@@ -56,7 +56,7 @@ public class FileHelper {
 	 */
 	public void parseCafeFile(){
 		
-		modules = new Vector<ModuleClass>(); // the modules containing within the file under translation
+		modules = new Vector<Module>(); // the modules containing within the file under translation
 		
 		
 		try {
@@ -78,7 +78,7 @@ public class FileHelper {
 					 // continue to the rest of the classes
 					 if(line.startsWith("mod") || line.startsWith("mod*") || line.startsWith("mod!")){
 						 
-						 ModuleClass newMod = new ModuleClass();
+						 Module newMod = new Module();
 						 modules.addElement(newMod);
 						 
 						 parseModule(br, line, newMod);
@@ -98,7 +98,7 @@ public class FileHelper {
 	/**
 	 * processes a new module 
 	 */
-	public void parseModule(BufferedReader br, String currentLine, ModuleClass mod){
+	public void parseModule(BufferedReader br, String currentLine, Module mod){
 		
 		boolean moduleParsed = false;
 		int numOfOpenCurlies = 1 ;
@@ -154,13 +154,13 @@ public class FileHelper {
 	 * parses the given line argument
 	 * @param line, a String representing a line read from the file
 	 */
-	public void parseLine(String line, ModuleClass mod){
+	public void parseLine(String line, Module mod){
 		String beforeModName = "( mod|mod\\*|mod! )";
 		String importString = "(pr|ext)[(]";
 		String sortDeclString = "\\[|\\*\\[";
 		String sortDeclEndString = "]";
 		
-		
+		line = line.trim();
 		
 		if(line.split(beforeModName).length > 1){
 			parseNameLine(line, beforeModName, mod);
@@ -198,6 +198,10 @@ public class FileHelper {
 			
 		}//end if line contains a single line declaration of  
 	
+		
+		if(line.startsWith("var") || line.startsWith("vars")){
+			parseVarLine(line,mod);
+		}//end if line contains a single variable declaration
 	
 	}//end of parseLine
 	
@@ -209,12 +213,17 @@ public class FileHelper {
 	 * @param before, a string which denotes  mod|mod\\*|mod!
 	 * @param mod, the module object where the result from parsing the line should be saved
 	*/
-	public void parseNameLine(String line, String before, ModuleClass mod){
+	public void parseNameLine(String line, String before, Module mod){
 		line = line.trim();
 
+		if(line.contains("::")){ //this is required for parametric modules(i.e., SET(X::TRIV))
+			line = line.split("[(]")[0];
+		}
+		
 		if(line.endsWith("{")){ 
 			line = StringHelper.remLastChar(line);
 		}
+		
 		mod.setName(line.split(before)[1].trim());
 	}//end of parseNameLine
 	
@@ -224,7 +233,7 @@ public class FileHelper {
 	 * @param importString, a string denoting the regular expression for CafeOBJ declaration of an import
 	 * @param mod, the Module object which will store the information stored by the parsing
 	 */
-	public void parseImportLine(String line, String importString,ModuleClass mod ){
+	public void parseImportLine(String line, String importString,Module mod ){
 		line = line.split(importString)[1].trim();
 		String[] imports = line.split("[+]");
 		for(String impName : imports){
@@ -239,7 +248,7 @@ public class FileHelper {
 	 * @param line the line we want to parse
 	 * @param mod the Module object which will store the information stored by the parsing
 	 */
-	public void parseSortDecLine(String line, ModuleClass mod){
+	public void parseSortDecLine(String line, Module mod){
 		line = line.replace("[","");
 		line = line.replace("]", "");
 		line = line.replace("*","");
@@ -280,7 +289,7 @@ public class FileHelper {
 	 * @param line, a string containing a line which defines a CafeOBJ operator declacration
 	 * @param mod
 	*/
-	public void parseOpLine(String line, ModuleClass mod){
+	public void parseOpLine(String line, Module mod){
 		CafeOperator cop = new CafeOperator();
 		String opName  = line.split(":")[0].trim();
 		
@@ -289,6 +298,13 @@ public class FileHelper {
 		
 		String opSig = line.split(":")[1].trim();
 		String arity = opSig.split("->")[0].trim();
+		
+		if(arity.equals("")){
+			cop.setType("constant");
+		}else{
+			cop.setType("operator");
+		}//end of discriminating the type
+		
 		String coArity = opSig.split("->")[1].trim();
 		
 		cop.setSort(StringHelper.cutStringAtWhite(coArity));
@@ -303,7 +319,7 @@ public class FileHelper {
 	
 	
 	
-	public void parseOpsLine(String line, ModuleClass mod){
+	public void parseOpsLine(String line, Module mod){
 		
 		Vector<CafeOperator> cops = new Vector<CafeOperator>();
 		
@@ -338,14 +354,81 @@ public class FileHelper {
 	}//end of parseOpsLine
 	
 	
+	/**
+	 * This method parses a line which should contain a variable declaration in CafeOBJ and store 
+	 * the result  in the module object
+	 * @param line the line we want to parse
+	 * @param mod  the object we store the result of the parsing
+	 */
+	public void parseVarLine(String line, Module mod){
+		
+		line = line.trim();
+		
+		String varName = line.split("[:]")[0];
+		String sort = (line.split("[:]")[1].replace(".","")).trim();
+		
+		varName = varName.trim();
+		int start = StringHelper.getWhitePos(varName);//varName
+		varName = varName.substring(start, varName.length()).trim();
+		
+		
+		if(!line.startsWith("vars")){//single variable declaration
+			
+			CafeVariable var = new CafeVariable();
+			var.setName(varName);
+			var.setSort(sort);
+			
+			mod.addVar(var);
+			
+		}else{ //multiple variables declaration
+			//vars C C' : consSet
+			String[] vars = varName.split("\\s+");
+			
+			for(String v : vars){
+				CafeVariable var = new CafeVariable();
+				var.setName(v.trim());
+				var.setSort(sort);
+			
+				mod.addVar(var);
+			}//end of for var names loop
+		}//end of else
+	}//end of parseVarLine
 	
 	
+	/**
+	 * Parses a line which contains an equation and stores the result of the parsing
+	 * @param line the line we want to parse
+	 * @param mod the module in which the result of the parsing is stored to
+	 */
+	public void parseEq(String line, Module mod){
+		//eq (black = black ) = true 
+		
+	}
 	
-	
-	
-	
-	
-	
+	/**
+	 * Parses a basic CafeOBJ expresion, i,e, an operator with values either variables or constants
+	 * and stores the result to the given BasicOpExpr object
+	 * @param exp
+	 * @param op
+	 */
+	public void parseBasicExpr(String exp, BasicOpExpr basic){
+		//belong5?(R , subL)
+		
+		String  opName = exp.split("[(]")[0].trim();
+		String arguments = exp.split("[(]")[1].replace(")","").trim();
+		if(arguments.contains(",")){ //then the arguments of the operator are separated by commas ,
+
+			String[] args = arguments.split("[,]");
+			for(int i = 0; i < args.length; i++){
+				args[i] = StringHelper.remWhite(args[i]);
+				basic.getArgs().ad
+			}
+		}//end if contains ","
+		
+		basic.setOpName(opName);
+		
+		
+	}//end of parseBasicExpr
 	
 	
 	

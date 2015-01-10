@@ -10,21 +10,22 @@ import java.util.Vector;
  * @author nikos
  *
  */
-public class ModuleClass {
+public class Module {
 
 
 	public String name;
+	String classSort ;
 	Vector<String> opNames = new Vector<String>();
 	Vector<String> importNames = new Vector<String>();
 	Vector<String> extendsNames = new Vector<String>();
-	String classSort ;
 	Vector<CafeOperator> ops = new Vector<CafeOperator>();
+	Vector<CafeVariable> vars = new Vector<CafeVariable>();
 
 	
 	private int numOfOps ;
 	private int numOfEq ;
 	
-	public  ModuleClass(){
+	public  Module(){
 		numOfOps = 0;
 		numOfEq = 0;
 	}
@@ -70,8 +71,17 @@ public class ModuleClass {
 	public Vector<CafeOperator> getOps(){return ops;}
 
 
+	public void addVar(CafeVariable v){
+		vars.addElement(v);
+	}
+	public Vector<CafeVariable> getVars(){return vars;}
+	
+	
+	
 	
 	public int getNumOfOps(){return numOfOps;}
 	public int getNumOfEqs(){return numOfEq;}
+	
+	public String getName(){return this.name;}
 	
 }//end of class

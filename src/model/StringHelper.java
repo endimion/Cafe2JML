@@ -71,6 +71,22 @@ public class StringHelper {
 	}//end of numOf
 	
 	
+	/**
+	 * 
+	 * @param st
+	 * @return the given string without any whitespaces
+	 */
+	public static String remWhite(String st){
+		
+		String res ="";
+		char[] orig = st.toCharArray();
+		
+		for(char ch : orig){
+			if(ch != ' '){res = res + ch;}
+		}
+		
+		return res;
+	}//returns the i
 	
 	
 	

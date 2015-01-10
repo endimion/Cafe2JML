@@ -2,16 +2,18 @@ package model;
 
 import java.util.Vector;
 
-public class CafeOperator {
+public class CafeOperator implements BasicBlock {
 	
 	String name ;
 	Vector<String> arity ;
 	String sort;
+	private String type;
 	
 	public CafeOperator(){
 		arity = new Vector<String>();
 		name ="";
 		sort = "";
+		type = "";
 	}//end of constructor
 	
 	public void setName(String n){this.name = n;}
@@ -26,6 +28,10 @@ public class CafeOperator {
 	public void setSort(String s){sort= s;}
 	public String getSort(){return sort;}
 	
-	
+	public String getType(){return this.type;}
+	public void setType(String t){this.type = t;}
 
+	
+	
+	
 }//end of CafeOperator

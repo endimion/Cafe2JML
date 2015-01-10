@@ -1,9 +1,10 @@
 package test;
 
 import static org.junit.Assert.*;
+import model.BasicOpExpr;
 import model.CafeOperator;
 import model.FileHelper;
-import model.ModuleClass;
+import model.Module;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class FileHelperTester {
 	public void testParseCafeFile(){
 		fh.parseCafeFile();
 		
-		for(ModuleClass mod : fh.modules ){
+		for(Module mod : fh.modules ){
 			String prString = "";
 			String extString ="";
 			String op ="";
@@ -85,6 +86,89 @@ public class FileHelperTester {
 	
 	
 	
+	@Test
+	public void testParseNameLine(){
+		 Module mod = new Module();
+		 String line = "mod! ConstraintSet{";
+		 String before ="( mod|mod\\*|mod! )";
 	
+		 fh.parseNameLine(line, before, mod);
+		 assertEquals("", mod.getName(),"ConstraintSet");
+	
+		 fh.parseNameLine("mod! PermissionSET{", before, mod);
+		 assertEquals("",mod.getName(),"PermissionSET");
+		 
+		 fh.parseNameLine("mod* SET(X :: TRIV){", before, mod);
+		 assertEquals("",mod.getName(),"SET");
+		 
+	}//end of parseNameLine
+	
+	
+	@Test
+	public void testParsOpLine(){
+		 Module mod = new Module();
+	
+		 fh.parseOpLine("op _about_ : consSet setofCP -> subLic", mod);
+		 assertEquals("",mod.getOps().get(0).getName() ,"about");
+		 assertEquals("",mod.getOps().get(0).getType() ,"operator");
+		 assertEquals("",mod.getOps().get(0).getSort(),"subLic");
+		 assertEquals("",mod.getOps().get(0).getArity().get(0),"consSet");
+		 assertEquals("",mod.getOps().get(0).getArity().get(1),"setofCP");
+	
+	}//end of testParsOpLine
+	
+	
+	
+	
+	
+	@Test
+	public void testParseVarLine(){
+		 Module mod = new Module();
+		 String line = "var n : Nat";
+		
+		 fh.parseVarLine(line, mod);  
+		 assertEquals("", mod.getVars().get(0).getName() ,"n");
+		 assertEquals("", mod.getVars().get(0).getSort() ,"Nat");
+		 assertEquals("", mod.getVars().get(0).getType() ,"var");
+		 
+	
+		 fh.parseVarLine("var CS : consSet", mod);
+		 assertEquals("", mod.getVars().get(1).getName() ,"CS");
+		 assertEquals("", mod.getVars().get(1).getSort() ,"consSet");
+		 
+		 mod = new Module();
+		 ////
+		 fh.parseVarLine("vars C C' : consSet", mod);
+		 assertEquals("", mod.getVars().get(0).getName() ,"C");
+		 assertEquals("", mod.getVars().get(0).getSort() ,"consSet");
+		 assertEquals("", mod.getVars().get(1).getName() ,"C'");
+		 assertEquals("", mod.getVars().get(1).getSort() ,"consSet");
+		 
+		////
+		 mod = new Module();
+		 fh.parseVarLine("vars P P' : permSet", mod);
+		 assertEquals("", mod.getVars().get(0).getName() ,"P");
+		 assertEquals("", mod.getVars().get(0).getSort() ,"permSet");
+		 assertEquals("", mod.getVars().get(1).getName() ,"P'");
+		 assertEquals("", mod.getVars().get(1).getSort() ,"permSet");
+		 
+		
+		////
+		 mod = new Module();
+		 fh.parseVarLine("vars A1 A2 : action", mod);
+		 assertEquals("", mod.getVars().get(0).getName() ,"A1");
+		 assertEquals("", mod.getVars().get(0).getSort() ,"action");
+		 assertEquals("", mod.getVars().get(1).getName() ,"A2");
+		 assertEquals("", mod.getVars().get(1).getSort() ,"action");
+	}//end of parseNameLine
+	
+	
+	@Test
+	public void testParseBasicExpr(){
+		BasicOpExpr basic = new BasicOpExpr();
+		
+		fh.parseBasicExpr("belong5?(R , subL)", basic);
+		
+	}//end of parseBasicExpr
 
 }//end of FileHelperTester
