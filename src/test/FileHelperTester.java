@@ -1,7 +1,7 @@
 package test;
 
 import static org.junit.Assert.*;
-import model.BasicOpExpr;
+import model.BasicTerm;
 import model.CafeOperator;
 import model.FileHelper;
 import model.Module;
@@ -76,10 +76,10 @@ public class FileHelperTester {
 			}//end of for loop
 			
 			
-			System.out.println(mod.name + 
+			/*System.out.println(mod.name + 
 					" with sort "+ mod.getClassSort()+" which imports" + prString + " " + "and extends" + extString);
 			System.out.println("and has  " + mod.getNumOfOps() +" operators "+ op);
-			
+			*/
 		}//end of for loop
 		
 	}//end of testParseCafeFile
@@ -108,16 +108,66 @@ public class FileHelperTester {
 	public void testParsOpLine(){
 		 Module mod = new Module();
 	
-		 fh.parseOpLine("op _about_ : consSet setofCP -> subLic", mod);
-		 assertEquals("",mod.getOps().get(0).getName() ,"about");
+		 /*fh.parseOpLine("op _about_ : consSet setofCP -> subLic", mod);
+		 	assertEquals("",mod.getOps().get(0).getName() ,"about");
+		 	assertEquals("",mod.getOps().get(0).getType() ,"operator");
+		 	assertEquals("",mod.getOps().get(0).getSort(),"subLic");
+		 	assertEquals("",mod.getOps().get(0).getArity().get(0),"consSet");
+		 	assertEquals("",mod.getOps().get(0).getArity().get(1),"setofCP");
+		  */
+		 
+		 fh.parseOpLine("op count[_] : Nat -> cons", mod);
+		 assertEquals("",mod.getOps().get(0).getName() ,"count");
 		 assertEquals("",mod.getOps().get(0).getType() ,"operator");
-		 assertEquals("",mod.getOps().get(0).getSort(),"subLic");
-		 assertEquals("",mod.getOps().get(0).getArity().get(0),"consSet");
-		 assertEquals("",mod.getOps().get(0).getArity().get(1),"setofCP");
-	
+		 assertEquals("",mod.getOps().get(0).getSort(),"cons");
+		 assertEquals("",mod.getOps().get(0).getArity().get(0),"Nat");
+		 
+		 mod = new Module();
+		 fh.parseOpLine("op belong2?(_,_) : req permSet -> Bool", mod);
+		 assertEquals("",mod.getOps().get(0).getName() ,"belong2?");
+		 assertEquals("",mod.getOps().get(0).getType() ,"operator");
+		 assertEquals("",mod.getOps().get(0).getSort(),"Bool");
+		 assertEquals("",mod.getOps().get(0).getArity().get(0),"req");
+		 assertEquals("",mod.getOps().get(0).getArity().get(1),"permSet");
+		 
+		 
+		 mod = new Module();
+		 fh.parseOpLine(" op belong3?(_,_) : req cPerm -> Bool", mod);
+		 assertEquals("",mod.getOps().get(0).getName() ,"belong3?");
+		 assertEquals("",mod.getOps().get(0).getType() ,"operator");
+		 assertEquals("",mod.getOps().get(0).getSort(),"Bool");
+		 assertEquals("",mod.getOps().get(0).getArity().get(0),"req");
+		 assertEquals("",mod.getOps().get(0).getArity().get(1),"cPerm");
+		 
+		
+		 
 	}//end of testParsOpLine
 	
 	
+	@Test
+	public void testParseOpsLine(){
+		Module mod = new Module();
+		fh.parseOpsLine("ops op1_,_  op2[_,_] : Nat1 Nat2 -> Nat", mod);
+		
+		 assertEquals("",mod.getOps().get(0).getName() ,"op1");
+		 assertEquals("",mod.getOps().get(0).getType() ,"operator");
+		 assertEquals("",mod.getOps().get(0).getSort(),"Nat");
+		 assertEquals("",mod.getOps().get(0).getArity().get(0),"Nat1");
+		 assertEquals("",mod.getOps().get(0).getArity().get(1),"Nat2");
+		 assertEquals("",mod.getOps().get(1).getName() ,"op2");
+		 assertEquals("",mod.getOps().get(1).getType() ,"operator");
+		 assertEquals("",mod.getOps().get(1).getSort(),"Nat");
+		 assertEquals("",mod.getOps().get(1).getArity().get(0),"Nat1");
+		 assertEquals("",mod.getOps().get(1).getArity().get(1),"Nat2");
+		
+		mod = new Module();
+		fh.parseOpsLine("ops op1(_ _)  op2 : Nat1 Nat2 -> Nat", mod);
+		assertEquals("",mod.getOps().get(0).getName() ,"op1");
+		assertEquals("",mod.getOps().get(0).getType() ,"operator");
+		assertEquals("",mod.getOps().get(0).getSort(),"Nat");
+		assertEquals("",mod.getOps().get(0).getArity().get(0),"Nat1");
+		assertEquals("",mod.getOps().get(0).getArity().get(1),"Nat2");
+	}//end of testParseOpsLine
 	
 	
 	
@@ -165,10 +215,63 @@ public class FileHelperTester {
 	
 	@Test
 	public void testParseBasicExpr(){
-		BasicOpExpr basic = new BasicOpExpr();
+		BasicTerm basic = new BasicTerm();
 		
 		fh.parseBasicExpr("belong5?(R , subL)", basic);
+		assertEquals("", basic.getOpName(), "belong5?");
+		assertEquals("",basic.getArgs().get(0),"R");
+		assertEquals("",basic.getArgs().get(1),"subL");
+		
+		basic = new BasicTerm();
+		
+		fh.parseBasicExpr("find4(R ,  L)", basic);
+		assertEquals("", basic.getOpName(), "find4");
+		assertEquals("",basic.getArgs().get(0),"R");
+		assertEquals("",basic.getArgs().get(1),"L");
+		
+		
+		fh.parseBasicExpr("find4(R   L)", basic);
+		assertEquals("", basic.getOpName(), "find4");
+		assertEquals("",basic.getArgs().get(0),"R");
+		assertEquals("",basic.getArgs().get(1),"L");
+		
 		
 	}//end of parseBasicExpr
 
+	
+	
+	@Test
+	public void testParseEq(){
+		Module mod = new Module();
+		
+		fh.parseEq("eq (black = black ) = true ", mod);
+		fh.parseEq("eq Union(e , empty) = e .", mod);
+		fh.parseEq("ceq (( C about P)  = ( C' about P')) = true  if (C = C') and (P = P') .", mod);
+		fh.parseEq("ceq find1(R , Union(CP , CPS)) = CP if (belong3?(R , CP)).",mod);
+		
+		
+		/*BasicTerm t1 = new BasicTerm();
+		BasicTerm t2 = new BasicTerm();
+		parseBasicExpr(leftHS, t1);
+		parseBasicExpr(rightHS, t2);
+		
+		CafeEquation e1 = new CafeEquation();
+		e1.setLeftTerm(t1);
+		e1.setRightTerm(t2);
+		
+		String ar1 = "";
+		for(Object s:e1.getLeftTerm().getArgs()){ ar1 = ar1 + " " + (String)s;}
+		
+		
+		System.out.println("line "+ line +" left op name '" + e1.getLeftTerm().getOpName() 
+				+" with arguments " + ar1 
+				+ "'  right '" + e1.getRightTerm().getOpName()+"'");
+		*/
+		
+	}//end of testParseEq
+	
+	
+	
+	
+	
 }//end of FileHelperTester

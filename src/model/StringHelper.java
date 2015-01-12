@@ -89,5 +89,17 @@ public class StringHelper {
 	}//returns the i
 	
 	
+	/**
+	 * Removes from a given string special characters like parenthesis and brackets
+	 * @param s
+	 * @return a string without "(" or ")" or "[" and "]"
+	 */
+	public static String removeSpecialCharacters(String s){
+		
+		return (s.replace("[", "")).replace("]","").replace("(","").replace(")", "").replace(",","");
+		
+	}
+	
+	
 	
 }//end of class

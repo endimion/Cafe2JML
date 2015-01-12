@@ -1,6 +1,6 @@
 package model;
 
-public class CafeVariable implements BasicBlock{
+public class CafeVariable {
 
 	private String sort;
 	private String name;

@@ -6,6 +6,16 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Vector;
 
+/**
+ * This class provides the required functionality to parse a file containing a CafeOBJ specification
+ * There is one limitation to the syntax of CafeOBJ expression in this version
+ * In the specification file you are supposed to only have pre-fix operation (as opposed to a variety of 
+ * infix, misfix and prefix) this does not affect at all the expressive power of the specification
+ * it only makes the pasing of the operators easier as the left-most part will allways be an operator name
+ *  
+ * @author Nikos Triantafyllou
+ *
+ */
 
 public class FileHelper {
 
@@ -292,6 +302,7 @@ public class FileHelper {
 	public void parseOpLine(String line, Module mod){
 		CafeOperator cop = new CafeOperator();
 		String opName  = line.split(":")[0].trim();
+			   opName = StringHelper.removeSpecialCharacters(opName.split("_")[0].trim());
 		
 		opName = opName.substring(StringHelper.getWhitePos(opName), opName.length()).replace("_","").trim();
 		cop.setName(opName);
@@ -327,10 +338,13 @@ public class FileHelper {
 		String opName  = line.split(":")[0].trim();
 		opName = opName.substring(StringHelper.getWhitePos(opName), opName.length()).replace("_","").trim();
 		
+		
 		String[] arrayOfOps = opName.split("\\s+");
 		//System.out.println(arrayOfOps.length + " !!!!!!");
 		for(String s:arrayOfOps){
 			CafeOperator cop = new CafeOperator();
+			
+			s = StringHelper.removeSpecialCharacters(s.trim());
 			cop.setName(s);
 			cops.add(cop);
 		}
@@ -343,11 +357,16 @@ public class FileHelper {
 		for(CafeOperator cop: cops){
 			cop.setSort(StringHelper.cutStringAtWhite(coArity));
 			
+			if(arity.equals("")){
+				cop.setType("constant");
+			}else{
+				cop.setType("operator");
+			}//end of discriminating the type
+			
 			String[] arityArr = arity.split("\\s+");
 			for(String arg : arityArr){
 				cop.addToArity(arg);
 			}//end of for
-	
 			mod.addOp(cop);
 		}//end of for loop
 		
@@ -403,31 +422,130 @@ public class FileHelper {
 	public void parseEq(String line, Module mod){
 		//eq (black = black ) = true 
 		
-	}
+		int leftParenCount = 0;
+		int rightParenCount = 0;
+		int pos = 0;
+		int firstOpenPos = 0;
+		char c;
+		String condition="";
+		String leftHS="";
+		String rightHS = ""; //line.split("[=]")[1];
+		
+		
+		if(line.startsWith("eq")){
+			line = line.split("(eq)\\s+")[1];
+		}else{
+			if(line.startsWith("ceq")){
+				condition = line.split("if")[1].trim();
+				line = line.split("if")[0].split("(ceq)\\s+")[1].trim();
+			}//end if it is a conditional equation
+		}//end of if it is not an unconditional equation
+		
+		//if the line contains many equals we have to use parethesis to parse it
+		
+		if(StringHelper.numOf(line, '=') > 1){
+			for(int i = 0; i < line.toCharArray().length;i++){
+				c = line.toCharArray()[i];
+				
+				if(c == '('){
+					if(leftParenCount == 0){firstOpenPos = i;}
+					leftParenCount++;
+				}
+				if(c == ')'){
+					rightParenCount++;
+				}
+				if(leftParenCount == rightParenCount && leftParenCount != 0){ 
+					pos =  i;
+					break;
+				}
+			}//end of looping through the characters of the line
+
+			if(firstOpenPos == 0){
+				leftHS = line.substring(1, pos).trim(); //we remove the opening parenthesis
+			}else{
+				String upToFirstParen = line.substring(0,firstOpenPos-1);
+				leftHS = (upToFirstParen + line.substring(firstOpenPos+1,pos)).trim();
+			}
+				  
+			rightHS = line.substring(pos+1,line.length()).trim();
+		
+		}else{//the line contains only one =
+			leftHS = line.split("=")[0].trim();
+			rightHS = line.split("=")[1].trim();
+			
+			
+		}
+		
+		if(isBasicTerm(leftHS)){
+			BasicTerm t1 = new BasicTerm();
+			parseBasicExpr(leftHS, t1);
+			
+			System.out.println("left " + t1.getOpName());
+		}else{
+			//TODO recursive call
+		}
+		
+		if(isBasicTerm(rightHS)){
+			BasicTerm t1 = new BasicTerm();
+			parseBasicExpr(rightHS, t1);
+			
+			System.out.println("right " + t1.getOpName());
+		}else{
+			//TODO recursive call
+		}
+		
+		
+		
+		//System.out.println("line "+ line +" left '" +leftHS + "'  right '" + rightHS+"'");
+		
+		
+	}//end of parseEq
+	
+	/**
+	 * Takes an expression and determines if it contains an operator call
+	 * or if it only contains a constant 
+	 * @return
+	 */
+	public boolean isBasicTerm(String s){
+		return (StringHelper.numOf(s, '(') == 0) && (StringHelper.numOf(s, '[') == 0)
+				&& (StringHelper.numOf(s, ',') == 0) && (!s.contains("\\s+"));
+	}//end of isBasicExpr
+	
+	
 	
 	/**
 	 * Parses a basic CafeOBJ expresion, i,e, an operator with values either variables or constants
+	 * an operator is thus basic if the arguments are not non-constant operators this is easily found
+	 * if we recall the for that to occur there must exist parenthesis of [] in the operator string  
 	 * and stores the result to the given BasicOpExpr object
 	 * @param exp
 	 * @param op
 	 */
-	public void parseBasicExpr(String exp, BasicOpExpr basic){
-		//belong5?(R , subL)
+	public void parseBasicExpr(String exp, BasicTerm basic){
+		//example1: belong5?(R , subL)
+		//example2 a constant: e
 		
-		String  opName = exp.split("[(]")[0].trim();
-		String arguments = exp.split("[(]")[1].replace(")","").trim();
-		if(arguments.contains(",")){ //then the arguments of the operator are separated by commas ,
-
-			String[] args = arguments.split("[,]");
+		String  opName="";
+		
+		if(exp.split("[(]").length > 1){
+			opName = exp.split("[(]")[0].trim();
+			String arguments = exp.split("[(]")[1].replace(")","").trim();
+			
+			String[] args ;
+			if(arguments.contains(",")){ //then the arguments of the operator are separated by commas ,
+				args = arguments.split("[,]");
+			}else{ //end if contains ","
+				args = arguments.split("\\s+");
+			}//arguments are split whit white spaces
+			
 			for(int i = 0; i < args.length; i++){
-				args[i] = StringHelper.remWhite(args[i]);
-				basic.getArgs().ad
-			}
-		}//end if contains ","
-		
+				basic.getArgs().add(StringHelper.remWhite(args[i]));
+			}//end of adding the arguments loop
+		}else{
+			opName = exp;
+		}
+			
 		basic.setOpName(opName);
-		
-		
 	}//end of parseBasicExpr
 	
 	
