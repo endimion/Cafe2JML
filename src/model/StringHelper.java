@@ -101,5 +101,61 @@ public class StringHelper {
 	}
 	
 	
+	/**
+	 * takes as input a string and returns an integer indicating the
+	 * position where the first to open parenthisis closes in that string
+	 * i.e. in the string: asd(dd)23 the result will be 6 
+	 * @return
+	 */
+	public static int colsingParPosition(String s){
+		int leftParenCount = 0;
+		int rightParenCount = 0;
+		int pos = -1;
+		char c;
+		
+		for(int i = 0; i < s.toCharArray().length;i++){
+			c = s.toCharArray()[i];
+			
+			if(c == '('){
+				leftParenCount++;
+			}
+			if(c == ')'){
+				rightParenCount++;
+			}
+			if(leftParenCount == rightParenCount && leftParenCount != 0){ 
+				pos =  i;
+				break;
+			}
+		}//end of looping through the characters of the line
+		
+		return pos;
+	}//end of closingParPosition
+	
+	
+	/**
+	 * example: asd(dd)23 the result will be 3
+	 * @param s a String
+	 * @param search a character we want to search the string for
+	 * @return the position where the search character appears for the first time in the given string
+	 */
+	public static int firstAppearOfChar(String s, char search){
+		int firstOpenPos = -1;
+		
+		char c;
+		
+		for(int i = 0; i < s.toCharArray().length;i++){
+			c = s.toCharArray()[i];
+			if(c == search){
+				firstOpenPos  = i;
+				break;
+			}
+		}//end of looping through the characters of the line
+		return firstOpenPos;
+	}//end of firstAppearOfChar 
+	
+	
+	
+	
+	
 	
 }//end of class

@@ -1,8 +1,16 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.Objects;
+import java.util.Vector;
+
 import model.BasicTerm;
+import model.CafeEquation;
 import model.CafeOperator;
+import model.CafeTerm;
+import model.CompTerm;
 import model.FileHelper;
 import model.Module;
 
@@ -243,35 +251,53 @@ public class FileHelperTester {
 	@Test
 	public void testParseEq(){
 		Module mod = new Module();
-		
-		fh.parseEq("eq (black = black ) = true ", mod);
-		fh.parseEq("eq Union(e , empty) = e .", mod);
-		fh.parseEq("ceq (( C about P)  = ( C' about P')) = true  if (C = C') and (P = P') .", mod);
-		fh.parseEq("ceq find1(R , Union(CP , CPS)) = CP if (belong3?(R , CP)).",mod);
+		CafeEquation eq = new CafeEquation();
 		
 		
-		/*BasicTerm t1 = new BasicTerm();
-		BasicTerm t2 = new BasicTerm();
-		parseBasicExpr(leftHS, t1);
-		parseBasicExpr(rightHS, t2);
-		
-		CafeEquation e1 = new CafeEquation();
-		e1.setLeftTerm(t1);
-		e1.setRightTerm(t2);
-		
-		String ar1 = "";
-		for(Object s:e1.getLeftTerm().getArgs()){ ar1 = ar1 + " " + (String)s;}
+		fh.parseEq("eq (black = black ) = true ", mod,eq);
+		//System.out.println(eq.getLeftTerm().getOpName());
 		
 		
-		System.out.println("line "+ line +" left op name '" + e1.getLeftTerm().getOpName() 
-				+" with arguments " + ar1 
-				+ "'  right '" + e1.getRightTerm().getOpName()+"'");
-		*/
+		
+		fh.parseEq("eq Union(e , empty) = e .", mod,eq);
+		//System.out.println(eq.getLeftTerm().getOpName());
+		
+		fh.parseEq("ceq (( C about P)  = ( C' about P')) = true  if (C = C') and (P = P') .", mod,eq);
+		//System.out.println(eq.getLeftTerm().getOpName());
+		
+		
+		fh.parseEq("ceq find1(R , Union(CP1 , CPS)) = CP2 if (belong3?(R , CP)).",mod,eq);
+		CafeTerm ct = eq.getLeftTerm();	
+		if(ct instanceof CompTerm){
+			@SuppressWarnings("unchecked")
+			Vector<Object> args = (Vector<Object>) ct.getArgs();
+			testRecursively(args);
+		}
+		
+		
+		//System.out.println(eq.getLeftTerm().getOpName());
 		
 	}//end of testParseEq
 	
 	
-	
+	public void testRecursively(Vector<Object> args){
+		for(Object o:args){
+			
+			if(o instanceof BasicTerm){
+				System.out.println(((BasicTerm) o).getOpName());
+				String basicargumnets="with arguments ";
+				for(String s : ((BasicTerm) o).getArgs()){
+					basicargumnets = basicargumnets + s  + " ";
+				}
+				System.out.println(basicargumnets);
+			}else{
+			System.out.println( "comp " +  ((CompTerm) o).getOpName());
+				Vector<Object> innerArgs = (Vector<Object>) (((CompTerm) o).getArgs() );
+				testRecursively(innerArgs);
+			}//end of if it is a composite term
+		}//end of the for loop of the arguments of the given term
+
+	}//end of testRecursively
 	
 	
 }//end of FileHelperTester

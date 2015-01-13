@@ -6,8 +6,10 @@ public interface CafeTerm {
 
 	
 	public String getOpName();
-	public Vector<Object> getArgs();
 	
+	public Vector<?> getArgs();
+	
+	public void addArg(Object arg);
 	
 	
 }

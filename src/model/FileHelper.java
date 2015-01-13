@@ -419,17 +419,9 @@ public class FileHelper {
 	 * @param line the line we want to parse
 	 * @param mod the module in which the result of the parsing is stored to
 	 */
-	public void parseEq(String line, Module mod){
-		//eq (black = black ) = true 
+	public void parseEq(String line, Module mod, CafeEquation eq){
 		
-		int leftParenCount = 0;
-		int rightParenCount = 0;
-		int pos = 0;
-		int firstOpenPos = 0;
-		char c;
 		String condition="";
-		String leftHS="";
-		String rightHS = ""; //line.split("[=]")[1];
 		
 		
 		if(line.startsWith("eq")){
@@ -441,74 +433,200 @@ public class FileHelper {
 			}//end if it is a conditional equation
 		}//end of if it is not an unconditional equation
 		
-		//if the line contains many equals we have to use parethesis to parse it
+		if(!condition.equals("")){
+			//TODO parse the effecitve condition
+		}
 		
-		if(StringHelper.numOf(line, '=') > 1){
-			for(int i = 0; i < line.toCharArray().length;i++){
-				c = line.toCharArray()[i];
-				
-				if(c == '('){
-					if(leftParenCount == 0){firstOpenPos = i;}
-					leftParenCount++;
-				}
-				if(c == ')'){
-					rightParenCount++;
-				}
-				if(leftParenCount == rightParenCount && leftParenCount != 0){ 
-					pos =  i;
-					break;
-				}
-			}//end of looping through the characters of the line
+		eq.setLeftTerm(parseEqTerm( eqToTree(line).get(0)  ));
+		eq.setRightTerm(parseEqTerm( eqToTree(line).get(1)    ));
+	}//end of parseEq
+	
+	
+	/**
+	 * 
+	 * @param eqTerm a String representing a equation 
+	 * @return a Vector (containing one or two Strings) representing
+	 * the left and right part of the equation term 
+	 * 
+	 */
+	public Vector<String> eqToTree(String eqTerm){
+		
+		Vector<String> result = new Vector<String>();
+		String leftHS;
+		String rightHS;
+		
+		if(StringHelper.numOf(eqTerm, '=') > 1){
+			//if the line contains many equals we have to use parenthesis to parse it
+			int firstPar = StringHelper.firstAppearOfChar(eqTerm,'(');
+			int pos = StringHelper.colsingParPosition(eqTerm);
 
-			if(firstOpenPos == 0){
-				leftHS = line.substring(1, pos).trim(); //we remove the opening parenthesis
+			if( firstPar == 0){
+				leftHS = eqTerm.substring(1, pos).trim(); //we remove the opening parenthesis
 			}else{
-				String upToFirstParen = line.substring(0,firstOpenPos-1);
-				leftHS = (upToFirstParen + line.substring(firstOpenPos+1,pos)).trim();
+				String upToFirstParen = eqTerm.substring(0,firstPar-1);
+				leftHS = (upToFirstParen + eqTerm.substring(firstPar+1,pos)).trim();
 			}
 				  
-			rightHS = line.substring(pos+1,line.length()).trim();
-		
+			rightHS = eqTerm.substring(pos+1,eqTerm.length()).trim();
+			if(rightHS.startsWith("=")){
+				rightHS = StringHelper.remFirstChar(rightHS).trim();
+			}
 		}else{//the line contains only one =
-			leftHS = line.split("=")[0].trim();
-			rightHS = line.split("=")[1].trim();
-			
-			
+			leftHS = eqTerm.split("=")[0].trim();
+			rightHS = eqTerm.split("=")[1].trim();
 		}
 		
-		if(isBasicTerm(leftHS)){
-			BasicTerm t1 = new BasicTerm();
-			parseBasicExpr(leftHS, t1);
-			
-			System.out.println("left " + t1.getOpName());
+		result.add(leftHS);
+		result.add(rightHS);
+		
+		return result;
+	}//end of getLR
+	
+	
+	
+	
+	
+	
+	/**
+	 * parses a left or right hand side term  of an equation
+	 * and returns a CafeTerm object which contains the result of the parsing
+	 * @param lhs the left/right hand side string represting the term
+	 * @return a CafeTerm object containing the result of the parsing
+	 */
+	public CafeTerm parseEqTerm(String line){
+		
+		
+		
+		if(isBasicTerm(line)){
+			BasicTerm t = new BasicTerm();
+			parseBasicExpr(line, t);
+			//System.out.println("Basic term " + line);
+			return t;
+		
 		}else{
-			//TODO recursive call
-		}
-		
-		if(isBasicTerm(rightHS)){
-			BasicTerm t1 = new BasicTerm();
-			parseBasicExpr(rightHS, t1);
+			CompTerm t = new CompTerm();
+			//TODO parse term
+			// we have to write a method that identifies the operator of a composite term 
+			//and then parses it
 			
-			System.out.println("right " + t1.getOpName());
-		}else{
-			//TODO recursive call
+			// we now have to discriminate how the arguments of the 
+			//composite term are represented
+			//e.g. find1(R , Union(CP1 , CPS)) in this case splitting on the first "(" is appropriate
+			// but here: R , Union(CP1 , CPS) we have to split on the ","
+			// and maybe some-times the arguments will be separated by white spaces
+			
+			//Solution: we have to find the first opening parenthesis
+			// the first appearence of a comma
+			// and the first appearence of a whitespace after which a non-whitedigit appears
+			// different than "," or "("
+			// and we will choose the smaller value to do the splitting
+			
+			
+			int firstP = StringHelper.firstAppearOfChar(line,'(');
+			int firstCom = StringHelper.firstAppearOfChar(line, ',');
+			
+			int discr = (firstP > firstCom)? firstCom : firstP ;
+			
+			String opName="";
+			//find1(R , Union(CP , CPS)
+			if(discr > 0){
+				opName = line.substring(0, discr);
+				t.setOpName(opName);
+			}
+			//Next we have to add the arguments of this operator
+			// so we have to first find them, i.e. in the case of find1(R , Union(CP , CPS))
+			//these are R and Union(CP,CPS)
+			//so we have to start reading the contents of the operator
+			//and when we read a comma remove the whiteSpaces and add that argument
+		    //but if we read a parenthesis then we have to wait until it closes
+			//System.out.println("the line is " + line);
+			
+			String opContent;
+			if(line.endsWith("")){
+				opContent = line.substring(firstP+1,line.length()-1 );
+			}else{
+				opContent = line.substring(firstP+1,line.length());
+			}
+			
+			//System.out.println("the operator is " +opName +" and the body " +opContent);
+			
+			Vector<String> opArguments =new Vector<String>();
+			int lastArgPos = 0;
+			boolean skip = false;
+			int openCount=0;
+			char c;
+			
+			for(int i =0 ; i < opContent.toCharArray().length; i++){
+				
+				c = opContent.toCharArray()[i];
+				
+				if(c == ',' && !skip){
+					
+					if(lastArgPos > 0){
+						opArguments.add(opContent.substring(lastArgPos,i).trim());
+					}else{opArguments.add(opContent.substring(0, i).trim());}
+					lastArgPos = i;
+				}
+				if(c =='(' ){
+					skip = true; 
+					openCount++;
+				}
+				if(c == ')'){
+					openCount--;
+					if(openCount == 0){skip = false;}
+				}
+				
+				if(i == opContent.toCharArray().length-1){
+					opArguments.add(opContent.substring(lastArgPos+1,i+1).trim());
+				}
+				
+			}//end of for loop
+			
+			for(String arg: opArguments){
+				t.addArg(parseEqTerm(arg));
+			}
+			
+			//t.addArg( parseEqTerm(line.substring(discr +1, line.length()-1)));
+			
+			
+			return t;
 		}
-		
-		
-		
-		//System.out.println("line "+ line +" left '" +leftHS + "'  right '" + rightHS+"'");
-		
-		
-	}//end of parseEq
+	}//end of parseLeftHS
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	/**
 	 * Takes an expression and determines if it contains an operator call
-	 * or if it only contains a constant 
-	 * @return
+	 * or if it only contains constants or variables as arguments 
+	 * @return true if the string has no '(' or if inside the initial (...) there exist 
+	 * no other parenthesis or brackets
+	 *  
 	 */
 	public boolean isBasicTerm(String s){
-		return (StringHelper.numOf(s, '(') == 0) && (StringHelper.numOf(s, '[') == 0)
-				&& (StringHelper.numOf(s, ',') == 0) && (!s.contains("\\s+"));
+		
+		int fParPos = StringHelper.firstAppearOfChar(s, '(');
+		if(fParPos > 0){
+			String inner = s.substring(fParPos+1, s.length()-1);
+		
+			if((StringHelper.numOf(inner, '(') == 0) && (StringHelper.numOf(inner, '[') == 0)){
+				return true;
+			}else{
+				return false;
+			}
+		}else{
+			return true;
+		}
 	}//end of isBasicExpr
 	
 	
@@ -540,6 +658,7 @@ public class FileHelper {
 			
 			for(int i = 0; i < args.length; i++){
 				basic.getArgs().add(StringHelper.remWhite(args[i]));
+				//System.out.println("for op "+opName + " add args " +args[i] );
 			}//end of adding the arguments loop
 		}else{
 			opName = exp;
@@ -547,6 +666,9 @@ public class FileHelper {
 			
 		basic.setOpName(opName);
 	}//end of parseBasicExpr
+	
+	
+	
 	
 	
 	
