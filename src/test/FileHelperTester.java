@@ -268,10 +268,13 @@ public class FileHelperTester {
 		
 		fh.parseEq("ceq find1(R , Union(CP1 , CPS)) = CP2 if (belong3?(R , CP)).",mod,eq);
 		CafeTerm ct = eq.getLeftTerm();	
+		
 		if(ct instanceof CompTerm){
 			@SuppressWarnings("unchecked")
 			Vector<Object> args = (Vector<Object>) ct.getArgs();
-			testRecursively(args);
+			
+			System.out.println(((CompTerm) ct).termToString());
+			//testRecursively(args);
 		}
 		
 		
@@ -298,6 +301,10 @@ public class FileHelperTester {
 		}//end of the for loop of the arguments of the given term
 
 	}//end of testRecursively
+	
+	
+	
+	
 	
 	
 }//end of FileHelperTester

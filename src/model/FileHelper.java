@@ -618,12 +618,8 @@ public class FileHelper {
 		int fParPos = StringHelper.firstAppearOfChar(s, '(');
 		if(fParPos > 0){
 			String inner = s.substring(fParPos+1, s.length()-1);
-		
-			if((StringHelper.numOf(inner, '(') == 0) && (StringHelper.numOf(inner, '[') == 0)){
-				return true;
-			}else{
-				return false;
-			}
+			return (StringHelper.numOf(inner, '(') == 0) && (StringHelper.numOf(inner, '[') == 0);
+			
 		}else{
 			return true;
 		}

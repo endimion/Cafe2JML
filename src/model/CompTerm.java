@@ -29,8 +29,27 @@ public class CompTerm implements CafeTerm{
 	
 	
 	
-	
-	
+	/**
+	 * 
+	 * @return a string representation of the term object
+	 */
+	public String termToString(){
+		String print =  getOpName() + "(";
+		
+		for(Object o : getArgs()){
+			if(o instanceof BasicTerm){
+				print = print + " " + ((BasicTerm) o).termToString() + ",";
+			}else{
+				print += print + ((CompTerm) o).termToString() + ",";
+			}
+		}
+		
+		print = StringHelper.remLastChar(print);
+		print += ")";
+		
+		return print;
+		
+	}//end of printTerm
 	
 	
 	

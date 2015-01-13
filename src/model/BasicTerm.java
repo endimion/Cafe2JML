@@ -24,5 +24,25 @@ public class BasicTerm implements CafeTerm{
 	
 	
 	
+	/**
+	 * 
+	 * @return a string representation of the term
+	 */
+	public String termToString(){
+		String print = getOpName();
+		String extra="";
+		
+		for(String s: getArgs()){
+			extra += " "+s +",";
+		}//end of looping through the term argumnets
+		
+		if(extra.length() > 0){
+			extra = StringHelper.remLastChar(extra); //we remove the last comma
+			print  += "(" + extra +")";
+		}
+
+		return print;
+	}//end of termToString
+	
 	
 }//end of BasicOpExpr
