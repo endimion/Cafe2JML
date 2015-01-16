@@ -11,5 +11,5 @@ public interface CafeTerm {
 	
 	public void addArg(Object arg);
 	
-	
+	public String termToString();
 }

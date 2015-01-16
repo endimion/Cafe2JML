@@ -33,6 +33,7 @@ public class CompTerm implements CafeTerm{
 	 * 
 	 * @return a string representation of the term object
 	 */
+	@Override
 	public String termToString(){
 		String print =  getOpName() + "(";
 		
@@ -42,7 +43,7 @@ public class CompTerm implements CafeTerm{
 			}else{
 				print += print + ((CompTerm) o).termToString() + ",";
 			}
-		}
+		}//end of for loop
 		
 		print = StringHelper.remLastChar(print);
 		print += ")";

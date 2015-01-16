@@ -84,4 +84,23 @@ public class Module {
 	
 	public String getName(){return this.name;}
 	
+	/**
+	 * 
+	 * @return a vector containing the "constructors" of the modules, i.e.
+	 * all the operators whose co-arity is the same sort as that of the module
+	 */
+	public Vector<CafeOperator> getConstructors(){
+		
+		Vector<CafeOperator> res = new Vector<CafeOperator>();
+		
+		for(CafeOperator op: getOps()){
+			if(op.getSort().equals(getClassSort())){
+				res.add(op);
+			}
+		}
+		return res;
+	}//end of getConstructors
+	
+	
+	
 }//end of class

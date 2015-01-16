@@ -28,6 +28,7 @@ public class BasicTerm implements CafeTerm{
 	 * 
 	 * @return a string representation of the term
 	 */
+	@Override
 	public String termToString(){
 		String print = getOpName();
 		String extra="";

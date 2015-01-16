@@ -1,5 +1,6 @@
 package model;
 
+
 public class StringHelper {
 
 	
@@ -52,7 +53,7 @@ public class StringHelper {
 	 * @return the input string without the first character
 	 */
 	public static String remFirstChar(String the_string){
-		return the_string.substring(1, the_string.length());
+		return (the_string.length() > 1)?the_string.substring(1, the_string.length()):the_string;
 	}
 	
 	
@@ -154,7 +155,48 @@ public class StringHelper {
 	}//end of firstAppearOfChar 
 	
 	
-	
+	/**
+	 * Takes as input a string and if it is enclosed in parenthesis it removes them
+	 * and returns the inside of the string
+	 * @param s a string
+	 * @return a string without the enclosing parenthesis nomatter how many
+	 */
+	public static String remEnclosingParenthesis(String s){
+		
+		if(s.length() > 0){
+			s = s.trim();
+		}
+		int noOfOpen = 0;
+		int noOfClosed = 0;
+		
+		if(s.startsWith("(") && s.endsWith(")")){
+			
+			char[] ar = s.toCharArray();
+			
+			for(int i=0; i< ar.length; i++){
+				
+				if(ar[i] == '('){
+					noOfOpen++;
+				}else{
+					if(ar[i] == ')'){
+						noOfClosed++;
+					}
+				}//end of else
+				
+				if(noOfOpen == noOfClosed && i != 0 && noOfOpen!=0 && i!= ar.length-1){
+					return s;
+				}
+				
+			}//end of for loop
+
+			s = remLastChar(remFirstChar(s));
+			
+			return remEnclosingParenthesis(s);
+		}else{
+			return s;
+		}
+		
+	}//end of remEnclosingParenthesis
 	
 	
 	
