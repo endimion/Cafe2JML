@@ -245,41 +245,7 @@ public class FileHelperTester {
 
 	
 	
-	@Test
-	public void testParseEq(){
-		Module mod = new Module();
-		CafeEquation eq = new CafeEquation();
-		//CafeTerm ct2;
-		
-		//fh.parseEq("eq (black = black ) = true ", mod,eq);
-		//ct2 = eq.getLeftTerm();
-		//System.out.println(ct2.termToString());
-		
-		//fh.parseEq("eq Union(e , empty) = e .", mod,eq);
-		//ct2 = eq.getLeftTerm();
-		//System.out.println(ct2.termToString());
-		
-		
-		//fh.parseEq("ceq ( about(C  P)  = about(C'  P')) = true  if (C = C') and (P = P') .", mod,eq);
-		//ct2 = eq.getLeftTerm();
-		//System.out.println(ct2.termToString());
-		
-		
-		fh.parseEq("ceq  ( g( f( about(C,  P)  = about(C,' P')) , asds) )   = true  if (C = C') and (P = P') .", mod,eq);
-		//ct2 = eq.getLeftTerm();
-		//System.out.println(ct2.termToString());
-		
-		
-		
-		fh.parseEq("ceq find1(R , Union(CP1 , CPS)) = CP2 if (belong3?(R , CP)).",mod,eq);
-		CafeTerm ct = eq.getLeftTerm();	
-		
-		if(ct instanceof CompTerm){
-			//System.out.println(((CompTerm) ct).termToString());
-		}
-		
-		
-	}//end of testParseEq
+	
 	
 	
 	public void testRecursively(Vector<Object> args){
@@ -420,7 +386,8 @@ public class FileHelperTester {
 	
 	@Test
 	public void testParseSubTerm(){
-		CafeTerm ct = fh.parseSubTerm("cons3?( g(R , about( C , CPS)) , cons0?(C), adbd,23)"); 
+		//CafeTerm ct = fh.parseSubTerm("cons3?( g(R , about( C , CPS)) , cons0?(C), adbd,23)");  OK
+		// CafeTerm ct = fh.parseSubTerm("cons3?( R , about( C , CPS) , cons0?(C), adbd,23)"); OK
 		ct.getArgs();
 		//System.out.println(ct.getOpName());
 		
@@ -428,12 +395,89 @@ public class FileHelperTester {
 			CafeTerm t = (CafeTerm) ct.getArgs().get(i);
 			String arg ="";
 			for(int j = 0; j < t.getArgs().size(); j++){
-				arg += " " + t.getArgs().get(j);
+				if(t.getArgs().get(j) instanceof CafeTerm){
+				 arg = arg + printTermsArgs((CafeTerm)t.getArgs().get(j));
+				}
+				else{
+					arg += t.getArgs().get(j);
+				}
+					
 			}
 			System.out.println(t.getOpName() +" with arguments " + arg);
 		}
 		
 	}//end of testParseSubTerm
+	
+	
+	public String printTermsArgs(CafeTerm t){
+		String name = t.getOpName();
+		Vector<Object> v = (Vector<Object>) t.getArgs();
+		
+		String res = name + "( ";
+		
+		for(int i=0; i< v.size();i++){
+			if(v.get(i) instanceof BasicTerm){
+				res = res + ((BasicTerm)v.get(i)).termToString() + ", ";
+			}else{
+				if(v.get(i) instanceof String){
+					res = res + (String)v.get(i) + ",";
+				}else{
+					res = res + printTermsArgs((CompTerm) v.get(i));
+				}
+			}
+		}//end of for loop
+		
+		return res + ")";
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@Test
+	public void testParseEq(){
+		Module mod = new Module();
+		CafeEquation eq = new CafeEquation();
+		CafeTerm ct2;
+		
+		fh.parseEq("eq (black = black ) = true ", mod,eq);
+		ct2 = eq.getLeftTerm();
+		//System.out.println(ct2.termToString());
+		
+		fh.parseEq("eq Union(e , empty) = e .", mod,eq);
+		ct2 = eq.getLeftTerm();
+		//System.out.println(ct2.termToString());
+		
+		
+		fh.parseEq("ceq ( about(C  P)  = about(C'  P')) = true  if (C = C') and (P = P') .", mod,eq);
+		ct2 = eq.getLeftTerm();
+		//System.out.println(ct2.termToString());
+		
+		
+		fh.parseEq("ceq  ( g( f( about(C,  P)  = about(C,' P')) , asds) )   = true  if (C = C') and (P = P') .", mod,eq);
+		ct2 = eq.getLeftTerm();
+		//System.out.println(ct2.termToString());
+		
+		
+		
+		fh.parseEq("ceq find1(R , Union(CP1 , CPS)) = CP2 if (belong3?(R , CP)).",mod,eq);
+		CafeTerm ct = eq.getLeftTerm();	
+		
+		if(ct instanceof CompTerm){
+			//System.out.println(((CompTerm) ct).termToString());
+		}
+		
+		
+	}//end of testParseEq
 	
 	
 	

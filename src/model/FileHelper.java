@@ -505,100 +505,13 @@ public class FileHelper {
 		
 		}else{
 			
+			return parseSubTerm(line);
 			
-			// we have to write a method that identifies the operator of a composite term 
-			//and then parses it
-			
-			// we now have to discriminate how the arguments of the 
-			//composite term are represented
-			//e.g. find1(R , Union(CP1 , CPS)) in this case splitting on the first "(" is appropriate
-			// but here: R , Union(CP1 , CPS) we have to split on the ","
-			// and maybe some-times the arguments will be separated by white spaces
-			
-			//Solution: we have to find the first opening parenthesis
-			// the first appearence of a comma
-			// and the first appearence of a whitespace after which a non-whitedigit appears
-			// different than "," or "("
-			// and we will choose the smaller value to do the splitting
-			
-			
-			
-			
-			if(!line.contains("=")){
-				return parseSubTermWithNoEq(line);
-			
-			}else{
-				//e.g. (( C about P)  = ( C' about P')) = true  
-				//System.out.println("composite term contains another = symbol!!");
-				return parseSubTermWithEq(line);
-			}
 		}
 	}//end of parseLeftHS
 	
 	
-	/**
-	 * parses a string denoting an equation sub-term which contains another equation symbol
-	 * @param line the subterm
-	 * @return a CompTerm object which stores the result of the parsing
-	 */
-	public CafeTerm parseSubTermWithEq(String line){
-		//first we find the the position of the parenthesis if they exist 
-		
-		 
-		//first we have to make sure that the = is the main operator of the term
-		
-		CompTerm ct =  new CompTerm();
-		
-		line = StringHelper.remEnclosingParenthesis(line).trim();
-		char[] lineAr = line.toCharArray();
-		
-		int open = 0;
-		String possible = "";
-		
-		
-		//(black = black )
-		//g( f( (C about P)  = ( C' about P')) , asds)
-		
-		// compute the main operator of the  term
-		for(int i =0 ; i< lineAr.length; i++){
-			if(lineAr[i] == '('){open++;}
-			if(lineAr[i] == ')'){
-				open--;
-				if(open == 0 && i != lineAr.length-1){possible = "";  }
-			}
-			
-			if( (lineAr[i] != '(') && (lineAr[i] != ')') && open == 0 
-					&& !Character.isWhitespace(lineAr[i]) 
-					&& possible =="" 
-					&& i != lineAr.length-1){
-				
-					if(lineAr[i+1] == '(' || lineAr[i] == '='){
-						possible =  possible +lineAr[i] ;
-						//System.out.println(possible + " !!!!!!!1");
-						
-					}
-				
-			}
-		}//end of for loop
-		
-		
-		
-		//System.out.println("MAINE IS " + possible + " " + pos);
-		
-		if(possible.equals("=")){
-			String leftPartofEq =line.split("=")[0].trim();
-			String rightPartofEq = line.split("=")[1].trim();
-			
-			ct.setOpName("equals");
-			ct.addArg(parseEqTerm(leftPartofEq));
-			ct.addArg(parseEqTerm(rightPartofEq));
 
-			return  ct;
-		}else{
-			return parseSubTermWithNoEq(line);
-		}
-		
-	}//end of parseLineWithEq
 	
 	
 	
@@ -711,14 +624,22 @@ public class FileHelper {
 				
 				return ct;
 			}else{
-				//TODO
+				
+				int eqPos = mainOp.getPos();
+				String lhs = term.substring(0, eqPos);
+				String rh = term.substring(eqPos+1, term.length());
+				ct.setOpName("equals");
+				ct.addArg(parseSubTerm(lhs));
+				ct.addArg(parseSubTerm(rh));
+			
+				return ct;
 			}//end if the main operator is not an = symbol
 			
 		}//end if it is not a basic term
 
 		
-		return null;
-	}
+		
+	}//end of parseSubTerm
 	
 	/**
 	 * 
@@ -869,11 +790,6 @@ public class FileHelper {
 	
 	
 	
-	// OLD STUFF//////////////////////////////////////////////////////
-	
-	
-	
-	
 	/**
 	 * Takes an expression and determines if it contains an operator call
 	 * or if it only contains constants or variables as arguments 
@@ -896,72 +812,6 @@ public class FileHelper {
 			return false;
 		}
 	}//end of isBasicExpr
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/**
-	 * parses a term whose main operator is not an = operator
-	 * @param line
-	 * @return
-	 */
-	public CafeTerm parseSubTermWithNoEq(String line){
-		
-		CompTerm t = new CompTerm();
-		//first remove the outerparenthesis of the line if it has any and whitespaces
-		line = (StringHelper.remEnclosingParenthesis(line.trim())).trim();
-		
-		int firstPar = line.indexOf('(');
-		
-		String opName = "";
-		String inner="";
-		
-		if(firstPar > 0){
-			opName = line.substring(0,firstPar);
-			t.setOpName(opName);
-			inner = line.substring(firstPar+1, line.length()-1).trim();
-		}
-		
-		String arg = "";
-		int openP = 0;
-		
-		for(int i =0 ; i<inner.length();i++){
-			char c = inner.toCharArray()[i];
-
-			if(c == '('){ openP ++;}
-			if(c == ')'){openP--;}
-			
-			if(c == ',' && openP == 0){
-				//System.out.println("arg : "+ arg);
-				t.addArg(parseEqTerm(arg));
-				arg ="";
-			}else{
-				if(!Character.isWhitespace(c)) arg = arg + c;
-			}
-		}//end of for
-		
-		//add the final arg
-		if(!arg.equals("") && openP == 0){t.addArg(parseEqTerm(arg));}
-		return t;
-	}//end of parseSubTermWithNoEq
-	
-	
-	
-	
-	
-	
 	
 	
 	
