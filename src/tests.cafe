@@ -398,16 +398,12 @@ var R :  req
 var LS : licSet
 
 eq cond1(R , L) = (belong6?(R , L) and  (subCons?(R , find4(R , L))) )  .
-eq cond2(R , L) = ( not ((type3?(label?(find4(R , L)) ) ) = once)) or 
-			             ((type2?(label?(find4(R , L)) ) ) = true) .
+eq cond2(R , L) = ( not ((type3?(label?(find4(R , L)) ) ) = once)) or  ((type2?(label?(find4(R , L)) ) ) = true) .
 
-eq cond3(R , L) =  not(((type3?(labelCP?(find3(R ,L))) = once )) or
-					   (type2?(labelCP?(find3(R ,L))) = true) ) .
+eq cond3(R , L) =  not(((type3?(labelCP?(find3(R ,L))) = once )) or   (type2?(labelCP?(find3(R ,L))) = true) ) .
 
-ceq build(R , (L , LS)) =  L , (build(R , LS)) 
-    	      	   	if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
-ceq build(R , (L ,LS)) = (build(R , LS)) 
-    	      	   	if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
+ceq build(R , (L , LS)) =  L , (build(R , LS)) if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
+ceq build(R , (L ,LS)) = (build(R , LS)) 	if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
 
 ceq build(R , L ) = L if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
 ceq build(R , L) = emptyLicSet  if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
@@ -425,7 +421,6 @@ ceq build2(R , (L , LS)) =  ( build2(R,LS))  if not( cond1(R,L)) .
 eq build2(R , emptyLic) = emptyLicSet .
 
 }
-
 
 
 
@@ -506,12 +501,7 @@ ceq  /inStartlic(request(R , S) , L) = true
 
 ceq /inPosslic(request(R , S) , L) = /inPosslic(S, L) if not c-request(S) .
 
-ceq /inPosslic(request(R , S) , L) = true 
-    			   if (      (/inStartlic(request(R , S) , L)) 
-			              and
-			             ( not ((type3?(label?(find4(R , L)) ) ) = once)) or 
-			             ((type2?(label?(find4(R , L)) ) ) = true)
-			      ) and c-request(S) .
+ceq /inPosslic(request(R , S) , L) = true  if (      (/inStartlic(request(R , S) , L))  and   ( not ((type3?(label?(find4(R , L)) ) ) = once)) or  ((type2?(label?(find4(R , L)) ) ) = true)) and c-request(S) .
 
 
 
@@ -519,11 +509,11 @@ ceq /inPosslic(request(R , S) , L) = true
 ceq /inFinallic(request(R , S) , L) = /inFinallic(S , L) if not c-request(S) .
 
 ceq /inFinallic(request(R , S) , L) = true 
-    			       	      if ( (/inPosslic(request(R , S) , L)) 
-				           and
-				           not(((type3?(labelCP?(find3(R ,L))) = once )) or
-					   (type2?(labelCP?(find3(R ,L))) = true) )
-					  ) and c-request(S) .
+--    			       	      if ( (/inPosslic(request(R , S) , L)) 
+--				           and
+--				           not(((type3?(labelCP?(find3(R ,L))) = once )) or
+--					   (type2?(labelCP?(find3(R ,L))) = true) )
+--					  ) and c-request(S) .
 
 
 ceq finalLic(request(R , S)) = build(R , licIns(S)) if c-request(S) .
@@ -547,13 +537,10 @@ ceq /inFinallic(choose(S) , L ) = /inFinallic(S , L ) if c-choose(S) .
 ceq finalLic(choose(S)) = finalLic(S) if c-choose(S) .
 
 
-ceq best(choose(S)) = OMA(useReq(S) , finalLic(choose(S))) if (#(finalLic(choose(S))) > 1)
-    		      		      			      	and  c-choose(S) .
+ceq best(choose(S)) = OMA(useReq(S) , finalLic(choose(S))) if (#(finalLic(choose(S))) > 1)	and  c-choose(S) .
 
 
-ceq best(choose(S)) = OMA(useReq(S) , build2(useReq(S) , licIns(choose(S))) ) 
-    		      		      if (not(#(finalLic(choose(S))) > 1)) 
-    		      		      			     and c-choose(S) .
+ceq best(choose(S)) = OMA(useReq(S) , build2(useReq(S) , licIns(choose(S))) )  if (not(#(finalLic(choose(S))) > 1)) and c-choose(S) .
 
 -- ---------------------------------------------------------------------------------------------
 -- TRANSITION USE1(S)
@@ -611,3 +598,4 @@ ceq finalLic(use2(S)) = finalLic(S) if c-choose(S) .
 
 
 }
+

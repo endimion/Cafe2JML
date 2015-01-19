@@ -392,15 +392,11 @@ public class FileHelperTester {
 		assertEquals("",v.get(0),"R");
 		assertEquals("",v.get(1),"about( C , CPS)");
 	
-	
-		
-		
 		v = new Vector<String>();
 		s = "g(f( about(C,  P)  = about(C,' P')) , asds)";
 		fh.splitTerm(s, v,false);
 		assertEquals("",v.get(0),"f( about(C,  P)  = about(C,' P'))");
 		assertEquals("",v.get(1),"asds");
-		
 		
 		v = new Vector<String>();
 		s = "f( about(C,  P)  = about(C,' P'))";
@@ -422,6 +418,7 @@ public class FileHelperTester {
 	
 	
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testParseSubTerm(){
 		//CafeTerm ct = fh.parseSubTerm("cons3?( g(R , about( C , CPS)) , cons0?(C), adbd,23)");  OK
@@ -429,24 +426,51 @@ public class FileHelperTester {
 		//CafeTerm ct = fh.parseSubTerm("find3(R , union(subL , L))"); //OK
 		//CafeTerm ct = fh.parseSubTerm("build(R , uni(L ,LS)) = (build(R , LS))"); //OK
 		
-		CafeTerm ct = fh.parseSubTerm(" ( g(f( about(C,  P)  = about(C,' P')) , asds) ) "); //NOT OK!!
-		ct.getArgs();
-		//System.out.println(ct.getOpName());
+		CafeTerm ct = fh.parseSubTerm(" ( g(f( about(C,  P)  = about(C', P')) , asds) ) "); //NOT OK!!
+		assertEquals("",ct.getOpName(),"g");
+		Vector<CafeTerm> args = (Vector<CafeTerm>) ct.getArgs();
+		CafeTerm arg0 = args.get(0);
+		CafeTerm arg1 = args.get(1);
+		assertEquals("",args.size(),2);
+		assertEquals("",arg0.getOpName(),"f");
+		assertEquals("",arg1.getOpName(),"asds");
 		
-		for(int i=0; i< ct.getArgs().size();i++){
-			CafeTerm t = (CafeTerm) ct.getArgs().get(i);
-			String arg ="";
-			for(int j = 0; j < t.getArgs().size(); j++){
-				if(t.getArgs().get(j) instanceof CafeTerm){
-				 arg = arg + printTermsArgs((CafeTerm)t.getArgs().get(j));
-				}
-				else{
-					arg +=  " ," + t.getArgs().get(j);
-				}
-					
-			}
-			System.out.println(t.getOpName() +" with arguments " + arg);
-		}//end of for loop
+		args = (Vector<CafeTerm>) arg0.getArgs();
+		assertEquals("",args.get(0).getOpName(),"equals");
+		assertEquals("",args.size(),1);
+		arg0 = args.get(0);
+		
+		args = (Vector<CafeTerm>) arg0.getArgs();
+		assertEquals("",args.get(0).getOpName(),"about");
+		assertEquals("",args.get(1).getOpName(),"about");
+		assertEquals("",args.size(),2);
+		arg0 = args.get(0);
+		arg1 = args.get(1);
+		
+		Vector<String> basicArgs = (Vector<String>) arg0.getArgs();
+		assertEquals("",basicArgs.get(0),"C");
+		assertEquals("",basicArgs.get(1),"P");
+		
+		
+		//test n02 
+		
+		ct = fh.parseSubTerm("cons3?( g(R , about( C , CPS)) , cons0?(C), adbd,23)");
+		assertEquals("",ct.getOpName(),"cons3?");
+		args = (Vector<CafeTerm>) ct.getArgs();
+		arg0 = args.get(0);
+		arg1 = args.get(1);
+		CafeTerm arg3 = args.get(2);
+		assertEquals("",args.size(),4);
+		
+		assertEquals("",arg0.getOpName(),"g");
+		assertEquals("",arg1.getOpName(),"cons0?");
+		assertEquals("",arg3.getOpName(),"adbd");	
+		assertEquals("",args.get(3).getOpName(),"23");
+		
+		
+		Vector<Object> arugm = (Vector<Object>)args.get(0).getArgs();
+		assertEquals("",((CafeTerm)arugm.get(0)).getOpName(),"R");
+		assertEquals("",((CafeTerm)arugm.get(1)).getOpName(),"about");
 		
 	}//end of testParseSubTerm
 	

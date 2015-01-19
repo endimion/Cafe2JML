@@ -213,6 +213,12 @@ public class FileHelper {
 			parseVarLine(line,mod);
 		}//end if line contains a single variable declaration
 	
+		if(line.startsWith("eq") || line.startsWith("ceq")){
+			CafeEquation eq = new CafeEquation();
+			parseEq(line,mod,eq);
+			mod.addEq(eq);
+		}//end if line contains a single variable declaration
+		
 	}//end of parseLine
 	
 	
@@ -422,7 +428,7 @@ public class FileHelper {
 	public void parseEq(String line, Module mod, CafeEquation eq){
 		
 		String condition="";
-		
+		line = line.replace(".","");
 		
 		if(line.startsWith("eq")){
 			line = line.split("(eq)\\s+")[1];
@@ -594,7 +600,8 @@ public class FileHelper {
 	
 	
 	/**
-	 * takes as input a term and returns a CafeTerm object which contains its parsing
+	 * takes as input a term and returns a CafeTerm object which contains its parsing, 
+	 * i.e. operator and a vector of the arguments of the term
 	 * @return
 	*/
 	public CafeTerm parseSubTerm(String term){
@@ -622,11 +629,6 @@ public class FileHelper {
 				
 				for(String t: args){
 					ct.addArg(parseSubTerm(t));
-				}
-				
-				if(mainOp.getName().equals("f")){
-					System.out.println("F found!!!!");
-					System.out.println(ct.getArgs().size() + " many arguments");
 				}
 				
 				return ct;
@@ -658,7 +660,11 @@ public class FileHelper {
 	 */
 	public String getInnerTerm(String term, String mainOp, int pos){
 		if(pos >= 0 && !mainOp.equals("=")){
-			return term.substring(pos +2, term.length()-1).trim();
+			//System.out.println(term);
+			try{
+				return term.substring(pos +2, term.length()-1).trim();
+			}catch(Exception e){System.out.println(term); return term;}
+			
 		}else{
 			return term;
 		}

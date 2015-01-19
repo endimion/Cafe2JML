@@ -20,7 +20,7 @@ public class Module {
 	Vector<String> extendsNames = new Vector<String>();
 	Vector<CafeOperator> ops = new Vector<CafeOperator>();
 	Vector<CafeVariable> vars = new Vector<CafeVariable>();
-
+	Vector<CafeEquation> eqs = new Vector<CafeEquation>();
 	
 	private int numOfOps ;
 	private int numOfEq ;
@@ -101,6 +101,17 @@ public class Module {
 		return res;
 	}//end of getConstructors
 	
-	
+	/**
+	 * adds a new CafeEquation to the vector of the modules equations
+	 * @param eq
+	 */
+	public void addEq(CafeEquation eq){
+		eqs.add(eq);
+	}
+	/**
+	 * 
+	 * @return a vector containing the equations of the module
+	 */
+	public Vector<CafeEquation> getEqs(){return this.eqs;}
 	
 }//end of class
