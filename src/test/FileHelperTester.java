@@ -13,6 +13,7 @@ import model.CompTerm;
 import model.FileHelper;
 import model.Module;
 import model.OpNamePos;
+import model.StringHelper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -283,6 +284,8 @@ public class FileHelperTester {
 		
 		s = "cons3?(R , C about CPS) = cons0?(C)";
 		assertEquals("",  fh.getMainPos(s).getName()  , "=");
+		assertEquals("",  fh.getMainPos(s).getPos()  , 24);
+		
 		
 		 s = "cons3?((R , C about CPS) = cons0?(C))";
 		assertEquals("",  fh.getMainPos(s).getName()  , "cons3?");
@@ -296,7 +299,16 @@ public class FileHelperTester {
 		 s= "R , about(C,  P)";
 		 assertEquals("",fh.getMainPos(s).getPos(),-1);
 		 
+		 s = "black = black";
+		 assertEquals("",  fh.getMainPos(s).getPos()  , 6);
+			
+		 s ="( g(f( about(C,  P)  = about(C,' P')) , asds) ) "; //OK
+		 assertEquals("",  fh.getMainPos(s).getName()  , "g");
 		 
+		 s = StringHelper.remEnclosingParenthesis(s);	
+		 assertEquals("",  fh.getMainPos(s).getName()  , "g");
+		 assertEquals("",s,"g(f( about(C,  P)  = about(C,' P')) , asds)");
+		 assertEquals("",fh.getMainPos(s).getPos(),0);
 	}//end of testParseTermContEq
 	
 	
@@ -321,6 +333,11 @@ public class FileHelperTester {
 		assertEquals("",  fh.getInnerTerm(s, main.getName(), main.getPos())  , 
 											"R , (subL , L)");
 		
+		
+		s =  "(R , C about CPS) = cons0?(C)";
+		main = fh.getMainPos(s);
+		assertEquals("",fh.getInnerTerm(s, main.getName(), main.getPos()) ,"(R , C about CPS) = cons0?(C)");
+		
 	}//end of testGetInnerTerm
 	
 	
@@ -329,7 +346,7 @@ public class FileHelperTester {
 		String s = "cons3?((R , C about CPS) = cons0?(C))";
 		String inner = fh.getInnerTerm(s, fh.getMainPos(s).getName(),
 				fh.getMainPos(s).getPos());
-		assertEquals("",fh.getSubTermPos(inner),-1);
+		assertEquals("",fh.getSubTermPos(inner),18);
 		
 		s =  "find3(R , (subL , L))";
 		inner = fh.getInnerTerm(s, fh.getMainPos(s).getName(),
@@ -339,18 +356,16 @@ public class FileHelperTester {
 		s =  "(R , C about CPS) = cons0?(C)";
 		inner = fh.getInnerTerm(s, fh.getMainPos(s).getName(),
 				fh.getMainPos(s).getPos());
-		assertEquals("",fh.getSubTermPos(inner),-1);
+		//assertEquals("",fh.getSubTermPos(inner),18);
+		assertEquals("",inner,"(R , C about CPS) = cons0?(C)");
 		
-		s =  "f( about(C,  P)  = about(C,' P'))";
+		s =  "f(about(C,  P) = about(C,' P'))";
 		inner = fh.getInnerTerm(s, fh.getMainPos(s).getName(),
 				fh.getMainPos(s).getPos());
-		assertEquals("",fh.getSubTermPos(inner),-1);
+		assertEquals("",fh.getSubTermPos(inner),13);
 		
-
-		s =  "f( about(C,  P) , about(C,' P'))";
-		inner = fh.getInnerTerm(s, fh.getMainPos(s).getName(),
-				fh.getMainPos(s).getPos());
-		assertEquals("",fh.getSubTermPos(inner),11);
+		
+		
 	}//end of testGetSubTerm
 	
 	
@@ -378,6 +393,29 @@ public class FileHelperTester {
 		assertEquals("",v.get(1),"about( C , CPS)");
 	
 	
+		
+		
+		v = new Vector<String>();
+		s = "g(f( about(C,  P)  = about(C,' P')) , asds)";
+		fh.splitTerm(s, v,false);
+		assertEquals("",v.get(0),"f( about(C,  P)  = about(C,' P'))");
+		assertEquals("",v.get(1),"asds");
+		
+		
+		v = new Vector<String>();
+		s = "f( about(C,  P)  = about(C,' P'))";
+		fh.splitTerm(s, v,false);
+		assertEquals("",v.get(0),"about(C,  P)  = about(C,' P')");
+		//assertEquals("",v.get(1),"about(C,' P')");
+		
+		
+		v = new Vector<String>();
+		s = " about(C,  P)  = about(C,' P')";
+		fh.splitTerm(s, v,false);
+		assertEquals("",v.get(0),"about(C,  P)");
+		assertEquals("",v.get(1),"about(C,' P')");
+		
+		
 	}//end of testSplitTerm
 	
 	
@@ -388,6 +426,10 @@ public class FileHelperTester {
 	public void testParseSubTerm(){
 		//CafeTerm ct = fh.parseSubTerm("cons3?( g(R , about( C , CPS)) , cons0?(C), adbd,23)");  OK
 		// CafeTerm ct = fh.parseSubTerm("cons3?( R , about( C , CPS) , cons0?(C), adbd,23)"); OK
+		//CafeTerm ct = fh.parseSubTerm("find3(R , union(subL , L))"); //OK
+		//CafeTerm ct = fh.parseSubTerm("build(R , uni(L ,LS)) = (build(R , LS))"); //OK
+		
+		CafeTerm ct = fh.parseSubTerm(" ( g(f( about(C,  P)  = about(C,' P')) , asds) ) "); //NOT OK!!
 		ct.getArgs();
 		//System.out.println(ct.getOpName());
 		
@@ -399,18 +441,19 @@ public class FileHelperTester {
 				 arg = arg + printTermsArgs((CafeTerm)t.getArgs().get(j));
 				}
 				else{
-					arg += t.getArgs().get(j);
+					arg +=  " ," + t.getArgs().get(j);
 				}
 					
 			}
 			System.out.println(t.getOpName() +" with arguments " + arg);
-		}
+		}//end of for loop
 		
 	}//end of testParseSubTerm
 	
 	
 	public String printTermsArgs(CafeTerm t){
 		String name = t.getOpName();
+		@SuppressWarnings("unchecked")
 		Vector<Object> v = (Vector<Object>) t.getArgs();
 		
 		String res = name + "( ";
@@ -422,6 +465,8 @@ public class FileHelperTester {
 				if(v.get(i) instanceof String){
 					res = res + (String)v.get(i) + ",";
 				}else{
+					System.out.println("comp term found" + ((CompTerm) v.get(i)).getOpName());
+					
 					res = res + printTermsArgs((CompTerm) v.get(i));
 				}
 			}
@@ -451,16 +496,16 @@ public class FileHelperTester {
 		
 		fh.parseEq("eq (black = black ) = true ", mod,eq);
 		ct2 = eq.getLeftTerm();
-		//System.out.println(ct2.termToString());
+		System.out.println(ct2.termToString());
 		
 		fh.parseEq("eq Union(e , empty) = e .", mod,eq);
 		ct2 = eq.getLeftTerm();
-		//System.out.println(ct2.termToString());
+		System.out.println(ct2.termToString());
 		
 		
 		fh.parseEq("ceq ( about(C  P)  = about(C'  P')) = true  if (C = C') and (P = P') .", mod,eq);
 		ct2 = eq.getLeftTerm();
-		//System.out.println(ct2.termToString());
+		System.out.println(ct2.termToString());
 		
 		
 		fh.parseEq("ceq  ( g( f( about(C,  P)  = about(C,' P')) , asds) )   = true  if (C = C') and (P = P') .", mod,eq);
@@ -473,7 +518,7 @@ public class FileHelperTester {
 		CafeTerm ct = eq.getLeftTerm();	
 		
 		if(ct instanceof CompTerm){
-			//System.out.println(((CompTerm) ct).termToString());
+			System.out.println(((CompTerm) ct).termToString());
 		}
 		
 		

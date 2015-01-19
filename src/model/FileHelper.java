@@ -564,8 +564,9 @@ public class FileHelper {
 							
 							case '=' :  if(openPars == 0){
 											addToMain = false;
-											mainOp = mainOp +c;
+											mainOp = ""+c;
 											pos = i;
+											continueLooping = false;
 										}
 										break;
 							
@@ -598,11 +599,12 @@ public class FileHelper {
 	*/
 	public CafeTerm parseSubTerm(String term){
 		
+		term = StringHelper.remEnclosingParenthesis(term);
 		OpNamePos mainOp = getMainPos(term);
 		
 		if(isBasicTerm(term)){
 			BasicTerm t = new BasicTerm();
-			parseBasicExpr(StringHelper.remEnclosingParenthesis(term), t);
+			parseBasicExpr(term, t);
 			return t;
 		}else{ //end if it is a basic term
 			CompTerm ct = new CompTerm();
@@ -622,16 +624,21 @@ public class FileHelper {
 					ct.addArg(parseSubTerm(t));
 				}
 				
+				if(mainOp.getName().equals("f")){
+					System.out.println("F found!!!!");
+					System.out.println(ct.getArgs().size() + " many arguments");
+				}
+				
 				return ct;
 			}else{
 				
 				int eqPos = mainOp.getPos();
-				String lhs = term.substring(0, eqPos);
-				String rh = term.substring(eqPos+1, term.length());
+				String lhs = term.substring(0, eqPos).trim();
+				String rhs = term.substring(eqPos+1, term.length()).trim();
 				ct.setOpName("equals");
 				ct.addArg(parseSubTerm(lhs));
-				ct.addArg(parseSubTerm(rh));
-			
+				ct.addArg(parseSubTerm(rhs));
+				
 				return ct;
 			}//end if the main operator is not an = symbol
 			
@@ -650,7 +657,7 @@ public class FileHelper {
 	 * otherwise the term as it is is returned
 	 */
 	public String getInnerTerm(String term, String mainOp, int pos){
-		if(pos >= 0){
+		if(pos >= 0 && !mainOp.equals("=")){
 			return term.substring(pos +2, term.length()-1).trim();
 		}else{
 			return term;
@@ -661,7 +668,7 @@ public class FileHelper {
 	
 	/**
 	 * takes as input a term and gets its inner part of the main operator 
-	 * splits that into arguments and returns a vecor containing those arguments
+	 * splits that into arguments and returns a vector containing those arguments
 	 * i.e. f(a(b,c),g) --> [a(b,c) , g]
 	 * @param term
 	 * @param args the vector in which the subterms are stored
@@ -672,36 +679,34 @@ public class FileHelper {
 		int pos = getSubTermPos(term);
 		int start = 0;
 		
-		
 		if(pos == term.length()-1) { makeSub = true;}
 		
 		if(makeSub){
 			
 			String inner = getInnerTerm(term, getMainPos(term).getName(),
 					getMainPos(term).getPos()).trim();
-			
-			
-			pos = getSubTermPos(inner) ;
-			if(pos>=0 && !(pos >= inner.length())){
-				if(inner.charAt(0) == ','){start = 1;}
-				args.addElement( inner.substring(start,pos+1).trim());
 
-				//System.out.println(pos + " "+ term + " " + term.length() + " " + getMainPos(term).getName());
-				splitTerm(inner.substring(pos+1 ,inner.length()).trim(),args,false);
-			}
+			pos = getSubTermPos(inner) ;
 			
+			
+			if(pos>=0 && !(pos >= inner.length())){
+				
+				if(!getMainPos(inner).getName().equals("=")){
+					if(inner.charAt(0)  == ','){start = 1;}
+					args.addElement( inner.substring(start,pos+1).trim());
+					splitTerm(inner.substring(pos+1 ,inner.length()).trim(),args,false);
+				}else{
+					args.addElement(inner.trim());
+				}//end if the main operator is not the = symbol
+			}//end if the position of the main operator is not the end of the term
 			
 		}else{
-			//if(term.startsWith(",")){term = StringHelper.remFirstChar(term);}
-			//if(term.endsWith(",")){term = StringHelper.remLastChar(term);}
 			
 			term = term.trim();
+		
 			pos = getSubTermPos(term);
 			
-			
-			
-			if(term.charAt(0) == ','){ start = 1;}
-			
+			if(term.charAt(0) == ',' ){ start = 1;}
 			
 			if(pos > 0 && pos+1 < term.length()){
 				
@@ -742,7 +747,8 @@ public class FileHelper {
 		//String inner = getInnerTerm(term, getMainPos(term).getName(),
 		//		getMainPos(term).getPos());
 		int start;
-		termAr  = term.trim().toCharArray();
+		term = term.trim();
+		termAr  = term.toCharArray();
 		
 		if(!getMainPos(term).getName().equals("=")){
 			
@@ -752,7 +758,7 @@ public class FileHelper {
 				
 				c = termAr[i];
 				
-				if(!Character.isWhitespace(c) && c!=',') skip = false; //with this we ignore the first white spaces
+				if(!Character.isWhitespace(c) && c!=',' && c!='=') skip = false; //with this we ignore the first white spaces
 				
 				if(c == '('){
 					open++;
@@ -764,10 +770,22 @@ public class FileHelper {
 							break;
 						}//end of if open is zero 
 					}else{
-						if((Character.isWhitespace(c) || c ==',')&& open == 0 && !skip){
+						
+						if(Character.isWhitespace(c) && open == 0 && !skip){
+							if(i < termAr.length -1 && !Character.isWhitespace(termAr[i+1])){
+								pos = i;
+								break;
+							}
+						}//end if c is a whitespace
+					
+						if(c ==',' 	&& open == 0 && !skip){
 							pos = i;
 							break;
-						}//end if c is a whitespace
+						}//end if c is a comma
+					
+					
+					
+					
 					}//end of if c is not a closing parenthesis
 				}//end if char is not (
 				
@@ -778,7 +796,10 @@ public class FileHelper {
 				}
 				
 			}//end of for loop
-		}//end of if the position of the main operator is >= 0
+		}//if the main op is not an =
+		else{
+			pos = getMainPos(term).getPos();
+		}//end if main operator is an = operator
 		
 		
 		
