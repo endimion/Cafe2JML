@@ -309,6 +309,22 @@ public class FileHelperTester {
 		 assertEquals("",  fh.getMainPos(s).getName()  , "g");
 		 assertEquals("",s,"g(f( about(C,  P)  = about(C,' P')) , asds)");
 		 assertEquals("",fh.getMainPos(s).getPos(),0);
+	
+	
+		 s = " adffdd and ssssv";
+		 assertEquals("",  fh.getMainPos(s).getName()  , "and");
+	
+		 s =" ((c-request(S)) and (belong6?(R , L))) ";
+		 assertEquals("",fh.getMainPos(s).getName(),"and");
+		 
+		 s ="not( c-request(S)) ";
+		 assertEquals("",fh.getMainPos(s).getName(),"not");
+		 
+		 s=" (not((type3?(labelCP?(find3(R ,L))) = once )) or (type2?(labelCP?(find3(R ,L))) = true) ";
+		 assertEquals("",s.contains(" or "),true);
+		 assertEquals("",fh.getMainPos(s).getName(),"or");
+	
+	
 	}//end of testParseTermContEq
 	
 	

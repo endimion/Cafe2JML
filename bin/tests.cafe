@@ -375,3 +375,226 @@ ceq bestLic( R , (L, LS)) = bestLic(R , LS) if ( bestLic(R ,LS) > cons4?(R ,L)) 
 }
 
 
+
+-- ----------------------------------------------------------
+-- Dummy module used just to delcare some datatype operatros
+-- ----------------------------------------------------------
+
+mod* Tools{
+pr(LicSet + Request + Colors)
+[tool]
+
+op build  : req licSet -> licSet -- builds the final lic set
+op build2 : req licSet -> licSet -- builds the startlic set
+op cond1  : req lic -> Bool
+op cond2  : req lic -> Bool
+op cond3  : req lic -> Bool
+op OMA    : req licSet -> lic
+
+
+var cp : cPerm
+var L :  lic
+var R :  req
+var LS : licSet
+
+--eq cond1(R , L) = (belong6?(R , L) and  (subCons?(R , find4(R , L))) )  .
+--eq cond2(R , L) = ( not ((type3?(label?(find4(R , L)) ) ) = once)) or  ((type2?(label?(find4(R , L)) ) ) = true) .
+
+--eq cond3(R , L) =  not(((type3?(labelCP?(find3(R ,L))) = once )) or   (type2?(labelCP?(find3(R ,L))) = true) ) .
+
+--ceq build(R , (L , LS)) =  L , (build(R , LS)) if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
+--ceq build(R , (L ,LS)) = (build(R , LS)) 	if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
+
+--ceq build(R , L ) = L if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
+--ceq build(R , L) = emptyLicSet  if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
+--eq build(R , emptyLic) = emptyLicSet .
+
+
+--eq OMA(R , L) = L .
+--ceq OMA(R , (L , LS)) = L if (cons4?(R , L) > bestLic(R , LS)) .
+--ceq OMA(R , (L , LS)) = OMA(R , LS) if ( bestLic(R , LS) > cons4?(R , L)) .
+
+
+
+--ceq build2(R , (L , LS)) =  L ,( build2(R,LS))  if cond1(R,L) .
+--ceq build2(R , (L , LS)) =  ( build2(R,LS))  if not( cond1(R,L)) .
+--eq build2(R , emptyLic) = emptyLicSet .
+
+}
+
+
+
+mod* OTS {
+pr(Tools)
+
+*[sys]*
+
+op init : -> sys
+
+-- action operators
+bop request : req sys -> sys
+bop choose  : sys -> sys
+bop use1    : sys -> sys
+bop use2    : sys -> sys
+
+-- observer operators
+
+bop licIns : sys -> licSet
+bop useReq : sys -> req
+bop best   : sys  -> lic
+bop color  : sys cPerm ->  color
+
+
+bop /inStartlic : sys lic -> Bool
+bop /inPosslic  : sys lic -> Bool
+bop /inFinallic : sys lic -> Bool
+
+
+bop finalLic    : sys -> licSet
+
+-- variables to denote "any"
+var S : sys
+var cp : cPerm
+var L : lic
+var R : req
+
+-- constants (arbritary values to datatypes)
+ op ls : -> licSet
+
+
+
+-- Initial state
+
+eq licIns(init) = ls .
+eq useReq(init) = null . 
+eq best(init)  = emptyLic .
+
+eq color(init ,  cp) = white .
+
+
+eq /inStartlic( init , L ) = false .
+eq /inPosslic( init , L ) = false .
+eq /inFinallic(init , L ) = false .
+
+eq finalLic(init) = emptyLic .
+
+
+-- ----------------------------------------------------------------
+-- transition  request(R ,S)
+-- models what happens when the user makes an arbritary  request R
+-- -----------------------------------------------------------------
+
+
+op c-request : sys -> Bool
+eq c-request(S) = (useReq(S) = null) .
+
+eq licIns(request(R , S)) = licIns(S) .
+ceq useReq(request(R , S)) = R  if c-request(S) .
+eq best(request(R , S)) = best(S) .
+
+eq color(request(R , S) , cp) = color(S , cp) .
+
+ceq  /inStartlic(request(R , S) , L) = /inStartlic(S , L) if not c-request(S) .
+ceq  /inStartlic(request(R , S) , L) = true    if ( ( c-request(S)) and (belong6?(R , L))  ) .
+
+ceq /inPosslic(request(R , S) , L) = /inPosslic(S, L) if not c-request(S) .
+
+ceq /inPosslic(request(R , S) , L) = true  if (      (/inStartlic(request(R , S) , L))  and   ( not ((type3?(label?(find4(R , L)) ) ) = once)) or  ((type2?(label?(find4(R , L)) ) ) = true)) and c-request(S) .
+
+
+
+
+ceq /inFinallic(request(R , S) , L) = /inFinallic(S , L) if not c-request(S) .
+
+--ceq /inFinallic(request(R , S) , L) = true 
+--    			       	      if ( (/inPosslic(request(R , S) , L)) 
+--				           and
+--				           not(((type3?(labelCP?(find3(R ,L))) = once )) or
+--					   (type2?(labelCP?(find3(R ,L))) = true) )
+--					  ) and c-request(S) .
+
+
+ceq finalLic(request(R , S)) = build(R , licIns(S)) if c-request(S) .
+ceq finalLic(request(R , S)) = finalLic(S) if not c-request(S) .
+
+-- ------------------------------------------------------------------------------------
+-- TRANSITION choose(S)
+-- ------------------------------------------------------------------------------------
+
+op c-choose : sys -> Bool
+eq c-choose(S) = (not( best(S) = emptyLic)) and ( not (useReq(S) = null)) .
+
+
+ceq licIns(choose(S)) = licIns(S) if c-choose(S) .
+ceq useReq(choose(S)) = useReq(S) if  c-choose(S) . 
+
+ceq color(choose(S) ,  cp) = color(S ,  cp) if c-choose(S) .
+ceq /inStartlic(choose(S) , L ) = /inStartlic(S , L ) if c-choose(S) .
+ceq /inPosslic(choose(S) , L ) = /inPosslic( S , L ) if c-choose(S) .
+ceq /inFinallic(choose(S) , L ) = /inFinallic(S , L ) if c-choose(S) .
+ceq finalLic(choose(S)) = finalLic(S) if c-choose(S) .
+
+
+ceq best(choose(S)) = OMA(useReq(S) , finalLic(choose(S))) if (#(finalLic(choose(S))) > 1)	and  c-choose(S) .
+
+
+ceq best(choose(S)) = OMA(useReq(S) , build2(useReq(S) , licIns(choose(S))) )  if (not(#(finalLic(choose(S))) > 1)) and c-choose(S) .
+
+-- ---------------------------------------------------------------------------------------------
+-- TRANSITION USE1(S)
+-- models the fact that the best license to use for this constraint 
+-- is a license in which the constraint permission  only allows one more execution of the right
+-- and thus here it will become depleted
+-- ----------------------------------------------------------------------------------------------
+
+op c-use1 : sys -> Bool
+eq c-use1(S) =  ( (not(useReq(S) = null) and (not (best(S) = emptyLic)))
+   	     	   and
+		   (type3?(labelCP?(find3(useReq(S), best(S) ))) = once )
+                ) .
+
+ceq licIns(use1(S)) = licIns(S) if c-use1(S) .
+
+ceq useReq(use1(S)) = null if  c-use1(S) . 
+
+ceq color(use1(S) ,  cp) = black if (cp = find3(useReq(S) , best(S))) and c-use1(S) .
+ceq color(use1(S) ,  cp) = color(S , cp)  if not ((cp = find3(useReq(S) , best(S))) and c-use1(S)) .
+
+
+ceq /inStartlic(use1(S) , L ) = /inStartlic(S , L ) if c-use1(S) .
+ceq /inPosslic(use1(S) , L ) = /inPosslic( S , L ) if c-use1(S) .
+ceq /inFinallic(use1(S) , L ) = /inFinallic(S , L ) if c-use1(S) .
+ceq finalLic(use1(S)) = finalLic(S) if c-choose(S) .
+
+
+
+-- ---------------------------------------------------------------------------------------------
+-- TRANSITION USE2(S)
+-- models the fact that the best license to use for this constraint 
+-- is a license in which the constraint permission  only allows more than one execution of the right
+-- and thus here it will NOT  become depleted
+-- ----------------------------------------------------------------------------------------------
+
+op c-use2 : sys -> Bool
+eq c-use2(S) =  ( (not(useReq(S) = null) and (not (best(S) = emptyLic)))
+   	     	   and
+		  not(type3?(labelCP?(find3(useReq(S), best(S) ))) = once )
+                ) .
+
+ceq licIns(use2(S)) = licIns(S) if c-use2(S) .
+
+ceq useReq(use2(S)) = null if  c-use2(S) . 
+
+ceq color(use2(S) ,  cp) = color(S , cp) if c-use2(S) .
+
+
+
+ceq /inStartlic(use2(S) , L ) = /inStartlic(S , L ) if c-use2(S) .
+ceq /inPosslic(use2(S) , L ) = /inPosslic( S , L ) if c-use2(S) .
+ceq /inFinallic(use2(S) , L ) = /inFinallic(S , L ) if c-use2(S) .
+ceq finalLic(use2(S)) = finalLic(S) if c-choose(S) .
+
+
+}
+
+

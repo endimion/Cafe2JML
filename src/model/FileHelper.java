@@ -542,57 +542,96 @@ public class FileHelper {
 		boolean addToMain = true;
 		char c;
 		boolean continueLooping = true;
+		boolean lookForLogic  = term.contains(" and ")|| term.contains(" or ");
 		
+		String logicConnect = ""; 
+		int logicPos = -1;
 		
-		if(!(StringHelper.numOf(term, '(') == 0 && StringHelper.numOf(term, '=') == 0)){
+		if(!(StringHelper.numOf(term, '(') == 0 && StringHelper.numOf(term, '=') == 0)
+				|| (term.contains(" and ") || term.contains(" or "))){
 			//"R , about(C,  P)"
-			for(int i =0; i< termAr.length; i++){
-				
-				if(continueLooping){
-					c = termAr[i];
-					
-					if(c != '(' && !Character.isWhitespace(c) && c!=')' && c !=',' && addToMain && c != '='){
-						mainOp = mainOp + c;
-						pos = i;
-					}else{ //end of if c is not a special character for this purposes
-						switch(c){
-							case '(' :	openPars++;
-										addToMain = false;
-										break;
-							
-							case ')' :	openPars--;
-										if(openPars == 0 && i !=0 && i != termAr.length-1){
-											mainOp ="";
-											pos = -1;
-											addToMain = true;
-										}//end if the closing of this parenthesis made the opened ones zero
-										break;
-							
-							case '=' :  if(openPars == 0){
-											addToMain = false;
-											mainOp = ""+c;
-											pos = i;
-											continueLooping = false;
-										}
-										break;
-							
-							case ',' : if(openPars == 0){
-											pos = -1;
-											continueLooping = false;
-										} 
-										break;
-						}//end of switch
-					}//end of else if c is not a special char
-		
-				}//end of for loop
-			}//end of continue looping
-				
-			if(openPars != 0){
-				mainOp ="";
-				pos = -1;
-			}//end of if some parenthesis remained open
 			
-		}//end if the term contains atleast a parenthesis or an = symbol
+			
+			if(lookForLogic){
+				for(int j = 0; j< term.toCharArray().length;j++){
+					c = term.toCharArray()[j];
+					
+					if(!Character.isWhitespace(c)){
+						if(c == '('){openPars++;}
+						else{if(c == ')') openPars--;}
+						
+						logicConnect += c;
+						if(logicConnect.equals("and")||logicConnect.equals("or")){
+							logicPos = j;
+							mainOp = logicConnect;
+							lookForLogic = false;
+							if(openPars == 0) return new OpNamePos(logicConnect, j);
+							//break;
+						}//end if and or or has been found
+					}else{
+						logicConnect="";
+					}
+				}//end for loop
+				
+			}else{ //end of if look for logic
+			
+				for(int i =0; i< termAr.length; i++){
+					
+					if(continueLooping){
+						c = termAr[i];
+						
+						if(c != '(' && !Character.isWhitespace(c) && c!=')' && c !=',' && addToMain && c != '='){
+							mainOp = mainOp + c;
+							pos = i;
+	
+						}else{ //end of if c is not a special character for this purposes
+							switch(c){
+								case '(' :	openPars++;
+											addToMain = false;
+											break;
+								
+								case ')' :	openPars--;
+											if(openPars == 0 && i !=0 && i != termAr.length-1){
+												mainOp ="";
+												pos = -1;
+												addToMain = true;
+											}//end if the closing of this parenthesis made the opened ones zero
+											break;
+								
+								case '=' :  if(openPars == 0){
+												addToMain = false;
+												mainOp = ""+c;
+												pos = i;
+												continueLooping = false;
+											}
+											break;
+								
+								case ',' : if(openPars == 0){
+												pos = -1;
+												continueLooping = false;
+											} 
+											break;
+							}//end of switch
+							
+							
+							
+							
+							
+						}//end of else if c is not a special char
+			
+					}//end of for loop
+					
+					
+				}//end of continue looping
+					
+				if(openPars != 0 && !mainOp.equals("or")&&!mainOp.equals("and")){
+					mainOp ="";
+					pos = -1;
+				}//end of if some parenthesis remained open
+				
+			}//end if the term contains atleast a parenthesis or an = symbol
+		
+		}//end of if not look for logic connectivity symbol
 		
 		return new OpNamePos(mainOp,pos);
 	}//end of getMainPos

@@ -397,31 +397,30 @@ var L :  lic
 var R :  req
 var LS : licSet
 
-eq cond1(R , L) = (belong6?(R , L) and  (subCons?(R , find4(R , L))) )  .
-eq cond2(R , L) = ( not ((type3?(label?(find4(R , L)) ) ) = once)) or  ((type2?(label?(find4(R , L)) ) ) = true) .
+--eq cond1(R , L) = (belong6?(R , L) and  (subCons?(R , find4(R , L))) )  .
+--eq cond2(R , L) = ( not ((type3?(label?(find4(R , L)) ) ) = once)) or  ((type2?(label?(find4(R , L)) ) ) = true) .
 
-eq cond3(R , L) =  not(((type3?(labelCP?(find3(R ,L))) = once )) or   (type2?(labelCP?(find3(R ,L))) = true) ) .
+--eq cond3(R , L) =  not(((type3?(labelCP?(find3(R ,L))) = once )) or   (type2?(labelCP?(find3(R ,L))) = true) ) .
 
-ceq build(R , (L , LS)) =  L , (build(R , LS)) if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
-ceq build(R , (L ,LS)) = (build(R , LS)) 	if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
+--ceq build(R , (L , LS)) =  L , (build(R , LS)) if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
+--ceq build(R , (L ,LS)) = (build(R , LS)) 	if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
 
-ceq build(R , L ) = L if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
-ceq build(R , L) = emptyLicSet  if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
-eq build(R , emptyLic) = emptyLicSet .
-
-
-eq OMA(R , L) = L .
-ceq OMA(R , (L , LS)) = L if (cons4?(R , L) > bestLic(R , LS)) .
-ceq OMA(R , (L , LS)) = OMA(R , LS) if ( bestLic(R , LS) > cons4?(R , L)) .
+--ceq build(R , L ) = L if (cond1(R , L) and cond2( R , L)) and cond3(R , L) .
+--ceq build(R , L) = emptyLicSet  if not ((cond1(R , L) and cond2( R , L)) and cond3(R , L)) .
+--eq build(R , emptyLic) = emptyLicSet .
 
 
+--eq OMA(R , L) = L .
+--ceq OMA(R , (L , LS)) = L if (cons4?(R , L) > bestLic(R , LS)) .
+--ceq OMA(R , (L , LS)) = OMA(R , LS) if ( bestLic(R , LS) > cons4?(R , L)) .
 
-ceq build2(R , (L , LS)) =  L ,( build2(R,LS))  if cond1(R,L) .
-ceq build2(R , (L , LS)) =  ( build2(R,LS))  if not( cond1(R,L)) .
-eq build2(R , emptyLic) = emptyLicSet .
+
+
+--ceq build2(R , (L , LS)) =  L ,( build2(R,LS))  if cond1(R,L) .
+--ceq build2(R , (L , LS)) =  ( build2(R,LS))  if not( cond1(R,L)) .
+--eq build2(R , emptyLic) = emptyLicSet .
 
 }
-
 
 
 
@@ -496,8 +495,7 @@ eq best(request(R , S)) = best(S) .
 eq color(request(R , S) , cp) = color(S , cp) .
 
 ceq  /inStartlic(request(R , S) , L) = /inStartlic(S , L) if not c-request(S) .
-ceq  /inStartlic(request(R , S) , L) = true
-     			    if ( ( c-request(S)) and (belong6?(R , L))  ) .
+ceq  /inStartlic(request(R , S) , L) = true    if ( ( c-request(S)) and (belong6?(R , L))  ) .
 
 ceq /inPosslic(request(R , S) , L) = /inPosslic(S, L) if not c-request(S) .
 
@@ -508,7 +506,7 @@ ceq /inPosslic(request(R , S) , L) = true  if (      (/inStartlic(request(R , S)
 
 ceq /inFinallic(request(R , S) , L) = /inFinallic(S , L) if not c-request(S) .
 
-ceq /inFinallic(request(R , S) , L) = true 
+--ceq /inFinallic(request(R , S) , L) = true 
 --    			       	      if ( (/inPosslic(request(R , S) , L)) 
 --				           and
 --				           not(((type3?(labelCP?(find3(R ,L))) = once )) or
@@ -598,4 +596,5 @@ ceq finalLic(use2(S)) = finalLic(S) if c-choose(S) .
 
 
 }
+
 
