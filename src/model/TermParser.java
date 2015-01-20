@@ -472,7 +472,7 @@ public class TermParser {
 	/**
 	 * parses a left or right hand side term  of an equation
 	 * and returns a CafeTerm object which contains the result of the parsing
-	 * @param lhs the left/right hand side string represting the term
+	 * @param the term
 	 * @return a CafeTerm object containing the result of the parsing
 	 */
 	public static CafeTerm parseEqTerm(String line){

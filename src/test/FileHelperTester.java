@@ -266,18 +266,18 @@ public class FileHelperTester {
 		assertEquals("",((CompTerm)ct2.getArgs().get(0)).getOpName(), "f");
 		assertEquals("",((BasicTerm)ct2.getArgs().get(1)).getOpName(), "asds");
 		assertEquals("",((CompTerm)((CompTerm)ct2.getArgs().get(0)).getArgs().get(0)).getOpName(), "equals");
+		assertEquals("",eq.getCondition().getOpName(),"and");
 		
-		
-		//System.out.println(ct2.termToString());
-		
-		
+
 		
 		fh.parseEq("ceq find1(R , Union(CP1 , CPS)) = CP2 if (belong3?(R , CP)).",mod,eq);
 		CafeTerm ct = eq.getLeftTerm();	
+		assertEquals("",eq.getCondition().getOpName(),"belong3?");
 		
 		if(ct instanceof CompTerm){
 			System.out.println(((CompTerm) ct).termToString());
 		}
+		
 		
 		
 	}//end of testParseEq

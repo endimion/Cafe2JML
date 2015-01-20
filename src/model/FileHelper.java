@@ -462,6 +462,9 @@ public class FileHelper {
 		
 		if(!condition.equals("")){
 			//TODO parse the effectiveCondition;
+			eq.setCondition(TermParser.parseEqTerm(condition.trim()));
+			//System.out.println("Condition found " + condition);
+			
 		}
 		
 		eq.setLeftTerm(TermParser.parseEqTerm( TermParser.eqToTree(line).get(0)  ));
