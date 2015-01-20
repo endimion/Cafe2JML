@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import model.BasicTerm;
 import model.CafeTerm;
+import model.CompTerm;
 import model.OpNamePos;
 import model.StringHelper;
 import model.TermParser;
@@ -113,27 +114,27 @@ public class TermParserTester {
 	public void testGetInnerTerm(){
 		String s = "cons3?((R , C about CPS) = cons0?(C))";
 		OpNamePos main = TermParser.getMainPos(s);
-		assertEquals("",   TermParser.getInnerTerm(s, main.getName(), main.getPos())  , 
+		assertEquals("",   TermParser.getInnerTerm(s)  , 
 											"(R , C about CPS) = cons0?(C)");
 		
 		s = "f( about(C,  P)  = about(C,' P'))";
 		main = TermParser.getMainPos(s);
-		assertEquals("",   TermParser.getInnerTerm(s, main.getName(), main.getPos())  , 
+		assertEquals("",   TermParser.getInnerTerm(s)  , 
 											"about(C,  P)  = about(C,' P')");
 		s="find3(R , (subL , L))";
 		main = TermParser.getMainPos(s);
-		assertEquals("",  TermParser.getInnerTerm(s, main.getName(), main.getPos())  , 
+		assertEquals("",  TermParser.getInnerTerm(s)  , 
 											"R , (subL , L)");
 		
 		s="find3(R , (subL , L))";
 		main = TermParser.getMainPos(s);
-		assertEquals("",   TermParser.getInnerTerm(s, main.getName(), main.getPos())  , 
+		assertEquals("",   TermParser.getInnerTerm(s)  , 
 											"R , (subL , L)");
 		
 		
 		s =  "(R , C about CPS) = cons0?(C)";
 		main = TermParser.getMainPos(s);
-		assertEquals("", TermParser.getInnerTerm(s, main.getName(), main.getPos()) ,"(R , C about CPS) = cons0?(C)");
+		assertEquals("", TermParser.getInnerTerm(s) ,"(R , C about CPS) = cons0?(C)");
 		
 	}//end of testGetInnerTerm
 
@@ -141,24 +142,20 @@ public class TermParserTester {
 	@Test
 	public void testGetSubTermPos(){
 		String s = "cons3?((R , C about CPS) = cons0?(C))";
-		String inner =  TermParser.getInnerTerm(s, TermParser.getMainPos(s).getName(),
-				TermParser.getMainPos(s).getPos());
+		String inner =  TermParser.getInnerTerm(s);
 		assertEquals("",TermParser.getSubTermPos(inner),18);
 		
 		s =  "find3(R , (subL , L))";
-		inner = TermParser.getInnerTerm(s, TermParser.getMainPos(s).getName(),
-				TermParser.getMainPos(s).getPos());
+		inner = TermParser.getInnerTerm(s);
 		assertEquals("",TermParser.getSubTermPos(inner),1);
 		
 		s =  "(R , C about CPS) = cons0?(C)";
-		inner =  TermParser.getInnerTerm(s, TermParser.getMainPos(s).getName(),
-				TermParser.getMainPos(s).getPos());
+		inner =  TermParser.getInnerTerm(s);
 		//assertEquals("",fh.getSubTermPos(inner),18);
 		assertEquals("",inner,"(R , C about CPS) = cons0?(C)");
 		
 		s =  "f(about(C,  P) = about(C,' P'))";
-		inner =  TermParser.getInnerTerm(s, TermParser.getMainPos(s).getName(),
-				TermParser.getMainPos(s).getPos());
+		inner =  TermParser.getInnerTerm(s);
 		assertEquals("",TermParser.getSubTermPos(inner),13);
 		
 		
@@ -268,6 +265,13 @@ public class TermParserTester {
 		assertEquals("",((CafeTerm)arugm.get(0)).getOpName(),"R");
 		assertEquals("",((CafeTerm)arugm.get(1)).getOpName(),"about");
 		
+		
+		
+		ct = TermParser.parseSubTerm(" (pc(S , I) = rs) and (not (locked(S)) )");
+		assertEquals("",ct.getOpName(),"and");
+		assertEquals("",ct.getArgs().size(),2);
+		assertEquals("",((CompTerm)ct.getArgs().get(0)).getOpName(),"equals");
+		assertEquals("",((CompTerm)ct.getArgs().get(1)).getOpName(),"not");
 	}//end of testParseSubTerm
 	
 	

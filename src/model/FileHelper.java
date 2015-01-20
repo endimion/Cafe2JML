@@ -461,11 +461,8 @@ public class FileHelper {
 		}//end of if it is not an unconditional equation
 		
 		if(!condition.equals("")){
-			//TODO parse the effectiveCondition;
-			eq.setCondition(TermParser.parseEqTerm(condition.trim()));
-			//System.out.println("Condition found " + condition);
-			
-		}
+			//eq.setCondition(TermParser.parseEqTerm(condition.trim()));
+		}//end if the equation contains a conditional part
 		
 		eq.setLeftTerm(TermParser.parseEqTerm( TermParser.eqToTree(line).get(0)  ));
 		eq.setRightTerm(TermParser.parseEqTerm( TermParser.eqToTree(line).get(1)    ));

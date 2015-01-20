@@ -24,12 +24,17 @@ public class TermParser {
 	 * @return the inside part of the term (inner part of the main operator) if that exists
 	 * otherwise the term as it is is returned
 	 */
-	public static String getInnerTerm(String term, String mainOp, int pos){
-		if(pos >= 0 && !mainOp.equals("=")){
+	public static String getInnerTerm(String term){
+		String mainOp = getMainPos(term).getName();
+		int pos = getMainPos(term).getPos();
+		
+		if(pos >= 0 && !(isBinary(mainOp))){
 			//System.out.println(term);
 			try{
 				return term.substring(pos +2, term.length()-1).trim();
-			}catch(Exception e){System.out.println(term); return term;}
+			}catch(Exception e){ //System.out.println(mainOp +" DUDDDDDEEE "+" "+term); 
+				return term;
+			}
 			
 		}else{
 			return term;
@@ -121,7 +126,7 @@ public class TermParser {
 		term = term.trim();
 		termAr  = term.toCharArray();
 		
-		if(!TermParser.getMainPos(term).getName().equals("=")){
+		if(!isBinary(getMainPos(term).getName()) ){
 			
 			start = 0;
 			
@@ -225,16 +230,15 @@ public class TermParser {
 						else{if(c == ')') openPars--;}
 						
 						logicConnect += c;
-						if(logicConnect.equals("and")||logicConnect.equals("or")
-							||logicConnect.equals("implies")||logicConnect.equals(">")		
-							||logicConnect.equals(">=")||logicConnect.equals("<")
-							||logicConnect.equals("<=")||logicConnect.equals("+")
-							||logicConnect.equals("*")||logicConnect.equals("/")
-							||logicConnect.equals("-")
-							){
+						if(isBinary(logicConnect)){
 							mainOp = logicConnect;
 							lookForLogic = false;
-							if(openPars == 0) return new OpNamePos(logicConnect, j);
+							if(openPars == 0){ 
+								//System.out.println("THE LOCATION OF " + logicConnect + " in " +  
+								//		term+" is " + j);
+								return new OpNamePos(logicConnect, j);
+							}
+							
 							
 						}//end if and or or has been found
 					}else{
@@ -294,7 +298,7 @@ public class TermParser {
 					
 				}//end of continue looping
 					
-				if(openPars != 0 && !mainOp.equals("or")&&!mainOp.equals("and")){
+				if(openPars != 0 && !isBinary(mainOp)){
 					mainOp ="";
 					pos = -1;
 				}//end of if some parenthesis remained open
@@ -326,15 +330,14 @@ public class TermParser {
 		
 		if(makeSub){
 			
-			String inner = TermParser.getInnerTerm(term, TermParser.getMainPos(term).getName(),
-					TermParser.getMainPos(term).getPos()).trim();
+			String inner = TermParser.getInnerTerm(term).trim();
 
 			pos = TermParser.getSubTermPos(inner) ;
 			
 			
 			if(pos>=0 && !(pos >= inner.length())){
 				
-				if(!TermParser.getMainPos(inner).getName().equals("=")){
+				if(!isBinary(getMainPos(inner).getName())){
 					if(inner.charAt(0)  == ','){start = 1;}
 					args.addElement( inner.substring(start,pos+1).trim());
 					splitTerm(inner.substring(pos+1 ,inner.length()).trim(),args,false);
@@ -392,8 +395,12 @@ public class TermParser {
 			CompTerm ct = new CompTerm();
 			ct.setOpName(mainOp.getName());
 			
-			if(!mainOp.getName().equals("=")){
+			//System.out.println("term "+ term + "main " + mainOp.getName());
+			if(!isBinary(mainOp.getName())){
 				//String inner = getInnerTerm(term, mainOp.getName(),mainOp.getPos());
+				
+				if(term.equals("(pc(S , I) = rs) and (not locked(S) )")){System.out.println("aaaa");}
+				
 				Vector<String> args = new Vector<String>(); 
 				
 				if(TermParser.getMainPos(term).getPos() > 0){
@@ -410,9 +417,18 @@ public class TermParser {
 			}else{
 				
 				int eqPos = mainOp.getPos();
-				String lhs = term.substring(0, eqPos).trim();
+				String lhs = "" ;term.substring(0, eqPos).trim();
+				
+				if(mainOp.getName().equals("=")){
+					lhs = term.substring(0, eqPos).trim();
+				}else{
+					lhs = term.substring(0, eqPos-mainOp.getName().length()).trim();
+				}
+				
 				String rhs = term.substring(eqPos+1, term.length()).trim();
-				ct.setOpName("equals");
+				
+				if(mainOp.getName().equals("=")){ ct.setOpName("equals");}
+				
 				ct.addArg(parseSubTerm(lhs));
 				ct.addArg(parseSubTerm(rhs));
 				
@@ -492,7 +508,19 @@ public class TermParser {
 		}
 	}//end of parseLeftHS
 	
-	
+	/**
+	 * takes as input the name of an operator and returns wheter or not it should be considered
+	 * a binary operator
+	 * @param opName
+	 * @return
+	 */
+	private static boolean isBinary(String opName){
+		return opName.equals("=")
+		||opName.equals("and")||opName.equals("or") 
+		||opName.equals(">")||opName.equals(">=")||opName.equals("<")
+		||opName.equals("<=")||opName.equals("+")||opName.equals("-")
+		||opName.equals("*")||opName.equals("/") ;
+	}//end of isBinary
 	
 
 }
