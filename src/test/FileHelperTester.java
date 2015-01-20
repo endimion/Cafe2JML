@@ -2,9 +2,6 @@ package test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
-import java.util.Vector;
-
 import model.BasicTerm;
 import model.CafeEquation;
 import model.CafeOperator;
@@ -12,8 +9,6 @@ import model.CafeTerm;
 import model.CompTerm;
 import model.FileHelper;
 import model.Module;
-import model.OpNamePos;
-import model.StringHelper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +21,7 @@ public class FileHelperTester {
 	@Before
 	public void setUpTests(){
 		fh = new FileHelper("src/tests.cafe");
+		//fh = new FileHelper("src/cafe2athena.test.txt");
 	}
 	
 	
@@ -219,314 +215,9 @@ public class FileHelperTester {
 	}//end of parseNameLine
 	
 	
-	@Test
-	public void testParseBasicExpr(){
-		BasicTerm basic = new BasicTerm();
-		
-		fh.parseBasicExpr("belong5?(R , subL)", basic);
-		assertEquals("", basic.getOpName(), "belong5?");
-		assertEquals("",basic.getArgs().get(0),"R");
-		assertEquals("",basic.getArgs().get(1),"subL");
-		
-		basic = new BasicTerm();
-		
-		fh.parseBasicExpr("find4(R ,  L)", basic);
-		assertEquals("", basic.getOpName(), "find4");
-		assertEquals("",basic.getArgs().get(0),"R");
-		assertEquals("",basic.getArgs().get(1),"L");
-		
-		
-		fh.parseBasicExpr("find4(R   L)", basic);
-		assertEquals("", basic.getOpName(), "find4");
-		assertEquals("",basic.getArgs().get(0),"R");
-		assertEquals("",basic.getArgs().get(1),"L");
-		
-		
-	}//end of parseBasicExpr
 
 	
-	
-	
-	
-	
-	public void testRecursively(Vector<Object> args){
-		for(Object o:args){
-			
-			if(o instanceof BasicTerm){
-				System.out.println(((BasicTerm) o).getOpName());
-				String basicargumnets="with arguments ";
-				for(String s : ((BasicTerm) o).getArgs()){
-					basicargumnets = basicargumnets + s  + " ";
-				}
-				System.out.println(basicargumnets);
-			}else{
-			System.out.println( "comp " +  ((CompTerm) o).getOpName());
-				Vector<Object> innerArgs = (Vector<Object>) (((CompTerm) o).getArgs() );
-				testRecursively(innerArgs);
-			}//end of if it is a composite term
-		}//end of the for loop of the arguments of the given term
-
-	}//end of testRecursively
-	
-	
-	@Test
-	public void testGetMainPos(){
-		String s = "( g( f( about(C,  P)  = about(C,' P')) , asds) )";
-		assertEquals("",  fh.getMainPos(s).getName()  , "g");
-		assertEquals("",  fh.getMainPos(s).getPos()  , 0);
 		
-		s = "about(C,  P)  = about(C,' P')";
-		assertEquals("",  fh.getMainPos(s).getName()  , "=");
-		assertEquals("",  fh.getMainPos(s).getPos()  , 14);
-		
-		s = "f( about(C,  P)  = about(C,' P'))";
-		assertEquals("",  fh.getMainPos(s).getName()  , "f");
-		
-		s = "cons3?(R , C about CPS) = cons0?(C)";
-		assertEquals("",  fh.getMainPos(s).getName()  , "=");
-		assertEquals("",  fh.getMainPos(s).getPos()  , 24);
-		
-		
-		 s = "cons3?((R , C about CPS) = cons0?(C))";
-		assertEquals("",  fh.getMainPos(s).getName()  , "cons3?");
-		
-		 s = "cons3";
-		 assertEquals("",  fh.getMainPos(s).getPos()  , -1);
-			
-		 s = "cons3(";
-		 assertEquals("",  fh.getMainPos(s).getPos()  , -1);
-		
-		 s= "R , about(C,  P)";
-		 assertEquals("",fh.getMainPos(s).getPos(),-1);
-		 
-		 s = "black = black";
-		 assertEquals("",  fh.getMainPos(s).getPos()  , 6);
-			
-		 s ="( g(f( about(C,  P)  = about(C,' P')) , asds) ) "; //OK
-		 assertEquals("",  fh.getMainPos(s).getName()  , "g");
-		 
-		 s = StringHelper.remEnclosingParenthesis(s);	
-		 assertEquals("",  fh.getMainPos(s).getName()  , "g");
-		 assertEquals("",s,"g(f( about(C,  P)  = about(C,' P')) , asds)");
-		 assertEquals("",fh.getMainPos(s).getPos(),0);
-	
-	
-		 s = " adffdd and ssssv";
-		 assertEquals("",  fh.getMainPos(s).getName()  , "and");
-	
-		 s =" ((c-request(S)) and (belong6?(R , L))) ";
-		 assertEquals("",fh.getMainPos(s).getName(),"and");
-		 
-		 s ="not( c-request(S)) ";
-		 assertEquals("",fh.getMainPos(s).getName(),"not");
-		 
-		 s=" (not((type3?(labelCP?(find3(R ,L))) = once )) or (type2?(labelCP?(find3(R ,L))) = true) ";
-		 assertEquals("",s.contains(" or "),true);
-		 assertEquals("",fh.getMainPos(s).getName(),"or");
-	
-	
-	}//end of testParseTermContEq
-	
-	
-	@Test
-	public void testGetInnerTerm(){
-		String s = "cons3?((R , C about CPS) = cons0?(C))";
-		OpNamePos main = fh.getMainPos(s);
-		assertEquals("",  fh.getInnerTerm(s, main.getName(), main.getPos())  , 
-											"(R , C about CPS) = cons0?(C)");
-		
-		s = "f( about(C,  P)  = about(C,' P'))";
-		main = fh.getMainPos(s);
-		assertEquals("",  fh.getInnerTerm(s, main.getName(), main.getPos())  , 
-											"about(C,  P)  = about(C,' P')");
-		s="find3(R , (subL , L))";
-		main = fh.getMainPos(s);
-		assertEquals("",  fh.getInnerTerm(s, main.getName(), main.getPos())  , 
-											"R , (subL , L)");
-		
-		s="find3(R , (subL , L))";
-		main = fh.getMainPos(s);
-		assertEquals("",  fh.getInnerTerm(s, main.getName(), main.getPos())  , 
-											"R , (subL , L)");
-		
-		
-		s =  "(R , C about CPS) = cons0?(C)";
-		main = fh.getMainPos(s);
-		assertEquals("",fh.getInnerTerm(s, main.getName(), main.getPos()) ,"(R , C about CPS) = cons0?(C)");
-		
-	}//end of testGetInnerTerm
-	
-	
-	@Test
-	public void testGetSubTermPos(){
-		String s = "cons3?((R , C about CPS) = cons0?(C))";
-		String inner = fh.getInnerTerm(s, fh.getMainPos(s).getName(),
-				fh.getMainPos(s).getPos());
-		assertEquals("",fh.getSubTermPos(inner),18);
-		
-		s =  "find3(R , (subL , L))";
-		inner = fh.getInnerTerm(s, fh.getMainPos(s).getName(),
-				fh.getMainPos(s).getPos());
-		assertEquals("",fh.getSubTermPos(inner),1);
-		
-		s =  "(R , C about CPS) = cons0?(C)";
-		inner = fh.getInnerTerm(s, fh.getMainPos(s).getName(),
-				fh.getMainPos(s).getPos());
-		//assertEquals("",fh.getSubTermPos(inner),18);
-		assertEquals("",inner,"(R , C about CPS) = cons0?(C)");
-		
-		s =  "f(about(C,  P) = about(C,' P'))";
-		inner = fh.getInnerTerm(s, fh.getMainPos(s).getName(),
-				fh.getMainPos(s).getPos());
-		assertEquals("",fh.getSubTermPos(inner),13);
-		
-		
-		
-	}//end of testGetSubTerm
-	
-	
-	@Test
-	public void testSplitTerm(){
-		
-		Vector<String> v = new Vector<String>();
-		String s = "cons3?( (R , C about CPS) , cons0?(C), adbd,23)";
-		fh.splitTerm(s, v,true);
-		assertEquals("",v.get(0),"(R , C about CPS)");
-		assertEquals("",v.get(1),"cons0?(C)");
-		assertEquals("",v.get(2),"adbd");
-		assertEquals("",v.get(3),"23");
-
-		v = new Vector<String>();
-		s = "R , about( C , CPS)";
-		fh.splitTerm(s, v,false);
-		assertEquals("",v.get(0),"R");
-		assertEquals("",v.get(1),"about( C , CPS)");
-	
-		v = new Vector<String>();
-		s = "g(R , about( C , CPS))";
-		fh.splitTerm(s, v,false);
-		assertEquals("",v.get(0),"R");
-		assertEquals("",v.get(1),"about( C , CPS)");
-	
-		v = new Vector<String>();
-		s = "g(f( about(C,  P)  = about(C,' P')) , asds)";
-		fh.splitTerm(s, v,false);
-		assertEquals("",v.get(0),"f( about(C,  P)  = about(C,' P'))");
-		assertEquals("",v.get(1),"asds");
-		
-		v = new Vector<String>();
-		s = "f( about(C,  P)  = about(C,' P'))";
-		fh.splitTerm(s, v,false);
-		assertEquals("",v.get(0),"about(C,  P)  = about(C,' P')");
-		//assertEquals("",v.get(1),"about(C,' P')");
-		
-		
-		v = new Vector<String>();
-		s = " about(C,  P)  = about(C,' P')";
-		fh.splitTerm(s, v,false);
-		assertEquals("",v.get(0),"about(C,  P)");
-		assertEquals("",v.get(1),"about(C,' P')");
-		
-		
-	}//end of testSplitTerm
-	
-	
-	
-	
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testParseSubTerm(){
-		//CafeTerm ct = fh.parseSubTerm("cons3?( g(R , about( C , CPS)) , cons0?(C), adbd,23)");  OK
-		// CafeTerm ct = fh.parseSubTerm("cons3?( R , about( C , CPS) , cons0?(C), adbd,23)"); OK
-		//CafeTerm ct = fh.parseSubTerm("find3(R , union(subL , L))"); //OK
-		//CafeTerm ct = fh.parseSubTerm("build(R , uni(L ,LS)) = (build(R , LS))"); //OK
-		
-		CafeTerm ct = fh.parseSubTerm(" ( g(f( about(C,  P)  = about(C', P')) , asds) ) "); //NOT OK!!
-		assertEquals("",ct.getOpName(),"g");
-		Vector<CafeTerm> args = (Vector<CafeTerm>) ct.getArgs();
-		CafeTerm arg0 = args.get(0);
-		CafeTerm arg1 = args.get(1);
-		assertEquals("",args.size(),2);
-		assertEquals("",arg0.getOpName(),"f");
-		assertEquals("",arg1.getOpName(),"asds");
-		
-		args = (Vector<CafeTerm>) arg0.getArgs();
-		assertEquals("",args.get(0).getOpName(),"equals");
-		assertEquals("",args.size(),1);
-		arg0 = args.get(0);
-		
-		args = (Vector<CafeTerm>) arg0.getArgs();
-		assertEquals("",args.get(0).getOpName(),"about");
-		assertEquals("",args.get(1).getOpName(),"about");
-		assertEquals("",args.size(),2);
-		arg0 = args.get(0);
-		arg1 = args.get(1);
-		
-		Vector<String> basicArgs = (Vector<String>) arg0.getArgs();
-		assertEquals("",basicArgs.get(0),"C");
-		assertEquals("",basicArgs.get(1),"P");
-		
-		
-		//test n02 
-		
-		ct = fh.parseSubTerm("cons3?( g(R , about( C , CPS)) , cons0?(C), adbd,23)");
-		assertEquals("",ct.getOpName(),"cons3?");
-		args = (Vector<CafeTerm>) ct.getArgs();
-		arg0 = args.get(0);
-		arg1 = args.get(1);
-		CafeTerm arg3 = args.get(2);
-		assertEquals("",args.size(),4);
-		
-		assertEquals("",arg0.getOpName(),"g");
-		assertEquals("",arg1.getOpName(),"cons0?");
-		assertEquals("",arg3.getOpName(),"adbd");	
-		assertEquals("",args.get(3).getOpName(),"23");
-		
-		
-		Vector<Object> arugm = (Vector<Object>)args.get(0).getArgs();
-		assertEquals("",((CafeTerm)arugm.get(0)).getOpName(),"R");
-		assertEquals("",((CafeTerm)arugm.get(1)).getOpName(),"about");
-		
-	}//end of testParseSubTerm
-	
-	
-	public String printTermsArgs(CafeTerm t){
-		String name = t.getOpName();
-		@SuppressWarnings("unchecked")
-		Vector<Object> v = (Vector<Object>) t.getArgs();
-		
-		String res = name + "( ";
-		
-		for(int i=0; i< v.size();i++){
-			if(v.get(i) instanceof BasicTerm){
-				res = res + ((BasicTerm)v.get(i)).termToString() + ", ";
-			}else{
-				if(v.get(i) instanceof String){
-					res = res + (String)v.get(i) + ",";
-				}else{
-					System.out.println("comp term found" + ((CompTerm) v.get(i)).getOpName());
-					
-					res = res + printTermsArgs((CompTerm) v.get(i));
-				}
-			}
-		}//end of for loop
-		
-		return res + ")";
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	@Test
 	public void testParseEq(){
@@ -534,22 +225,49 @@ public class FileHelperTester {
 		CafeEquation eq = new CafeEquation();
 		CafeTerm ct2;
 		
-		fh.parseEq("eq (black = black ) = true ", mod,eq);
+		fh.parseEq("eq (black = black) = true ", mod,eq);
 		ct2 = eq.getLeftTerm();
-		System.out.println(ct2.termToString());
+		assertEquals("",ct2.getOpName(),"equals" );
+		assertEquals("",((BasicTerm)ct2.getArgs().get(0)).getOpName(), "black");
+		assertEquals("",((BasicTerm)ct2.getArgs().get(1)).getOpName(), "black");
+		//System.out.println(ct2.termToString());
+		
+		fh.parseEq("eq (c1 = c2) = true", mod, eq);
+		ct2 = eq.getLeftTerm();
+		assertEquals("",ct2.getOpName(),"equals" );
+		assertEquals("",((BasicTerm)ct2.getArgs().get(0)).getOpName(), "c1");
+		assertEquals("",((BasicTerm)ct2.getArgs().get(1)).getOpName(), "c2");
+		//System.out.println(ct2.termToString());
+		
 		
 		fh.parseEq("eq Union(e , empty) = e .", mod,eq);
 		ct2 = eq.getLeftTerm();
-		System.out.println(ct2.termToString());
+		assertEquals("",ct2.getOpName(),"Union" );
+		assertEquals("",(String)ct2.getArgs().get(0), "e");
+		assertEquals("",(String)ct2.getArgs().get(1), "empty");
+		//System.out.println(ct2.termToString());
 		
 		
 		fh.parseEq("ceq ( about(C  P)  = about(C'  P')) = true  if (C = C') and (P = P') .", mod,eq);
 		ct2 = eq.getLeftTerm();
-		System.out.println(ct2.termToString());
+		assertEquals("",ct2.getOpName(),"equals" );
+		assertEquals("",((BasicTerm)ct2.getArgs().get(0)).getOpName(), "about");
+		assertEquals("",((BasicTerm)ct2.getArgs().get(0)).getArgs().get(0), "C");
+		assertEquals("",((BasicTerm)ct2.getArgs().get(0)).getArgs().get(1), "P");
+		assertEquals("",((BasicTerm)ct2.getArgs().get(1)).getOpName(), "about");
+		assertEquals("",((BasicTerm)ct2.getArgs().get(1)).getArgs().get(0), "C'");
+		assertEquals("",((BasicTerm)ct2.getArgs().get(1)).getArgs().get(1), "P'");
+		//System.out.println(ct2.termToString());
 		
 		
 		fh.parseEq("ceq  ( g( f( about(C,  P)  = about(C,' P')) , asds) )   = true  if (C = C') and (P = P') .", mod,eq);
 		ct2 = eq.getLeftTerm();
+		assertEquals("",ct2.getOpName(),"g" );
+		assertEquals("",((CompTerm)ct2.getArgs().get(0)).getOpName(), "f");
+		assertEquals("",((BasicTerm)ct2.getArgs().get(1)).getOpName(), "asds");
+		assertEquals("",((CompTerm)((CompTerm)ct2.getArgs().get(0)).getArgs().get(0)).getOpName(), "equals");
+		
+		
 		//System.out.println(ct2.termToString());
 		
 		

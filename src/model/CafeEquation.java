@@ -8,6 +8,7 @@ public class CafeEquation {
 	
 	private CafeTerm leftT ;
 	private CafeTerm rightT;
+	private CafeTerm condition;
 	
 	
 	
@@ -23,5 +24,7 @@ public class CafeEquation {
 	public CafeTerm getLeftTerm(){return this.leftT;}
 	public CafeTerm getRightTerm(){return this.rightT;}
 	
+	public void setCondition(CafeTerm t){this.condition = t;}
+	public CafeTerm getCondition(){return this.condition ;}
 		
 }//end of class

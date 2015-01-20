@@ -1,0 +1,41 @@
+mod* Content{
+*[cont]*
+
+-- op _=_ : cont cont -> Bool {comm} -- den diavazei swsta to onoma toy op (op anti gia =)
+
+op at : cont cont -> Bool {comm}
+
+op truth : -> Bool
+
+op null : -> cont 
+
+op locked : cont -> Bool
+
+op get : cont cont -> Bool
+
+op getcont : cont -> cont
+
+var C1  : cont
+
+var B : Bool
+
+-- eq (C1 = C1) = true .
+
+-- eq locked(null) = false 
+
+-- eq get(C1,truth) = false 
+
+}
+
+mod* Pid{
+[pid]
+
+}
+
+mod! Label {
+[label]
+
+ops rs cs : -> label
+
+}
+
