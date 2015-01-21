@@ -442,9 +442,10 @@ public class FileHelper {
 	
 	
 	/**
-	 * Parses a line which contains an equation and stores the result of the parsing
+	 * Parses a line which contains an equation and stores the result of the parsing to the given eq object
 	 * @param line the line we want to parse
 	 * @param mod the module in which the result of the parsing is stored to
+	 * @param eq the Object in which the parsing of the line should be stored in
 	 */
 	public void parseEq(String line, Module mod, CafeEquation eq){
 		
@@ -461,7 +462,8 @@ public class FileHelper {
 		}//end of if it is not an unconditional equation
 		
 		if(!condition.equals("")){
-			//eq.setCondition(TermParser.parseEqTerm(condition.trim()));
+			//System.out.println("CONDITION!!!: " + condition.trim());
+			eq.setCondition(TermParser.parseEqTerm(condition.trim()));
 		}//end if the equation contains a conditional part
 		
 		try {

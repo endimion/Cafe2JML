@@ -83,6 +83,13 @@ public class TermParserTester {
 		 s = "c-try(S,I)";
 		 assertEquals("",TermParser.getMainPos(s).getName(),"c-try");
 		 
+		 
+		s =" not(#(finalLic(choose(S))) > 1) ";
+		//System.out.println(TermParser.getMainPos(s).getName());
+		//System.out.println(TermParser.getMainPos(s).getPos());
+					//t = TermParser.parseEqTerm(s);
+		 assertEquals("",TermParser.getMainPos(s).getName(),"not");
+		
 	}//end of testParseTermContEq
 	
 
@@ -293,7 +300,15 @@ public class TermParserTester {
 		
 		assertEquals("",t.getOpName(),"c-try");
 		assertEquals("",t.getArgs().get(0),"S");
-		assertEquals("",t.getArgs().get(1),"I");
+
+		
+		//s =" (not(#(finalLic(choose(S))) > 1)) and c-choose(S)";
+		//System.out.println(TermParser.getMainPos(s).getName());
+		//System.out.println(TermParser.getMainPos(s).getPos());
+		//t = TermParser.parseEqTerm(s);
+		
+		
+				
 		
 	}//end of testParseEqTerm
 	

@@ -192,6 +192,7 @@ public class TermParser {
 		
 		term = StringHelper.remEnclosingParenthesis(term).trim();
 		
+		
 		String mainOp ="";
 		char[] termAr = term.toCharArray();
 		
@@ -227,6 +228,7 @@ public class TermParser {
 						else{if(c == ')') openPars--;}
 						
 						logicConnect += c;
+						
 						if(isBinary(logicConnect)){
 							mainOp = logicConnect;
 							lookForLogic = false;
@@ -244,8 +246,12 @@ public class TermParser {
 					}
 				}//end for loop
 				
-			}else{ //end of if look for logic
+			} //end of if lookForLogic
 			
+				mainOp = "";
+				continueLooping = true;
+				//if(term.startsWith("not"))System.out.println("HEYYYY!! "+term);
+				
 				for(int i =0; i< termAr.length; i++){
 					
 					if(continueLooping){
@@ -254,8 +260,12 @@ public class TermParser {
 						if(c != '(' && !Character.isWhitespace(c) && c!=')' && c !=',' && addToMain && c != '='){
 							mainOp = mainOp + c;
 							pos = i;
+							
+							//if(term.startsWith("not"))System.out.println("HEYYYY!! "+term);
 	
 						}else{ //end of if c is not a special character for this purposes
+							
+							
 							switch(c){
 								case '(' :	openPars++;
 											addToMain = false;
@@ -302,7 +312,7 @@ public class TermParser {
 				
 			}//end if the term contains atleast a parenthesis or an = symbol
 		
-		}//end of if not look for logic connectivity symbol
+		//}//end of if not look for logic connectivity symbol
 		
 		return new OpNamePos(mainOp,pos);
 	}//end of getMainPos
@@ -398,8 +408,6 @@ public class TermParser {
 			if(!isBinary(mainOp.getName())){
 				//String inner = getInnerTerm(term, mainOp.getName(),mainOp.getPos());
 				
-				if(term.equals("(pc(S , I) = rs) and (not locked(S) )")){System.out.println("aaaa");}
-				
 				Vector<String> args = new Vector<String>(); 
 				
 				if(TermParser.getMainPos(term).getPos() > 0){
@@ -416,11 +424,12 @@ public class TermParser {
 			}else{
 				
 				int eqPos = mainOp.getPos();
-				String lhs = "" ;term.substring(0, eqPos).trim();
+				String lhs = "" ; //term.substring(0, eqPos).trim();
 				
 				if(mainOp.getName().equals("=")){
 					lhs = term.substring(0, eqPos).trim();
 				}else{
+					//System.out.println("TERM :" + term);
 					lhs = term.substring(0, eqPos-mainOp.getName().length()).trim();
 				}
 				

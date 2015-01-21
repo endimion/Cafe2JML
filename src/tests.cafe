@@ -411,8 +411,8 @@ eq build(R , emptyLic) = emptyLicSet .
 
 
 eq OMA(R , L) = L .
-ceq OMA(R , (L , LS)) = L if >((cons4?(R , L) , bestLic(R , LS)) ).
-ceq OMA(R , (L , LS)) = OMA(R , LS) if > ((( bestLic(R , LS) , cons4?(R , L))) .
+ceq OMA(R , (L , LS)) = L if ((cons4?(R , L) > bestLic(R , LS)) ).
+ceq OMA(R , (L , LS)) = OMA(R , LS) if  ((( bestLic(R , LS) > cons4?(R , L))) .
 
 
 

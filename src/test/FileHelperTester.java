@@ -283,10 +283,12 @@ public class FileHelperTester {
 		assertEquals("",ct.getOpName(),"equals");
 		
 		fh.parseEq("eq c-try(S,I) = ( (pc(S , I) = rs) and (not locked(S)) ) .", mod,eq);
-		ct = eq.getRightTerm();
-		System.out.println(ct.getOpName());
-		
 		ct = eq.getLeftTerm();
+		assertEquals("",ct.getOpName(),"c-try");
+		assertEquals("",ct.getArgs().get(0),"S");
+		assertEquals("",ct.getArgs().get(1),"I");
+		
+		ct = eq.getRightTerm();
 		System.out.println(ct.getOpName());
 		//System.out.println( "Name "+ ((CompTerm)ct.getArgs().get(0)).getOpName());
 		
