@@ -122,15 +122,12 @@ public class TermParser {
 		
 		//String inner = getInnerTerm(term, getMainPos(term).getName(),
 		//		getMainPos(term).getPos());
-		int start;
 		term = term.trim();
 		termAr  = term.toCharArray();
 		
 		if(!isBinary(getMainPos(term).getName()) ){
 			
-			start = 0;
-			
-			for(int i=start; i< termAr.length; i++){
+			for(int i=0; i< termAr.length; i++){
 				
 				c = termAr[i];
 				
@@ -155,7 +152,7 @@ public class TermParser {
 						}//end if c is a whitespace
 					
 						if(c ==',' 	&& open == 0 && !skip){
-							pos = i;
+							pos = i-1;
 							break;
 						}//end if c is a comma
 					
@@ -341,6 +338,8 @@ public class TermParser {
 					if(inner.charAt(0)  == ','){start = 1;}
 					args.addElement( inner.substring(start,pos+1).trim());
 					splitTerm(inner.substring(pos+1 ,inner.length()).trim(),args,false);
+					
+					//System.out.println("not binary " +term);
 				}else{
 					args.addElement(inner.trim());
 				}//end if the main operator is not the = symbol
@@ -449,27 +448,19 @@ public class TermParser {
 	 * the left and right part of the equation term 
 	 * 
 	 */
-	public static Vector<String> eqToTree(String eqTerm){
+	public static Vector<String> eqToTree(String eqTerm) throws Exception{
 		
 		Vector<String> result = new Vector<String>();
 		String leftHS;
 		String rightHS;
 		
 		if(StringHelper.numOf(eqTerm, '=') > 1){
-			//if the line contains many equals we have to use parenthesis to parse it
-			int firstPar = StringHelper.firstAppearOfChar(eqTerm,'(');
-			int pos = StringHelper.colsingParPosition(eqTerm);
-
-			if( firstPar == 0){
-				leftHS = eqTerm.substring(1, pos).trim(); //we remove the opening parenthesis
+			OpNamePos main = getMainPos(eqTerm);
+			if(main.getName().equals("=")){
+				leftHS = eqTerm.substring(0, main.getPos()).trim();
+				rightHS = eqTerm.substring(main.getPos()+1, eqTerm.length()).trim();
 			}else{
-				String upToFirstParen = eqTerm.substring(0,firstPar-1);
-				leftHS = (upToFirstParen + eqTerm.substring(firstPar+1,pos)).trim();
-			}
-				  
-			rightHS = eqTerm.substring(pos+1,eqTerm.length()).trim();
-			if(rightHS.startsWith("=")){
-				rightHS = StringHelper.remFirstChar(rightHS).trim();
+				throw new Exception("The term parsed should be an equation but " + eqTerm + "is not");
 			}
 		}else{//the line contains only one =
 			leftHS = eqTerm.split("=")[0].trim();

@@ -285,6 +285,9 @@ public class FileHelperTester {
 		fh.parseEq("eq c-try(S,I) = ( (pc(S , I) = rs) and (not locked(S)) ) .", mod,eq);
 		ct = eq.getRightTerm();
 		System.out.println(ct.getOpName());
+		
+		ct = eq.getLeftTerm();
+		System.out.println(ct.getOpName());
 		//System.out.println( "Name "+ ((CompTerm)ct.getArgs().get(0)).getOpName());
 		
 	}//end of testParseEq

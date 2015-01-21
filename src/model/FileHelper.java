@@ -464,8 +464,14 @@ public class FileHelper {
 			//eq.setCondition(TermParser.parseEqTerm(condition.trim()));
 		}//end if the equation contains a conditional part
 		
-		eq.setLeftTerm(TermParser.parseEqTerm( TermParser.eqToTree(line).get(0)  ));
-		eq.setRightTerm(TermParser.parseEqTerm( TermParser.eqToTree(line).get(1)    ));
+		try {
+			eq.setLeftTerm(TermParser.parseEqTerm( TermParser.eqToTree(line).get(0)  ));
+			eq.setRightTerm(TermParser.parseEqTerm( TermParser.eqToTree(line).get(1)    ));
+		} catch (Exception e) {
+			// 
+			e.printStackTrace();
+		}
+		
 	}//end of parseEq
 	
 	

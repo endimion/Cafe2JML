@@ -7,7 +7,6 @@ import java.util.Vector;
 import model.BasicTerm;
 import model.CafeTerm;
 import model.CompTerm;
-import model.OpNamePos;
 import model.StringHelper;
 import model.TermParser;
 
@@ -80,6 +79,10 @@ public class TermParserTester {
 		 
 		 s=" G( a + b) / G(d,e * f) ";
 		 assertEquals("",TermParser.getMainPos(s).getName(),"/");
+		 
+		 s = "c-try(S,I)";
+		 assertEquals("",TermParser.getMainPos(s).getName(),"c-try");
+		 
 	}//end of testParseTermContEq
 	
 
@@ -113,28 +116,26 @@ public class TermParserTester {
 	@Test
 	public void testGetInnerTerm(){
 		String s = "cons3?((R , C about CPS) = cons0?(C))";
-		OpNamePos main = TermParser.getMainPos(s);
 		assertEquals("",   TermParser.getInnerTerm(s)  , 
 											"(R , C about CPS) = cons0?(C)");
 		
 		s = "f( about(C,  P)  = about(C,' P'))";
-		main = TermParser.getMainPos(s);
 		assertEquals("",   TermParser.getInnerTerm(s)  , 
 											"about(C,  P)  = about(C,' P')");
 		s="find3(R , (subL , L))";
-		main = TermParser.getMainPos(s);
 		assertEquals("",  TermParser.getInnerTerm(s)  , 
 											"R , (subL , L)");
 		
 		s="find3(R , (subL , L))";
-		main = TermParser.getMainPos(s);
 		assertEquals("",   TermParser.getInnerTerm(s)  , 
 											"R , (subL , L)");
 		
 		
 		s =  "(R , C about CPS) = cons0?(C)";
-		main = TermParser.getMainPos(s);
 		assertEquals("", TermParser.getInnerTerm(s) ,"(R , C about CPS) = cons0?(C)");
+		
+		s ="c-try(S,I)";
+		assertEquals("",TermParser.getInnerTerm(s), "S,I");
 		
 	}//end of testGetInnerTerm
 
@@ -158,7 +159,10 @@ public class TermParserTester {
 		inner =  TermParser.getInnerTerm(s);
 		assertEquals("",TermParser.getSubTermPos(inner),13);
 		
-		
+		s ="c-try(S,I)";
+		inner = TermParser.getInnerTerm(s);
+		assertEquals("",inner, "S,I");
+		assertEquals("",TermParser.getSubTermPos(inner),0);
 		
 	}//end of testGetSubTerm
 
@@ -205,6 +209,12 @@ public class TermParserTester {
 		TermParser.splitTerm(s, v,false);
 		assertEquals("",v.get(0),"about(C,  P)");
 		assertEquals("",v.get(1),"about(C,' P')");
+		
+		v = new Vector<String>();
+		s ="c-try(S,I)";
+		TermParser.splitTerm(s, v,false);
+		assertEquals("",v.get(0),"S");
+		assertEquals("",v.get(1),"I");
 		
 		
 	}//end of testSplitTerm
@@ -275,7 +285,28 @@ public class TermParserTester {
 	}//end of testParseSubTerm
 	
 	
+	@Test
+	public void testParseEqTerm(){
+		
+		String s = "c-try(S,I)";
+		CafeTerm t = TermParser.parseEqTerm(s);
+		
+		assertEquals("",t.getOpName(),"c-try");
+		assertEquals("",t.getArgs().get(0),"S");
+		assertEquals("",t.getArgs().get(1),"I");
+		
+	}//end of testParseEqTerm
 	
+	
+	@Test
+	public void testEqToTree(){
+		String s = "c-try(S,I) = (pc(S , I) = rs) and (not (locked(S)))";
+		try{
+			Vector<String> tree = TermParser.eqToTree(s);
+			assertEquals("",tree.get(0),"c-try(S,I)");
+			assertEquals("",tree.get(1),"(pc(S , I) = rs) and (not (locked(S)))");
+		}catch(Exception e){e.printStackTrace();}
+	}//end of EqToTree test
 	
 	
 }//end of testerClass
