@@ -12,4 +12,6 @@ public interface CafeTerm {
 	public void addArg(Object arg);
 	
 	public String termToString();
+	
+	public boolean containsOp(String op);
 }

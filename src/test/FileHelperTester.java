@@ -141,6 +141,11 @@ public class FileHelperTester {
 		 assertEquals("",mod.getOps().get(0).getArity().get(0),"req");
 		 assertEquals("",mod.getOps().get(0).getArity().get(1),"cPerm");
 		 
+		 
+		 mod = new Module();
+		 fh.parseOpLine("op _,_ : cont action -> req", mod);
+		 assertEquals("",mod.getOps().get(0).getName() ,"comma");
+		
 		
 		 
 	}//end of testParsOpLine
@@ -293,6 +298,27 @@ public class FileHelperTester {
 		//System.out.println( "Name "+ ((CompTerm)ct.getArgs().get(0)).getOpName());
 		
 	}//end of testParseEq
+	
+	@Test
+	public void testContainsLeftOp(){
+		Module mod = new Module();
+		CafeEquation eq = new CafeEquation();
+		
+		
+		fh.parseEq("ceq /inFinallic(request(R , S) , L) = /inFinallic(S , L) if not c-request(S) .", mod, eq);
+		assertEquals("",eq.containsLeftOp("request"),true);
+		assertEquals("",eq.containsLeftOp("R"),true);
+		
+
+		fh.parseEq("ceq /inPosslic(choose(S) , L ) = /inPosslic( S , L ) if c-choose(S) .", mod, eq);
+		assertEquals("",eq.containsLeftOp("request"),false);
+		assertEquals("",eq.containsLeftOp("/inPosslic"),true);
+		assertEquals("",eq.containsLeftOp("choose"),true);
+		assertEquals("",eq.containsLeftOp("S"),true);
+		assertEquals("",eq.containsLeftOp("L"),true);
+	}//end of testContainsLeftOp
+	
+	
 	
 	
 	

@@ -22,6 +22,8 @@ public class Module {
 	Vector<CafeVariable> vars = new Vector<CafeVariable>();
 	Vector<CafeEquation> eqs = new Vector<CafeEquation>();
 	
+	Vector<CafeOperator> constr = new Vector<CafeOperator>(); //the constructors of the module
+	
 	private int numOfOps ;
 	private int numOfEq ;
 	
@@ -113,5 +115,82 @@ public class Module {
 	 * @return a vector containing the equations of the module
 	 */
 	public Vector<CafeEquation> getEqs(){return this.eqs;}
+	
+	
+	/**
+	 * returns the constructor operators,
+	 * i.e. the operators which have as sort the same as that of the module
+	 * 
+	 */
+	public Vector<CafeOperator> getConstr(){
+		Vector<CafeOperator> opr = new Vector<CafeOperator>();
+		
+		for(CafeOperator op: getOps()){
+			if(op.getSort().equals(getClassSort())){
+				opr.add(op);
+			}
+		}//end of for loop
+		
+		return opr;
+	}//end of getConstr
+	
+	
+	
+	/**
+	 *  
+	 * @return a Vector of constructor CafeOperators which have no arity,
+	 * e.g. init : -> Sys
+	 */
+	public Vector<CafeOperator> getHiddenConstants(){
+		
+		Vector<CafeOperator> consts = new Vector<CafeOperator>();
+		
+		for(CafeOperator op: getConstr()){
+			if(op.getArity().size() == 0){
+				consts.add(op);
+			}
+		}//end of for loop
+		return consts;
+	}//end of getHiddenConstants
+	
+	
+	
+	/**
+	 * 
+	 * @return the action operators of the specification
+	 */
+	public Vector<CafeOperator> getActions(){
+		Vector<CafeOperator> act = new Vector<CafeOperator>();
+		
+		for(CafeOperator op:getConstr()){
+			if( op.getArity().size() >0){
+				act.add(op);
+			}
+		}//end for loop
+		
+		return act;
+	}//end of getObservations()
+	
+	
+	
+	/**
+	 * 
+	 * @param opName the name of an operator
+	 * @return all the CafeEquations of the module which contain on the lhs the given operator
+	 */
+	public Vector<CafeEquation> getMatchingLeftEqs(String opName){
+		
+		Vector<CafeEquation> res = new Vector<CafeEquation>();
+		
+		for(CafeEquation eq: getEqs()){
+			if(eq.containsLeftOp(opName)){
+				res.add(eq);
+			}
+		}//end of for loop
+		
+		return res;
+	}//end of getMatchingLeftEqs
+	
+	
 	
 }//end of class

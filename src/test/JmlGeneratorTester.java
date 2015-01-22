@@ -27,7 +27,7 @@ public class JmlGeneratorTester {
 	@Test
 	public void testGenMethodSig(){
 		//CafeOperator op = mods.get(0).getOps().get(0); 
-		Module mod = mods.get(2);
+		Module mod = mods.get(mods.size()-1);
 		
 		for(CafeOperator oper : mod.getOps()){
 			System.out.println(gen.genMethodSig(oper, mod));

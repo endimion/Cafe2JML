@@ -45,5 +45,25 @@ public class BasicTerm implements CafeTerm{
 		return print;
 	}//end of termToString
 	
+	/**
+	 * 
+	 * @param op the name of an operator
+	 * @return true if the given name appears in this term
+	 */
+	public boolean containsOp(String op){
+		if(op.equals(opName)){
+			return true;
+		}else{
+			for(String arg:getArgs()){
+				if(arg.equals(op))return true;
+			}
+		}
+		return false;
+	}//end of containsOp
+	
+	
+	
+	
+	
 	
 }//end of BasicOpExpr

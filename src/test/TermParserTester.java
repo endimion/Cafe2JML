@@ -306,9 +306,11 @@ public class TermParserTester {
 		//System.out.println(TermParser.getMainPos(s).getName());
 		//System.out.println(TermParser.getMainPos(s).getPos());
 		//t = TermParser.parseEqTerm(s);
-		
-		
-				
+		s ="not((I = J) and c-exit(S,I)) ";
+		t = TermParser.parseEqTerm(s);
+		assertEquals("", t.getOpName(),"not");
+		assertEquals("",((CompTerm)t.getArgs().get(0)).getOpName(),"and");		
+		assertEquals("",((BasicTerm)((CompTerm)t.getArgs().get(0)).getArgs().get(1)).getOpName(),"c-exit");
 		
 	}//end of testParseEqTerm
 	

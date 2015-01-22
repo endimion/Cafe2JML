@@ -331,9 +331,7 @@ public class FileHelper {
 	public void parseOpLine(String line, Module mod){
 		CafeOperator cop = new CafeOperator();
 		String opName  = line.split(":")[0].trim();
-			   //opName = StringHelper.removeSpecialCharacters(opName.split("_")[0].trim());
-			  //opName = opName.substring(StringHelper.getWhitePos(opName), opName.length()).replace("_","").trim();
-		//TODO		
+
 		opName = StringHelper.removeSpecialCharacters(StringHelper.replaceSpecialChars(opName));
 		opName = opName.split("op\\s+")[1].trim();
 		
@@ -352,9 +350,9 @@ public class FileHelper {
 		
 		cop.setSort(StringHelper.cutStringAtWhite(coArity));
 		
-		String[] arityArr = arity.split("\\s+");
+		String[] arityArr = arity.split("(\\s)+");
 		for(String arg : arityArr){
-			cop.addToArity(arg);
+			if(!arg.equals(""))cop.addToArity(arg);
 		}//end of for
 
 		mod.addOp(cop);

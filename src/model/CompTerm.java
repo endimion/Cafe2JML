@@ -54,7 +54,27 @@ public class CompTerm implements CafeTerm{
 	
 	
 	
-	
+	/**
+	 * 
+	 * @param op the name of an operator
+	 * @return true if the given name appears in this term
+	 */
+	public boolean containsOp(String op){
+		if(op.equals(opName)){
+			return true;
+		}else{
+			for(Object arg:getArgs()){
+				if(arg instanceof String){
+					if(arg.equals(op))return true;
+				}else{
+					if(arg instanceof CafeTerm){
+						if(((CafeTerm) arg).containsOp(op)) return true;
+					}//end if the arg is an instance of CafeTerm
+				}//end if arg is not a string
+			}//end of looping through the term arguments
+		}//end if it is not the operator name
+		return false;
+	}//end of containsOp
 	
 	
 	
