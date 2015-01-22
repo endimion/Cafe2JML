@@ -1,5 +1,8 @@
 package model;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 public class StringHelper {
 
@@ -198,6 +201,56 @@ public class StringHelper {
 		
 	}//end of remEnclosingParenthesis
 	
+	/**
+	 * replaces all occurrences of special characters in operator names with safe ones
+	 * i.e. (=  ,  & && \s )
+	 * @param s a string
+	 * @return 
+	 */
+	public static String replaceSpecialChars(String s){
+		
+		String insidePattern = "op(\\s+)(.*?)(\\()(_,_)(,_)*(\\)*)";
+		String commaPattern =  "op(\\s+)(_,_)(,_)*";
+		String addPattern =  "op(\\s+)(_&+_)(&+_)*";
+		
+		Pattern pattern = Pattern.compile(insidePattern);
+		Matcher insideMatcher = pattern.matcher(s);
+		
+		if(insideMatcher.find()){
+			return s.replace(",","").replace("_","");
+		}
+		
+		
+		pattern = Pattern.compile(commaPattern);
+		Matcher commaMatcher = pattern.matcher(s);
+		if(commaMatcher.find()){
+			String opPart = s.split(",")[0];
+			String sortPart = s.split(",")[1];
+			
+			opPart = opPart.replace(",", "").replace("_","") +  "comma";
+			sortPart = sortPart.replace(",", "").replace("_","");
+			
+			return opPart + sortPart;
+		}
+		
+		pattern = Pattern.compile(addPattern);
+		Matcher addMatcher = pattern.matcher(s);
+		if(addMatcher.find()){
+			String opPart = s.split("&")[0];
+			String sortPart = s.split("&")[1];
+			
+			opPart = opPart.replace("&", "").replace("_","") +  "add";
+			sortPart = sortPart.replace("&", "").replace("_","");
+			
+			return opPart + sortPart;
+		}
+		
+		
+		return s.replace("_","");
+		
+	}//end of replaceSpecialChars
 	
-	
+
+
+
 }//end of class

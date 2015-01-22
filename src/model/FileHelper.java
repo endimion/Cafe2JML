@@ -65,7 +65,7 @@ public class FileHelper {
 	 * if a line starts with } it should end there
 	 * 
 	 */
-	public void parseCafeFile(){
+	public Vector<Module> parseCafeFile(){
 		
 		modules = new Vector<Module>(); // the modules containing within the file under translation
 		
@@ -103,6 +103,8 @@ public class FileHelper {
 			br.close();
 			 
 		} catch (Exception e) {e.printStackTrace();}
+	
+		return modules;
 	}//end of parseCafeFile
 	
 	
@@ -329,9 +331,12 @@ public class FileHelper {
 	public void parseOpLine(String line, Module mod){
 		CafeOperator cop = new CafeOperator();
 		String opName  = line.split(":")[0].trim();
-			   opName = StringHelper.removeSpecialCharacters(opName.split("_")[0].trim());
+			   //opName = StringHelper.removeSpecialCharacters(opName.split("_")[0].trim());
+			  //opName = opName.substring(StringHelper.getWhitePos(opName), opName.length()).replace("_","").trim();
+		//TODO		
+		opName = StringHelper.removeSpecialCharacters(StringHelper.replaceSpecialChars(opName));
+		opName = opName.split("op\\s+")[1].trim();
 		
-		opName = opName.substring(StringHelper.getWhitePos(opName), opName.length()).replace("_","").trim();
 		cop.setName(opName);
 		
 		String opSig = line.split(":")[1].trim();
@@ -479,8 +484,14 @@ public class FileHelper {
 	
 	
 	
-	
-	
+	/**
+	 * @return a vector containing the modules parsed by the given file
+	 * used to create this object;
+	 */
+	public Vector<Module> getModules(){
+		
+		return parseCafeFile();
+	}//end of getModules
 	
 
 	
