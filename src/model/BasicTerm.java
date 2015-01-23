@@ -45,6 +45,35 @@ public class BasicTerm implements CafeTerm{
 		return print;
 	}//end of termToString
 	
+	
+	
+	/**
+	 * 
+	 * @param pos
+	 * @return a string representation of the term skipping the 
+	 * argument in the given position
+	 */
+	public String printTermSkipArg(int pos){
+		
+		String res = getOpName() +"(";;
+		//System.out.println("aaaa " + getOpName());
+		if(getArgs().size()>0){
+			//res += "(";
+			for(int i= 0; i < getArgs().size();i++){
+				if(i != pos) res += getArgs().get(i) + ", ";
+			}
+			if(!res.endsWith("("))res = StringHelper.remLastChar(res.trim());
+			res +=")";
+		}
+		return res;
+	}//end of printTermSkippingArg
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * 
 	 * @param op the name of an operator

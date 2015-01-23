@@ -288,6 +288,13 @@ public class FileHelper {
 	 * @param mod the Module object which will store the information stored by the parsing
 	 */
 	public void parseSortDecLine(String line, Module mod){
+		
+		if(line.trim().startsWith("*")){
+			mod.setHidden(true);
+		}else{
+			mod.setHidden(false);
+		}
+		
 		line = line.replace("[","");
 		line = line.replace("]", "");
 		line = line.replace("*","");

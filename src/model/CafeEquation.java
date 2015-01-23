@@ -34,7 +34,7 @@ public class CafeEquation {
 	/**
 	 * 
 	 * @param opName the name of an operator
-	 * @return true if the given operator name exists in the lefthandside of the equation
+	 * @return true if the given operator name exists in the left-hand-side of the equation
 	 */
 	public boolean containsLeftOp(String opName){
 	

@@ -30,7 +30,7 @@ public class JmlGeneratorTester {
 		Module mod = mods.get(mods.size()-1);
 		
 		for(CafeOperator oper : mod.getOps()){
-			System.out.println(gen.genMethodSig(oper, mod));
+			//System.out.println(gen.genMethodSig(oper, mod));
 		}
 	
 	
@@ -40,10 +40,31 @@ public class JmlGeneratorTester {
 	
 	
 	
+	@Test
+	public void testTranslateInitialStates(){
+		//CafeOperator op = mods.get(0).getOps().get(0); 
+		Module mod = mods.get(mods.size()-1);
+		System.out.println(gen.translateInitStates(mod));
+		
+	}
 	
 	
+	@Test
+	public void testTranslateObservers(){
+		//CafeOperator op = mods.get(0).getOps().get(0); 
+		Module mod = mods.get(mods.size()-1);
+		System.out.println(gen.translateObservers(mod));
+		System.out.println("translated observers");
+	}
 	
-	
+	@Test
+	public void testTranslateTransitions(){
+		//CafeOperator op = mods.get(0).getOps().get(0); 
+		Module mod = mods.get(mods.size()-1);
+		//System.out.println(gen.translateObservers(mod));
+		gen.translateTransition(mod);
+		System.out.println("translated TRANSITIONS");
+	}
 	
 	
 	

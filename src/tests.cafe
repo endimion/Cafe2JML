@@ -392,7 +392,8 @@ op cond3  : req lic -> Bool
 op OMA    : req licSet -> lic
 
 
-var cp : cPerm
+var cp  : cPerm
+
 var L :  lic
 var R :  req
 var LS : licSet
@@ -431,6 +432,8 @@ pr(Tools)
 
 op init : -> sys
 
+op ots : -> sys
+
 -- action operators
 bop request : req sys -> sys
 bop choose  : sys -> sys
@@ -442,7 +445,7 @@ bop use2    : sys -> sys
 bop licIns : sys -> licSet
 bop useReq : sys -> req
 bop best   : sys  -> lic
-bop color  : sys cPerm ->  color
+bop color  : sys cPerm cPerm ->  color
 
 
 bop /inStartlic : sys lic -> Bool
@@ -454,9 +457,10 @@ bop finalLic    : sys -> licSet
 
 -- variables to denote "any"
 var S : sys
-var cp : cPerm
+vars cp cp1 : cPerm
 var L : lic
 var R : req
+-- var  : cPerm
 
 -- constants (arbritary values to datatypes)
  op ls : -> licSet
@@ -477,6 +481,25 @@ eq /inPosslic( init , L ) = false .
 eq /inFinallic(init , L ) = false .
 
 eq finalLic(init) = emptyLic .
+
+
+
+
+
+-- Initial state 2
+
+eq licIns(ots) = ls .
+eq useReq(ots) = null . 
+eq best(ots)  = emptyLic .
+
+eq color(ots ,  cp) = white .
+
+
+eq /inStartlic( ots , L ) = false .
+eq /inPosslic( ots , L ) = false .
+eq /inFinallic(ots , L ) = false .
+
+eq finalLic(ots) = emptyLic .
 
 
 -- ----------------------------------------------------------------
@@ -521,8 +544,8 @@ ceq finalLic(request(R , S)) = finalLic(S) if not c-request(S) .
 -- TRANSITION choose(S)
 -- ------------------------------------------------------------------------------------
 
-op c-choose : sys -> Bool
-eq c-choose(S) = (not( best(S) = emptyLic)) and ( not (useReq(S) = null)) .
+op c-choose : sys req -> Bool
+eq c-choose(S, R) = (not( best(S) = emptyLic)) and ( not (useReq(S) = null)) .
 
 
 ceq licIns(choose(S)) = licIns(S) if c-choose(S) .
@@ -598,3 +621,22 @@ ceq finalLic(use2(S)) = finalLic(S) if c-choose(S) .
 }
 
 
+
+
+
+mod* COUNTER{
+protecting(INT + BOOL)
+*[Counter]*
+op init : -> Counter
+bop add : Int Counter -> Counter
+bop read : Counter -> Int
+var I : Int . 
+var C : Counter .
+op c-add : Int -> Bool.
+eq c-add(I) = I >= 0 .
+eq read(init) = 0 .
+ceq read(add(I,C)) = I + read(C)
+if c-add(I) .
+ceq add(I,C) = C if not c-add(I).
+
+}

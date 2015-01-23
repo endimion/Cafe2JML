@@ -14,4 +14,7 @@ public interface CafeTerm {
 	public String termToString();
 	
 	public boolean containsOp(String op);
+	
+
+	public String printTermSkipArg(int pos);
 }
