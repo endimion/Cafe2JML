@@ -84,18 +84,19 @@ public class CompTerm implements CafeTerm{
 	 * position of the arguments
 	 */
 	public String printTermSkipArg(int pos){
-		String res = getOpName();
+		String res = getOpName() + "(";
 		
 		if(getArgs().size() >0){
 			for(int i =0; i< getArgs().size();i++){
 				if(getArgs().get(i) instanceof BasicTerm){
 					if(i != pos)res = res + " " + ((BasicTerm) getArgs().get(i)).termToString() + ",";
 				}else{
-					res += res + ((CompTerm) getArgs().get(i)).termToString() + ",";
+					if(i != pos) res += res + ((CompTerm) getArgs().get(i)).termToString() + ",";
 				}
 			}//end of for loop
 			
-			res = StringHelper.remLastChar(res);
+			if(!res.trim().endsWith("(")) res = StringHelper.remLastChar(res);
+			
 			res += ")";
 		}
 		

@@ -79,12 +79,7 @@ public class JmlGenerator {
 		
 		String forallDecl="";
 		
-		forallDecl ="/*@ initially (\\forall ";
-		for(CafeVariable var: mod.getVars()){
-			forallDecl = forallDecl + " "+ var.getSort() + " " +var.getName() + ", ";
-		}
-		forallDecl = StringHelper.remLastChar(forallDecl.trim());
-		forallDecl += ";" + '\n';
+		forallDecl = forallDecl(mod);
 		
 		for(CafeOperator init : initStates){
 			//1)get the equations matching that have on the left hand side the intial state operator
@@ -101,7 +96,7 @@ public class JmlGenerator {
 				CafeTerm left = eq.getLeftTerm();
 				CafeTerm right = eq.getRightTerm();
 				
-				res += " @ "+ left.printTermSkipArg(0) + " == " + right.termToString() + '\n';
+				res += "  @ "+ left.printTermSkipArg(0) + " == " + right.termToString() + '\n';
 				
 			}//end of looping through the matching equations
 			res +=  ") @*/"+ '\n' +"public "+init.getName() + "(){}"  + '\n' + '\n';
@@ -162,14 +157,21 @@ public class JmlGenerator {
 		for(CafeOperator bop : actions){
 			transEq = mod.getMatchingLeftEqs(bop.getName());
 			
+			res ="/*@" + forallDecl(mod);
 			for(int i =0; i< transEq.size();i++){
 				CafeTerm left = transEq.get(i).getLeftTerm();
-				CafeTerm right = transEq.get(i).getLeftTerm();
-				int pos = mod.getPositionOfSystemSort(left);
-						System.out.println( left.printTermSkipArg(pos) + "==" + right.termToString() );
+				CafeTerm right = transEq.get(i).getRightTerm();
+				int leftPos = mod.getPositionOfSystemSort(left);
+				int rightPos = mod.getPositionOfSystemSort(left);
+				//System.out.println("left part is " + left.getOpName() + " and it has " + left.getArgs().size() +" stuff");		
+				res += "  @ "+ left.printTermSkipArg(leftPos) + " == " 
+						+ "\\old("+right.printTermSkipArg(rightPos) +")" +'\n';
+				//right.termToString() + '\n';
+				
+				//System.out.println( left.printTermSkipArg(pos) + "==" + right.termToString() );
 			}//end of looping through the transition equations
-			
-		}//end of looping through the transition 
+			res +="  @*/";
+		}//end of looping through the transitions 
 		
 		
 		
@@ -180,8 +182,25 @@ public class JmlGenerator {
 	
 	
 	
-	
-	
+	/**
+	 * 
+	 * @param mod
+	 * @return a String containing the forall variables declared in the module
+	 * declaration
+	 */
+	public String forallDecl(Module mod){
+		String forallDecl="";
+		
+		forallDecl ="/*@ initially (\\forall ";
+		for(CafeVariable var: mod.getVars()){
+			if(!var.getSort().equals(mod.getClassSort()))
+				forallDecl = forallDecl + " "+ var.getSort() + " " +var.getName() + ", ";
+		}
+		forallDecl = StringHelper.remLastChar(forallDecl.trim());
+		forallDecl += ";" + '\n';
+		
+		return forallDecl;
+	}
 	
 	
 	

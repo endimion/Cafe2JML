@@ -635,8 +635,7 @@ var C : Counter .
 op c-add : Int -> Bool.
 eq c-add(I) = I >= 0 .
 eq read(init) = 0 .
-ceq read(add(I,C)) = I + read(C)
-if c-add(I) .
+ceq read(add(I,C)) = I + read(C) if c-add(I) .
 ceq add(I,C) = C if not c-add(I).
 
 }

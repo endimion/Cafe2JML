@@ -62,9 +62,12 @@ public class BasicTerm implements CafeTerm{
 			for(int i= 0; i < getArgs().size();i++){
 				if(i != pos) res += getArgs().get(i) + ", ";
 			}
+			//System.out.println("RES " + res);
 			if(!res.endsWith("("))res = StringHelper.remLastChar(res.trim());
 			res +=")";
+			
 		}
+		//System.out.println("RES2 " + res);
 		return res;
 	}//end of printTermSkippingArg
 	

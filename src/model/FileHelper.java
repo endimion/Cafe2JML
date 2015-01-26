@@ -466,8 +466,9 @@ public class FileHelper {
 			line = line.split("(eq)\\s+")[1];
 		}else{
 			if(line.startsWith("ceq")){
-				condition = line.split("if")[1].trim();
-				line = line.split("if")[0].split("(ceq)\\s+")[1].trim();
+				//System.out.println("conditional line "+ line);
+				condition = line.split("(\\s+)if(\\s+)")[1].trim();
+				line = line.split("(\\s+)if(\\s+)")[0].split("(ceq)\\s+")[1].trim();
 			}//end if it is a conditional equation
 		}//end of if it is not an unconditional equation
 		

@@ -1,0 +1,124 @@
+mod* ABP {
+  pr(PNAT + PACKET-LIST)
+  pr(BOOL-QUEUE)
+  pr(BOOL-PACKET-PAIR-QUEUE)
+  *[Sys]*
+-- initial states
+  op init : -> Sys
+-- observations
+  bop fifo1 : Sys -> PFifo 
+  bop fifo2 : Sys -> BFifo 
+  bop bit1  : Sys -> Bool  
+  bop bit2  : Sys -> Bool  
+  bop next  : Sys -> Nat   
+  bop list  : Sys -> List  
+-- actions
+  bop send1 : Sys -> Sys
+  bop rec1  : Sys -> Sys 
+  bop send2 : Sys -> Sys 
+  bop rec2  : Sys -> Sys 
+  bop drop1 : Sys -> Sys 
+  bop dup1  : Sys -> Sys 
+  bop drop2 : Sys -> Sys 
+  bop dup2  : Sys -> Sys 
+-- CafeOBJ variables
+  var S : Sys
+-- for initial state
+  eq fifo1(init) = empty .
+  eq fifo2(init) = empty .
+  eq bit1(init)  = false .
+  eq bit2(init)  = false .
+  eq next(init)  = 0 .
+  eq list(init)  = nil .
+-- send1
+  eq fifo1(send1(S)) = put(fifo1(S),< bit1(S),pac(next(S)) >) .
+  eq fifo2(send1(S)) = fifo2(S) .
+  eq bit1(send1(S))  = bit1(S) .
+  eq bit2(send1(S))  = bit2(S) .
+  eq next(send1(S))  = next(S) .
+  eq list(send1(S))  = list(S) .
+-- rec1
+  op c-rec1 : Sys -> Bool
+  eq c-rec1(S) = not(fifo2(S) = empty) .
+  --
+  eq  fifo1(rec1(S)) = fifo1(S) .
+  ceq fifo2(rec1(S)) = get(fifo2(S)) if c-rec1(S) .
+--  ceq bit1(rec1(S))
+--     = (if bit1(S) = top(fifo2(S)) then bit1(S) else top(fifo2(S)) fi)
+--      if c-rec1(S) .
+  eq  bit2(rec1(S))  = bit2(S) .
+--  ceq next(rec1(S))  
+--      = (if bit1(S) = top(fifo2(S)) then next(S) else s(next(S)) fi)
+--      if c-rec1(S) .
+  eq list(rec1(S))  = list(S) .
+  bceq rec1(S)      = S if not c-rec1(S) .
+-- send2
+  eq fifo1(send2(S)) = fifo1(S) .
+  eq fifo2(send2(S)) = put(fifo2(S),bit2(S)) .
+  eq bit1(send2(S))  = bit1(S) .
+  eq bit2(send2(S))  = bit2(S) .
+  eq next(send2(S))  = next(S) .
+  eq list(send2(S))  = list(S) .
+-- rec2
+  op c-rec2 : Sys -> Bool
+  eq c-rec2(S) = not(fifo1(S) = empty) .
+  --
+  ceq fifo1(rec2(S)) = get(fifo1(S)) if c-rec2(S) .
+  eq  fifo2(rec2(S)) = fifo2(S) .
+  eq  bit1(rec2(S))  = bit1(S) .
+--  ceq bit2(rec2(S))  
+--    = (if bit2(S) = fst(top(fifo1(S))) 
+--     then not fst(top(fifo1(S))) else bit2(S) fi)
+-- if c-rec2(S) .
+  eq  next(rec2(S))  = next(S) .
+--  ceq list(rec2(S))  
+--      = (if bit2(S) = fst(top(fifo1(S))) 
+--         then (snd(top(fifo1(S))) list(S)) else list(S) fi) 
+--     if c-rec2(S) .
+  bceq rec2(S)      = S if not c-rec2(S) .
+-- drop1
+  op c-drop1 : Sys -> Bool
+  eq c-drop1(S) = not(fifo1(S) = empty) .
+  --
+  ceq fifo1(drop1(S)) = get(fifo1(S)) if c-drop1(S) .
+  eq  fifo2(drop1(S)) = fifo2(S) .
+  eq  bit1(drop1(S))  = bit1(S) .
+  eq  bit2(drop1(S))  = bit2(S) .
+  eq  next(drop1(S))  = next(S) .
+  eq  list(drop1(S))  = list(S) .
+  bceq drop1(S)       = S if not c-drop1(S) .
+-- dup1
+  op c-dup1 : Sys -> Bool
+  eq c-dup1(S) = not(fifo1(S) = empty) .
+  --
+  ceq fifo1(dup1(S)) = union(top(fifo1(S)),fifo1(S)) if c-dup1(S) .
+  eq  fifo2(dup1(S)) = fifo2(S) .
+  eq  bit1(dup1(S))  = bit1(S) .
+  eq  bit2(dup1(S))  = bit2(S) .
+  eq  next(dup1(S))  = next(S) .
+  eq  list(dup1(S))  = list(S) .
+  bceq dup1(S)       = S if not c-dup1(S) .
+-- drop2
+  op c-drop2 : Sys -> Bool
+  eq c-drop2(S) = not(fifo2(S) = empty) .
+  --
+  eq  fifo1(drop2(S)) = fifo1(S) .
+  ceq fifo2(drop2(S)) = get(fifo2(S)) if c-drop2(S) .
+  eq  bit1(drop2(S))  = bit1(S) .
+  eq  bit2(drop2(S))  = bit2(S) .
+  eq  next(drop2(S))  = next(S) .
+  eq  list(drop2(S))  = list(S) .
+  bceq drop2(S)       = S if not c-drop2(S) .
+-- dup2
+  op c-dup2 : Sys -> Bool
+  eq c-dup2(S) = not(fifo2(S) = empty) .
+  --
+  eq  fifo1(dup2(S)) = fifo1(S) .
+  ceq fifo2(dup2(S)) = top(fifo2(S)),fifo2(S) if c-dup2(S) .
+  eq  bit1(dup2(S))  = bit1(S) .
+  eq  bit2(dup2(S))  = bit2(S) .
+  eq  next(dup2(S))  = next(S) .
+  eq  list(dup2(S))  = list(S) .
+  bceq dup2(S)       = S if not c-dup2(S) .
+}
+

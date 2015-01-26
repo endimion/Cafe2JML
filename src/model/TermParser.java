@@ -473,6 +473,7 @@ public class TermParser {
 			}
 		}else{//the line contains only one =
 			leftHS = eqTerm.split("=")[0].trim();
+			//System.out.println("the term is" + eqTerm);
 			rightHS = eqTerm.split("=")[1].trim();
 		}
 		
