@@ -79,7 +79,7 @@ public class JmlGenerator {
 		
 		String forallDecl="";
 		
-		forallDecl = forallDecl(mod);
+		forallDecl = forallDecl(mod, "initially");
 		
 		for(CafeOperator init : initStates){
 			//1)get the equations matching that have on the left hand side the intial state operator
@@ -122,16 +122,7 @@ public class JmlGenerator {
 		
 		for(int j=0; j < obs.size();j++){
 			bop = obs.get(j);
-			observerArguments = "(";
-			
-			for(int i=0; i< bop.getArity().size(); i++){
-				if(!bop.getArity().get(i).equals(mod.getClassSort())){ 
-					observerArguments += bop.getArity().get(i) + " " + 
-								getVarBySort(bop.getArity().get(i), mod, observerArguments) + ", ";
-				}//end of if the argument is not the sort of the module
-			}//end of looping  through the arguments of the observer
-			if(observerArguments.trim().endsWith(",")) observerArguments = StringHelper.remLastChar(observerArguments.trim());
-			
+			observerArguments = "(" + opArgsToString(bop, mod);
 			res += start + bop.getSort()+ " "+ bop.getName() + observerArguments +"){}" +'\n';
 			
 		}//end of looping through the observers
@@ -154,27 +145,57 @@ public class JmlGenerator {
 		Vector<CafeEquation> transEq; // = mod.getMatchingLeftEqs("");
 		
 		String res ="";
+		boolean isObject;
+		
 		for(CafeOperator bop : actions){
 			transEq = mod.getMatchingLeftEqs(bop.getName());
 			
-			res ="/*@" + forallDecl(mod);
+			res ="/*@ " +  forallDecl(mod,"ensures") ;
 			for(int i =0; i< transEq.size();i++){
 				CafeTerm left = transEq.get(i).getLeftTerm();
 				CafeTerm right = transEq.get(i).getRightTerm();
+				CafeTerm cond = transEq.get(i).getCondition();
+				
 				int leftPos = mod.getPositionOfSystemSort(left);
 				int rightPos = mod.getPositionOfSystemSort(left);
+				
+				//res += forallDecl(mod," @ ensures") ;
 				//System.out.println("left part is " + left.getOpName() + " and it has " + left.getArgs().size() +" stuff");		
-				res += "  @ "+ left.printTermSkipArg(leftPos) + " == " 
-						+ "\\old("+right.printTermSkipArg(rightPos) +")" +'\n';
+				
+				if(cond!= null){
+					int condPos = mod.getPositionOfSystemSort(cond);
+					res += "@ (" + cond.printTermSkipArg(condPos)+ " ==> "+ '\n';
+				}
+				
+				res += "@ "+ left.printTermSkipArg(leftPos) ;
+				isObject =isObjectByOpName(left.getOpName(), mod);
+				if(isObject){
+					res += ".equals("; 
+							
+				}else{
+					res += " == ";
+				}
+				
+				if(StringHelper.numOf(right.printTermSkipArg(rightPos), '(') > 0){
+						res += "\\old("+right.printTermSkipArg(rightPos) +")" ;
+				}else{
+					res += right.printTermSkipArg(rightPos)  ;		
+				}
+				
+				if(isObject){res += ")";}
+				if(i != transEq.size()-1){
+					res += ") &&" +'\n';
+				}else{
+					res += ");" +'\n';
+				}
 				//right.termToString() + '\n';
 				
 				//System.out.println( left.printTermSkipArg(pos) + "==" + right.termToString() );
 			}//end of looping through the transition equations
-			res +="  @*/";
+			res +="@*/" + '\n';
+			res += "public void " + bop.getName() +"("+ opArgsToString(bop, mod) +"){}" +'\n';
+		
 		}//end of looping through the transitions 
-		
-		
-		
 		
 		return res;
 	}//end of translateTransition
@@ -188,19 +209,19 @@ public class JmlGenerator {
 	 * @return a String containing the forall variables declared in the module
 	 * declaration
 	 */
-	public String forallDecl(Module mod){
+	public String forallDecl(Module mod, String initString){
 		String forallDecl="";
-		
-		forallDecl ="/*@ initially (\\forall ";
+		forallDecl += (initString.equals("initially"))? "/*@" :"";
+		forallDecl += initString +" (\\forall ";
 		for(CafeVariable var: mod.getVars()){
 			if(!var.getSort().equals(mod.getClassSort()))
 				forallDecl = forallDecl + " "+ var.getSort() + " " +var.getName() + ", ";
 		}
-		forallDecl = StringHelper.remLastChar(forallDecl.trim());
+		if(forallDecl.endsWith(", "))forallDecl = StringHelper.remLastChar(forallDecl.trim());
 		forallDecl += ";" + '\n';
 		
 		return forallDecl;
-	}
+	}//forallDecl
 	
 	
 	
@@ -245,6 +266,42 @@ public class JmlGenerator {
 	}//end of getVarBySort
 	
 	
+	/**
+	 * 
+	 * @param opName the name of the operator
+	 * @param mod the module object this op is defined in
+	 * @return true if the sort of the operator denotes an Object, 
+	 * false if it denotes a primitive Java data-type
+	 */
+	public boolean isObjectByOpName(String opName, Module mod){
+		String sort = mod.getOpSortByName(opName);
+		return !(sort.equals("Int") || sort.equals("Bool")|| sort.equals("String"));
+	}//end of isObjectByOpName
+	
+	
+	
+	/**
+	 * 
+	 * @param bop a CafeOperator Object
+	 * @param mod the module the operator is defined in
+	 * @return the arguments of the Operator skipping the sort of the module
+	 */
+	public String opArgsToString(CafeOperator bop, Module mod){
+		
+		String stringArgs="";
+		for(int i=0; i< bop.getArity().size(); i++){
+			if(!bop.getArity().get(i).equals(mod.getClassSort())){ 
+				stringArgs += bop.getArity().get(i) + " " + 
+							getVarBySort(bop.getArity().get(i), mod, stringArgs) + ", ";
+			}//end of if the argument is not the sort of the module
+		}//end of looping  through the arguments of the observer
+		if(stringArgs.trim().endsWith(",")) stringArgs = StringHelper.remLastChar(stringArgs.trim());
+		
+		return stringArgs;
+	}//end of opArgsToString
+	
+
+
 	
 	
 	

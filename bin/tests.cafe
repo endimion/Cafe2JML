@@ -513,6 +513,7 @@ eq c-request(S) = (useReq(S) = null) .
 
 eq licIns(request(R , S)) = licIns(S) .
 ceq useReq(request(R , S)) = R  if c-request(S) .
+
 eq best(request(R , S)) = best(S) .
 
 eq color(request(R , S) , cp) = color(S , cp) .
@@ -615,27 +616,9 @@ ceq color(use2(S) ,  cp) = color(S , cp) if c-use2(S) .
 ceq /inStartlic(use2(S) , L ) = /inStartlic(S , L ) if c-use2(S) .
 ceq /inPosslic(use2(S) , L ) = /inPosslic( S , L ) if c-use2(S) .
 ceq /inFinallic(use2(S) , L ) = /inFinallic(S , L ) if c-use2(S) .
-ceq finalLic(use2(S)) = finalLic(S) if c-choose(S) .
+ceq finalLic(use2(S)) = finalLic(S) if c-use2(S) .
 
 
 }
 
 
-
-
-
-mod* COUNTER{
-protecting(INT + BOOL)
-*[Counter]*
-op init : -> Counter
-bop add : Int Counter -> Counter
-bop read : Counter -> Int
-var I : Int . 
-var C : Counter .
-op c-add : Int -> Bool.
-eq c-add(I) = I >= 0 .
-eq read(init) = 0 .
-ceq read(add(I,C)) = I + read(C) if c-add(I) .
-ceq add(I,C) = C if not c-add(I).
-
-}

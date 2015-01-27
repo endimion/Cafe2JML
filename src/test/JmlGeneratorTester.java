@@ -60,6 +60,7 @@ public class JmlGeneratorTester {
 	@Test
 	public void testTranslateTransitions(){
 		//CafeOperator op = mods.get(0).getOps().get(0); 
+		//Module mod = mods.get(mods.size()-2);
 		Module mod = mods.get(mods.size()-1);
 		//System.out.println(gen.translateObservers(mod));
 		System.out.println(gen.translateTransition(mod));

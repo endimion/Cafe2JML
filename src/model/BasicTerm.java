@@ -55,7 +55,7 @@ public class BasicTerm implements CafeTerm{
 	 */
 	public String printTermSkipArg(int pos){
 		
-		String res = getOpName() +"(";;
+		String res = (getArgs().size() ==0)?getOpName() :getOpName() +"(";
 		//System.out.println("aaaa " + getOpName());
 		if(getArgs().size()>0){
 			//res += "(";
