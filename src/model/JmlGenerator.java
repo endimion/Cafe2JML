@@ -96,7 +96,7 @@ public class JmlGenerator {
 				CafeTerm left = eq.getLeftTerm();
 				CafeTerm right = eq.getRightTerm();
 				
-				res += "  @ "+ left.printTermSkipArg(0) + " == " + right.termToString() + '\n';
+				res += "  @ "+ left.printTermSkipArg(0,mod) + " == " + right.termToString() + '\n';
 				
 			}//end of looping through the matching equations
 			res +=  ") @*/"+ '\n' +"public "+init.getName() + "(){}"  + '\n' + '\n';
@@ -156,23 +156,19 @@ public class JmlGenerator {
 				CafeTerm right = transEq.get(i).getRightTerm();
 				CafeTerm cond = transEq.get(i).getCondition();
 				
-				int leftPos = mod.getPositionOfSystemSort(left);
-				int rightPos = mod.getPositionOfSystemSort(left);
+				int leftPos = TermParser.getPositionOfSystemSort(left,mod);
+				int rightPos = TermParser.getPositionOfSystemSort(left,mod);
 				
 				//res += forallDecl(mod," @ ensures") ;
 				//System.out.println("left part is " + left.getOpName() + " and it has " + left.getArgs().size() +" stuff");		
 				
 				if(cond!= null){
-					int condPos = mod.getPositionOfSystemSort(cond);
-					if(! TermParser.isBinary(cond.getOpName())){
-						res += "@ (" + cond.printTermSkipArg(condPos)+ " ==> "+ '\n';
-					}else{
-						
-						res += "@ ("+ cond.printBinaryOpTermSkipArg(0) + " ==> "+ '\n';
-					}
+					int condPos = TermParser.getPositionOfSystemSort(cond,mod);
+					res += "@ (" + cond.printTermSkipArg(condPos,mod)+ " ==> "+ '\n';
+					
 				}
 				
-				res += "@ "+ left.printTermSkipArg(leftPos) ;
+				res += "@ "+ left.printTermSkipArg(leftPos,mod) ;
 				isObject =isObjectByOpName(left.getOpName(), mod);
 				if(isObject){
 					res += ".equals("; 
@@ -181,10 +177,10 @@ public class JmlGenerator {
 					res += " == ";
 				}
 				
-				if(StringHelper.numOf(right.printTermSkipArg(rightPos), '(') > 0){
-						res += "\\old("+right.printTermSkipArg(rightPos) +")" ;
+				if(StringHelper.numOf(right.printTermSkipArg(rightPos,mod), '(') > 0){
+						res += "\\old("+right.printTermSkipArg(rightPos,mod) +")" ;
 				}else{
-					res += right.printTermSkipArg(rightPos)  ;		
+					res += right.printTermSkipArg(rightPos,mod)  ;		
 				}
 				
 				if(isObject){res += ")";}
@@ -227,6 +223,34 @@ public class JmlGenerator {
 		
 		return forallDecl;
 	}//forallDecl
+	
+	
+	/**
+	 * 
+	 * @param mod
+	 * @return
+	 */
+	public String translateGuards(Module mod){
+		//TODO
+		String res ="";
+		Vector<CafeOperator> guards = mod.getEffectiveConditions();
+		System.out.println("!!!!!" + guards.size());
+		
+		for(CafeOperator guard : guards){
+			Vector<CafeEquation> guardEqs = mod.getMatchingLeftEqs(guard.getName().trim());
+			System.out.println("!!!!!@@@ "+guard.getName()+" " + guardEqs.size());
+			
+			for(CafeEquation eq : guardEqs){
+				System.out.println("!!!!!" + guard.getName());
+				int rightSortPos = TermParser.getPositionOfSystemSort(eq.getRightTerm(), mod);
+				res = forallDecl(mod, "ensures");
+				res += "\\result == " + eq.getRightTerm().printTermSkipArg(rightSortPos, mod);
+			}//end of looping through the equations that have at the lhs an observer
+			
+		}//end of looping through the observers
+
+		return res;
+	}//end of translateGuards
 	
 	
 	
@@ -280,7 +304,7 @@ public class JmlGenerator {
 	 */
 	public boolean isObjectByOpName(String opName, Module mod){
 		String sort = mod.getOpSortByName(opName);
-		return !(sort.equals("Int") || sort.equals("Bool")|| sort.equals("String"));
+		return !(sort.equals("int") || sort.equals("boolean")|| sort.equals("String"));
 	}//end of isObjectByOpName
 	
 	

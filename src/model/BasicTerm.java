@@ -53,7 +53,7 @@ public class BasicTerm implements CafeTerm{
 	 * @return a string representation of the term skipping the 
 	 * argument in the given position
 	 */
-	public String printTermSkipArg(int pos){
+	public String printTermSkipArg(int pos, Module mod){
 		String res ="";
 		if(!TermParser.isBinary(getOpName())){
 			res = (getArgs().size() ==0)?getOpName() :getOpName() +"(";
@@ -82,7 +82,7 @@ public class BasicTerm implements CafeTerm{
 	 * @return a string representation of the term skipping the 
 	 * argument in the given position
 	 */
-	public String printBinaryOpTermSkipArg(int pos){
+	public String printBinaryOpTermSkipArg(int pos, Module mod){
 		
 		if(getArgs().size() == 2){
 			String res = " (" + getArgs().get(0) + " "+ getOpName() + " "+ getArgs().get(1) + " )";

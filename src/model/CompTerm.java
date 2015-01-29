@@ -80,70 +80,70 @@ public class CompTerm implements CafeTerm{
 	
 		
 	/**
+	 * @pos an integer denoting the position of the system sort
+	 * @mod the module from which the system sort is retrieved
 	 * @return a string representation of the term skipping the given 
 	 * position of the arguments
 	 */
-	public String printTermSkipArg(int pos){
-		String res = getOpName() + "(";
+	public String printTermSkipArg(int pos, Module mod){
+		String res ="";
+		int newPos = -1;
+		
 		
 		if(!TermParser.isBinary(getOpName())){
 			if(getArgs().size() >0){
+				res = getOpName() + "(";
 				for(int i =0; i< getArgs().size();i++){
-					if(i != pos){
-							if(!TermParser.isBinary( ((CafeTerm)getArgs().get(i)).getOpName())){
-								res = res + " " + ((CafeTerm) getArgs().get(i)).termToString() + ",";
-							}else{ 
-								res = res + " " + ((CafeTerm) getArgs().get(i)).printBinaryOpTermSkipArg(0) + ",";
-								}
-						
-						}//end if pos is not equal to i
+					String endingChar = (i == getArgs().size()-1)?"":", ";
+
+					if(getArgs().get(i) instanceof BasicTerm){
+						if(i != pos){
+								
+							newPos = TermParser.getPositionOfSystemSort((CafeTerm) getArgs().get(i), mod);
+							res = res +  ((CafeTerm) getArgs().get(i)).printTermSkipArg(newPos, mod) + endingChar 
+									+" "	;
+							}//end if pos is not equal to i
+					}else{
+						newPos = TermParser.getPositionOfSystemSort((CafeTerm) getArgs().get(i), mod);
+						//System.out.println(((CafeTerm) getArgs().get(i)).getOpName() + " AAAASSS " + newPos);
+						res = res +  ((CafeTerm) getArgs().get(i)).printTermSkipArg(newPos, mod) + endingChar
+								;
+					}
 				}//end of for loop
-			}//end of if args size is greater than zero
 				
-				if(!res.trim().endsWith("(")) res = StringHelper.remLastChar(res);
+				res += ")";
+			}else{  //end of if args size is greater than zero
+				res = getOpName();
+			}//end if the term is binary and has no arguments                  
+			//if(!res.trim().endsWith("(")) res = StringHelper.remLastChar(res);
 				
 				
-		}else{
-			res = "(" +  ((CafeTerm) getArgs().get(0)).printTermSkipArg(-1) 
-						+ getOpName() 
-					  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(-1) ;
+		}else{ //if the term has as a many operator a binary term
+			int leftPos = TermParser.getPositionOfSystemSort((CafeTerm) getArgs().get(0), mod);
+			int rightPos = TermParser.getPositionOfSystemSort((CafeTerm) getArgs().get(1), mod);
+			
+			if(!getOpName().equals("equals")){
+				res = "(" +  ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod) +" "
+							+ getOpName() +" "
+						  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")";
+			}else{
+				String sort = mod.getOpSortByName( ((CafeTerm) getArgs().get(1)).getOpName());
+				if(sort.equals("int")||sort.equals("boolean")){
+					res = "(" +  ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()+") == (" 
+							  + (((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")"  ;
+				}else{
+					
+					res =   ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()+"." 
+							+ getOpName()+"(" 
+						  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")";
+				}
+			
+			}//end of else if the name of the operator is "equals"
 		}
-		res += ")";
+		if(res.trim().endsWith("(")){res += ")";}
 		return res;
-		
-		//TODO make it so that the system sort is not printed in the left and right terms
-		//i.e. found out where the correct position for each such sort is
-		
 	}//end of printTermNoFirstArg
 	
-	
-	/**
-	 * 
-	 * @param pos
-	 * @return a string representation of the term skipping the 
-	 * argument in the given position
-	 */
-	public String printBinaryOpTermSkipArg(int pos){
-		String res ="";
-		
-		String leftTerm = (TermParser.isBinary(((CafeTerm)getArgs().get(0)).getOpName()))?
-				((CafeTerm)getArgs().get(0)).printBinaryOpTermSkipArg(0):
-					((CafeTerm)getArgs().get(0)).printTermSkipArg(-1);
-		
-		String rightTerm = (TermParser.isBinary(((CafeTerm)getArgs().get(1)).getOpName()))?
-					((CafeTerm)getArgs().get(1)).printBinaryOpTermSkipArg(1):
-						((CafeTerm)getArgs().get(1)).printTermSkipArg(-1);		
-				
-				
-		res = " (" + leftTerm + " " + getOpName() + " " + rightTerm+ " )";
-		
-		
-		if(getArgs().size() == 2){
-			return res;
-		}else{
-			return "This is not a binary operator!!! something went wrong!!!!";
-		}
-	}//end of printTermSkippingArg
 	
 	
 	

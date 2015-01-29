@@ -16,7 +16,7 @@ public interface CafeTerm {
 	public boolean containsOp(String op);
 	
 
-	public String printTermSkipArg(int pos);
+	public String printTermSkipArg(int pos, Module mod);
 	
-	public String printBinaryOpTermSkipArg(int pos);
+	//private String printBinaryOpTermSkipArg(int pos, Module mod);
 }

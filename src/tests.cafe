@@ -715,7 +715,7 @@ var S : bs
 
 eq left(init) = 0 .
 eq right(init) = getSize(arr(init)) .
-eq pivot(init) = (left(init) + right(init)) quo 2 .
+eq pivot(init) = quo((left(init) + right(init)) , 2) .
 eq value(init) = v .
 eq found(init) = (getIndex(arr(init),pivot(init)) = value(init)) .
 ceq return(init) = -1 if found(init) = false . 
@@ -731,13 +731,13 @@ eq c-searchright(S) = (found(S) = false) and (pivot(S) >= 0)
 
 ceq left(searchright(S)) = 1 + pivot(S) if c-searchright(S) .
 ceq right(searchright(S)) = right(S) if c-searchright(S) .
-ceq found(searchright(S)) = getIndex(arr(S),((pivot(S) + 1) + right(S)) quo 2) = value(S) if c-searchright(S) .
-ceq pivot(searchright(S)) = ((pivot(S) + 1) + right(S)) quo 2 if c-searchright(S) .
-ceq return(searchright(S)) = ((pivot(S) + 1) + right(S)) quo 2 if c-searchright(S) 
-	and  (getIndex(arr(S),((pivot(S) + 1) + right(S)) quo 2) = value(S)) .
+ceq found(searchright(S)) = getIndex(arr(S),  quo(((pivot(S) + 1) + right(S)), 2) ) = value(S) if c-searchright(S) .
+ceq pivot(searchright(S)) =  quo( ((pivot(S) + 1) + right(S)),2 ) if c-searchright(S) .
+ceq return(searchright(S)) = ((pivot(S) + 1) + quo(right(S)),2)  if c-searchright(S) 
+	and  (getIndex(arr(S), quo(((pivot(S) + 1) + right(S)),1)) = value(S)) .
  
 ceq return(searchright(S)) = -1 if c-searchright(S) 
-	and  not (getIndex(arr(S),((pivot(S) + 1) + right(S)) quo 2 ) = value(S)) .
+	and  not (getIndex(arr(S), quo(((pivot(S) + 1) + right(S)),2) ) = value(S)) .
 
 eq value(searchright(S)) = value(S) .
 eq arr(searchright(S)) = arr(S) .
@@ -755,13 +755,13 @@ eq c-searchleft(S) = (found(S) = false) and (pivot(S) >= 0)
 
 ceq left(searchleft(S)) = left(S)  if c-searchleft(S) .
 ceq right(searchleft(S)) = pivot(S) - 1 if c-searchleft(S) .
-ceq found(searchleft(S)) = getIndex(arr(S),((pivot(S) - 1) + left(S)) quo 2) = value(S) if c-searchleft(S) .
-ceq pivot(searchleft(S)) = ((pivot(S) - 1) + left(S)) quo 2 if c-searchleft(S) .
-ceq return(searchleft(S)) = ((pivot(S) - 1) + left(S)) quo 2 if c-searchleft(S) 
-	and  (getIndex(arr(S),((pivot(S) - 1) + left(S)) quo 2) = value(S)) .
+ceq found(searchleft(S)) = getIndex(arr(S), quo( ((pivot(S) - 1) + left(S)),2)) = value(S) if c-searchleft(S) .
+ceq pivot(searchleft(S)) = quo( ((pivot(S) - 1) + left(S)) ,2) if c-searchleft(S) .
+ceq return(searchleft(S)) = quo( ((pivot(S) - 1) + left(S)),2) if c-searchleft(S) 
+	and  (getIndex(arr(S), quo(((pivot(S) - 1) + left(S)), 2)) = value(S)) .
  
 ceq return(searchleft(S)) = -1 if c-searchleft(S) 
-	and  not (getIndex(arr(S),((pivot(S) - 1) + left(S)) quo 2 ) = value(S)) .
+	and  not (getIndex(arr(S), quo(((pivot(S) - 1) + left(S)) , 2) ) = value(S)) .
 
 
 

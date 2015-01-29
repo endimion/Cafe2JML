@@ -232,7 +232,7 @@ public class Module {
 		int posOfSysState = -1; 
 		
 		for(CafeEquation eq: getEqs()){
-			posOfSysState = getPositionOfSystemSort(eq.getLeftTerm());
+			posOfSysState = TermParser.getPositionOfSystemSort(eq.getLeftTerm(),this);
 			
 			if(posOfSysState >= 0){
 				Object critical = eq.getLeftTerm().getArgs().get(posOfSysState);
@@ -242,7 +242,7 @@ public class Module {
 				}else{
 					//System.out.println("CRITICAL " + ((CafeTerm)critical).getOpName() + " "+opName);
 					if(critical instanceof CafeTerm && ((CafeTerm) critical).getOpName().equals(opName))
-					{	
+					{	//System.out.println("CRITICAL " + ((CafeTerm)critical).getOpName() + " "+opName);
 						res.add(eq);
 					}
 				}//end if the critical term is not a string
@@ -266,7 +266,7 @@ public class Module {
 		Vector<CafeOperator> effectives = new Vector<CafeOperator>();
 		
 		for(CafeOperator op: getOps()){
-			if(op.getName().startsWith("c-")) effectives.add(op);
+			if(op.getName().trim().startsWith("c-")) effectives.add(op);
 		}
 		return effectives;
 	}//end of getEffectiveConditions
@@ -305,31 +305,7 @@ public class Module {
 	}//end of getTermSort
 	
 	
-	/**
-	 * 
-	 * @param t
-	 * @return the position of the system sort, i.e. the sort which is 
-	 * defined by the module in the term. If no such sort exists -1 is returned
-	 */
-	public int getPositionOfSystemSort(CafeTerm t){
-		
-		@SuppressWarnings("unchecked")
-		Vector<Object> args = (Vector<Object>) t.getArgs();
-		
-		for(int i = 0; i < args.size(); i++){
-			Object arg = args.get(i);
-			
-			if(arg instanceof String &&  arg != null 
-					&& getOpSortByName((String)arg).equals(getClassSort())){
-				return i;
-			}else{
-				if(arg instanceof CafeTerm &&  
-						getOpSortByName(((CafeTerm) arg).getOpName()).equals(getClassSort()))
-				{return i;}
-			}//end if the argument is not a string
-		}//end of looping through the arguments of the term r
-		return -1;
-	}//end of getPositionOfSystemSort
+	
 	
 	
 	/**
@@ -349,6 +325,7 @@ public class Module {
 
 		return "";
 	}//end of getOpSortByName
+	
 	
 	
 	//TODO getVariablesOfEquations which

@@ -29,7 +29,11 @@ public class CafeOperator {
 	
 	
 	public void setSort(String s){sort= s;}
-	public String getSort(){return sort;}
+	public String getSort(){
+		// we translate here the CafeOBJ sorts so that they 
+		//match the Java ones
+		return TermParser.cafe2JavaSort(sort);
+	}
 	
 	public String getType(){return this.type;}
 	public void setType(String t){this.type = t;}

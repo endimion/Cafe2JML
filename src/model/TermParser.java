@@ -545,8 +545,54 @@ public class TermParser {
 		||opName.equals("and")||opName.equals("or") 
 		||opName.equals(">")||opName.equals(">=")||opName.equals("<")
 		||opName.equals("<=")||opName.equals("+")||opName.equals("-")
-		||opName.equals("*")||opName.equals("/") ;
+		||opName.equals("*")||opName.equals("/") || opName.equals("equals");
 	}//end of isBinary
 	
+
+	
+	/**
+	 * 
+	 * @param t
+	 * @return the position of the system sort, i.e. the sort which is 
+	 * defined by the module in the term. If no such sort exists -1 is returned
+	 */
+	public static int getPositionOfSystemSort(CafeTerm t, Module mod){
+		
+		@SuppressWarnings("unchecked")
+		Vector<Object> args = (Vector<Object>) t.getArgs();
+		
+		for(int i = 0; i < args.size(); i++){
+			Object arg = args.get(i);
+			
+			if(arg instanceof String &&  arg != null 
+					&& mod.getOpSortByName((String)arg).equals(mod.getClassSort())){
+				return i;
+			}else{
+				if(arg instanceof CafeTerm &&  
+						mod.getOpSortByName(((CafeTerm) arg).getOpName()).equals(mod.getClassSort()))
+				{return i;}
+			}//end if the argument is not a string
+		}//end of looping through the arguments of the term r
+		return -1;
+	}//end of getPositionOfSystemSort
+	
+
+	/**
+	 * translates the given CafeOBJ sort to the corresponding Java sort
+	 * @param sort
+	 * @return
+	 */
+	public static String cafe2JavaSort(String sort){
+		
+		switch(sort){
+		case "Int" : sort = "int";
+					 break;
+		case "Bool" : sort = "boolean";
+					  break;
+	
+		}
+		return sort;
+	}//end of cafe2JavaSort
+
 
 }

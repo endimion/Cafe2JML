@@ -44,7 +44,7 @@ public class JmlGeneratorTester {
 	public void testTranslateInitialStates(){
 		//CafeOperator op = mods.get(0).getOps().get(0); 
 		Module mod = mods.get(mods.size()-1);
-		System.out.println(gen.translateInitStates(mod));
+		//System.out.println(gen.translateInitStates(mod));
 		
 	}
 	
@@ -53,8 +53,8 @@ public class JmlGeneratorTester {
 	public void testTranslateObservers(){
 		//CafeOperator op = mods.get(0).getOps().get(0); 
 		Module mod = mods.get(mods.size()-1);
-		System.out.println(gen.translateObservers(mod));
-		System.out.println("translated observers");
+		//System.out.println(gen.translateObservers(mod));
+		//System.out.println("translated observers");
 	}
 	
 	@Test
@@ -65,6 +65,16 @@ public class JmlGeneratorTester {
 		//System.out.println(gen.translateObservers(mod));
 		System.out.println(gen.translateTransition(mod));
 		System.out.println("translated TRANSITIONS");
+	}
+	
+	@Test
+	public void testTranslateGuards(){
+		//CafeOperator op = mods.get(0).getOps().get(0); 
+		//Module mod = mods.get(mods.size()-2);
+		Module mod = mods.get(mods.size()-1);
+		//System.out.println(gen.translateObservers(mod));
+		System.out.println(gen.translateGuards(mod));
+		System.out.println("translated effective conditions!!!!!");
 	}
 	
 	
