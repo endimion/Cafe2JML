@@ -54,22 +54,44 @@ public class BasicTerm implements CafeTerm{
 	 * argument in the given position
 	 */
 	public String printTermSkipArg(int pos){
-		
-		String res = (getArgs().size() ==0)?getOpName() :getOpName() +"(";
-		//System.out.println("aaaa " + getOpName());
-		if(getArgs().size()>0){
-			//res += "(";
-			for(int i= 0; i < getArgs().size();i++){
-				if(i != pos) res += getArgs().get(i) + ", ";
+		String res ="";
+		if(!TermParser.isBinary(getOpName())){
+			res = (getArgs().size() ==0)?getOpName() :getOpName() +"(";
+			//System.out.println("aaaa " + getOpName());
+			if(getArgs().size()>0){
+				//res += "(";
+				for(int i= 0; i < getArgs().size();i++){
+					if(i != pos) res += getArgs().get(i) + ", ";
+				}
+				//System.out.println("RES " + res);
+				if(!res.endsWith("("))res = StringHelper.remLastChar(res.trim());
+				res +=")";
 			}
-			//System.out.println("RES " + res);
-			if(!res.endsWith("("))res = StringHelper.remLastChar(res.trim());
-			res +=")";
-			
+			//System.out.println("RES2 " + res);
+		}else{
+			res +="BASIC BINARRRUUUU";
 		}
-		//System.out.println("RES2 " + res);
 		return res;
 	}//end of printTermSkippingArg
+	
+	
+	
+	/**
+	 * 
+	 * @param pos
+	 * @return a string representation of the term skipping the 
+	 * argument in the given position
+	 */
+	public String printBinaryOpTermSkipArg(int pos){
+		
+		if(getArgs().size() == 2){
+			String res = " (" + getArgs().get(0) + " "+ getOpName() + " "+ getArgs().get(1) + " )";
+			return res;
+		}else{
+			return "This is not a binary operator!!! something went wrong!!!! "+ getOpName();
+		}
+	}//end of printTermSkippingArg
+
 	
 	
 	

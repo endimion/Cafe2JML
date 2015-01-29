@@ -86,23 +86,65 @@ public class CompTerm implements CafeTerm{
 	public String printTermSkipArg(int pos){
 		String res = getOpName() + "(";
 		
-		if(getArgs().size() >0){
-			for(int i =0; i< getArgs().size();i++){
-				if(getArgs().get(i) instanceof BasicTerm){
-					if(i != pos)res = res + " " + ((BasicTerm) getArgs().get(i)).termToString() + ",";
-				}else{
-					if(i != pos) res += res + ((CompTerm) getArgs().get(i)).termToString() + ",";
-				}
-			}//end of for loop
-			
-			if(!res.trim().endsWith("(")) res = StringHelper.remLastChar(res);
-			
-			res += ")";
+		if(!TermParser.isBinary(getOpName())){
+			if(getArgs().size() >0){
+				for(int i =0; i< getArgs().size();i++){
+					if(i != pos){
+							if(!TermParser.isBinary( ((CafeTerm)getArgs().get(i)).getOpName())){
+								res = res + " " + ((CafeTerm) getArgs().get(i)).termToString() + ",";
+							}else{ 
+								res = res + " " + ((CafeTerm) getArgs().get(i)).printBinaryOpTermSkipArg(0) + ",";
+								}
+						
+						}//end if pos is not equal to i
+				}//end of for loop
+			}//end of if args size is greater than zero
+				
+				if(!res.trim().endsWith("(")) res = StringHelper.remLastChar(res);
+				
+				
+		}else{
+			res = "(" +  ((CafeTerm) getArgs().get(0)).printTermSkipArg(-1) 
+						+ getOpName() 
+					  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(-1) ;
 		}
-		
-		
+		res += ")";
 		return res;
+		
+		//TODO make it so that the system sort is not printed in the left and right terms
+		//i.e. found out where the correct position for each such sort is
+		
 	}//end of printTermNoFirstArg
+	
+	
+	/**
+	 * 
+	 * @param pos
+	 * @return a string representation of the term skipping the 
+	 * argument in the given position
+	 */
+	public String printBinaryOpTermSkipArg(int pos){
+		String res ="";
+		
+		String leftTerm = (TermParser.isBinary(((CafeTerm)getArgs().get(0)).getOpName()))?
+				((CafeTerm)getArgs().get(0)).printBinaryOpTermSkipArg(0):
+					((CafeTerm)getArgs().get(0)).printTermSkipArg(-1);
+		
+		String rightTerm = (TermParser.isBinary(((CafeTerm)getArgs().get(1)).getOpName()))?
+					((CafeTerm)getArgs().get(1)).printBinaryOpTermSkipArg(1):
+						((CafeTerm)getArgs().get(1)).printTermSkipArg(-1);		
+				
+				
+		res = " (" + leftTerm + " " + getOpName() + " " + rightTerm+ " )";
+		
+		
+		if(getArgs().size() == 2){
+			return res;
+		}else{
+			return "This is not a binary operator!!! something went wrong!!!!";
+		}
+	}//end of printTermSkippingArg
+	
 	
 	
 }//end of OpExpression

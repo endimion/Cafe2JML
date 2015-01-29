@@ -3,6 +3,8 @@ package model;
 import java.util.Vector;
 
 
+
+
 /**
  * This class provides a variety of methods which can be used to parse a CafeOBJ term 
  * and store its contents in appropriate objects
@@ -55,6 +57,16 @@ public class TermParser {
 	public static boolean isBasicTerm(String s){
 		
 		int fParPos = StringHelper.firstAppearOfChar(s, '(');
+		
+		OpNamePos mainOp = getMainPos(s);
+		
+		if(isBinary(mainOp.getName()) && !mainOp.getName().equals("=")){
+			return isTermConsOrVar(s.substring(0,mainOp.getPos())) 
+					&& 
+					isTermConsOrVar(s.substring(mainOp.getPos()+1,s.length()) );
+		}
+		
+		
 		if(!s.contains("=")){
 			if(fParPos >= 0){
 				String inner = s.substring(fParPos+1, s.length()-1);
@@ -67,6 +79,19 @@ public class TermParser {
 			return false;
 		}
 	}//end of isBasicExpr
+	
+	
+	/**
+	 * 
+	 * @param term
+	 * @return whether or not the given term is a constant or a variable,
+	 * i.e. contains no arguments
+	 */
+	public static boolean isTermConsOrVar(String term){
+		return !term.contains("(");
+	}
+	
+	
 	
 	
 	/**
@@ -229,7 +254,7 @@ public class TermParser {
 						
 						logicConnect += c;
 						
-						if(isBinary(logicConnect)){
+						if(isBinary(logicConnect.trim())){
 							mainOp = logicConnect;
 							lookForLogic = false;
 							if(openPars == 0){ 
@@ -515,7 +540,7 @@ public class TermParser {
 	 * @param opName
 	 * @return
 	 */
-	private static boolean isBinary(String opName){
+	public static boolean isBinary(String opName){
 		return opName.equals("=")
 		||opName.equals("and")||opName.equals("or") 
 		||opName.equals(">")||opName.equals(">=")||opName.equals("<")

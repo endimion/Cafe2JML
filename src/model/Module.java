@@ -341,6 +341,12 @@ public class Module {
 		for(CafeOperator op: getOps()){
 			if(op.getName().equals(name)) return op.getSort();
 		}
+		
+		Vector<CafeVariable> vars = getVars();
+		for(CafeVariable var : vars){
+			if(var.getName().equals(name)) return var.getSort();
+		}
+
 		return "";
 	}//end of getOpSortByName
 	

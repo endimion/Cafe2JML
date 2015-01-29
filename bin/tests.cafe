@@ -622,3 +622,156 @@ ceq finalLic(use2(S)) = finalLic(S) if c-use2(S) .
 }
 
 
+
+
+
+mod* ABP {
+  pr(PNAT + PACKET-LIST)
+  pr(BOOL-QUEUE)
+  pr(BOOL-PACKET-PAIR-QUEUE)
+  *[Sys]*
+-- initial states
+  op init : -> Sys
+-- observations
+  bop fifo1 : Sys -> PFifo -- Sender-to-Receiver channel
+  bop fifo2 : Sys -> BFifo -- Receiver-to-Sender channel
+  bop bit1  : Sys -> Bool  -- Sender's bit
+  bop bit2  : Sys -> Bool  -- Receiver's bit
+  bop next  : Sys -> Nat   -- the ordinal of the packet sent next by Sender
+  bop list  : Sys -> List  -- the packets received by Receiver
+-- actions
+  bop send1 : Sys -> Sys -- Sender's sending pairs of bits&packets
+  bop rec1  : Sys -> Sys -- Sender's receiving bits
+  bop send2 : Sys -> Sys -- Receiver's sending bits
+  bop rec2  : Sys -> Sys -- Receiver's receiving pairs of bits&packets
+  bop drop1 : Sys -> Sys -- dropping the 1st of fifo1
+  bop dup1  : Sys -> Sys -- duplicating the 1st of fifo1
+  bop drop2 : Sys -> Sys -- dropping the 1st of fifo2
+  bop dup2  : Sys -> Sys -- duplicating the 1st of fifo2
+-- CafeOBJ variables
+  var S : Sys
+-- for initial state
+  eq fifo1(init) = empty .
+  eq fifo2(init) = empty .
+  eq bit1(init)  = false .
+  eq bit2(init)  = false .
+  eq next(init)  = 0 .
+  eq list(init)  = nil .
+-- send1
+  eq fifo1(send1(S)) = put(fifo1(S), union(bit1(S),pac(next(S))) ) .
+  eq fifo2(send1(S)) = fifo2(S) .
+  eq bit1(send1(S))  = bit1(S) .
+  eq bit2(send1(S))  = bit2(S) .
+  eq next(send1(S))  = next(S) .
+  eq list(send1(S))  = list(S) .
+-- rec1
+  op c-rec1 : Sys -> Bool
+  eq c-rec1(S) = not(fifo2(S) = empty) .
+  --
+  eq  fifo1(rec1(S)) = fifo1(S) .
+  ceq fifo2(rec1(S)) = get(fifo2(S)) if c-rec1(S) .
+  ceq bit1(rec1(S)) = bit1(S) if (bit1(S) = top(fifo2(S))) and c-rec1(S) .
+  ceq bit1(rec1(S)) = top(fifo2(S)) if not(bit1(S) = top(fifo2(S)) ) and c-rec1(S)  .
+      
+  
+  eq  bit2(rec1(S))  = bit2(S) .
+
+}
+
+
+
+mod* BINARYSEARCH  {
+*[bs]*
+
+pr(MyArray)
+pr(BOOL)
+pr(EQL)
+
+-- projection
+bop arr : bs -> ma
+
+-- observers
+bop pivot : bs -> Int
+bop value : bs -> Int
+bop left : bs -> Int
+bop right : bs -> Int
+bop found : bs -> Bool
+bop return : bs -> Int
+
+-- transitions
+bop searchleft : bs -> bs
+bop searchright : bs -> bs
+
+-- constants
+op init : -> bs
+op v : -> Int
+
+-- variables
+
+var S : bs
+
+
+-- initially
+
+eq left(init) = 0 .
+eq right(init) = getSize(arr(init)) .
+eq pivot(init) = (left(init) + right(init)) quo 2 .
+eq value(init) = v .
+eq found(init) = (getIndex(arr(init),pivot(init)) = value(init)) .
+ceq return(init) = -1 if found(init) = false . 
+ceq return(init) = pivot(init) if found(init) = true .
+
+-- searchright
+
+op c-searchright : bs -> Bool 
+eq c-searchright(S) = (found(S) = false) and (pivot(S) >= 0) 
+              and not(right(S) = left(S)) and (left(S) >= 0) 
+              and (right(S) >= 0) and 
+              (getIndex(arr(S),pivot(S)) < value(S)) .
+
+ceq left(searchright(S)) = 1 + pivot(S) if c-searchright(S) .
+ceq right(searchright(S)) = right(S) if c-searchright(S) .
+ceq found(searchright(S)) = getIndex(arr(S),((pivot(S) + 1) + right(S)) quo 2) = value(S) if c-searchright(S) .
+ceq pivot(searchright(S)) = ((pivot(S) + 1) + right(S)) quo 2 if c-searchright(S) .
+ceq return(searchright(S)) = ((pivot(S) + 1) + right(S)) quo 2 if c-searchright(S) 
+	and  (getIndex(arr(S),((pivot(S) + 1) + right(S)) quo 2) = value(S)) .
+ 
+ceq return(searchright(S)) = -1 if c-searchright(S) 
+	and  not (getIndex(arr(S),((pivot(S) + 1) + right(S)) quo 2 ) = value(S)) .
+
+eq value(searchright(S)) = value(S) .
+eq arr(searchright(S)) = arr(S) .
+
+ceq searchright(S) = S if not c-searchright(S) .  
+
+-- searchleft
+-- searchright
+
+op c-searchleft : bs -> Bool 
+eq c-searchleft(S) = (found(S) = false) and (pivot(S) >= 0) 
+              and not(right(S) = left(S)) and (left(S) >= 0) 
+              and (right(S) >= 0) and 
+              (getIndex(arr(S),pivot(S)) > value(S)) .
+
+ceq left(searchleft(S)) = left(S)  if c-searchleft(S) .
+ceq right(searchleft(S)) = pivot(S) - 1 if c-searchleft(S) .
+ceq found(searchleft(S)) = getIndex(arr(S),((pivot(S) - 1) + left(S)) quo 2) = value(S) if c-searchleft(S) .
+ceq pivot(searchleft(S)) = ((pivot(S) - 1) + left(S)) quo 2 if c-searchleft(S) .
+ceq return(searchleft(S)) = ((pivot(S) - 1) + left(S)) quo 2 if c-searchleft(S) 
+	and  (getIndex(arr(S),((pivot(S) - 1) + left(S)) quo 2) = value(S)) .
+ 
+ceq return(searchleft(S)) = -1 if c-searchleft(S) 
+	and  not (getIndex(arr(S),((pivot(S) - 1) + left(S)) quo 2 ) = value(S)) .
+
+
+
+eq value(searchleft(S)) = value(S) .
+eq arr(searchleft(S)) = arr(S) .
+
+ceq searchleft(S) = S if not c-searchleft(S) .  
+ 
+
+
+
+}
+

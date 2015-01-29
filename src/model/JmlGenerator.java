@@ -150,7 +150,7 @@ public class JmlGenerator {
 		for(CafeOperator bop : actions){
 			transEq = mod.getMatchingLeftEqs(bop.getName());
 			
-			res ="/*@ " +  forallDecl(mod,"ensures") ;
+			res +="/*@ " +  forallDecl(mod,"ensures") ;
 			for(int i =0; i< transEq.size();i++){
 				CafeTerm left = transEq.get(i).getLeftTerm();
 				CafeTerm right = transEq.get(i).getRightTerm();
@@ -164,7 +164,12 @@ public class JmlGenerator {
 				
 				if(cond!= null){
 					int condPos = mod.getPositionOfSystemSort(cond);
-					res += "@ (" + cond.printTermSkipArg(condPos)+ " ==> "+ '\n';
+					if(! TermParser.isBinary(cond.getOpName())){
+						res += "@ (" + cond.printTermSkipArg(condPos)+ " ==> "+ '\n';
+					}else{
+						
+						res += "@ ("+ cond.printBinaryOpTermSkipArg(0) + " ==> "+ '\n';
+					}
 				}
 				
 				res += "@ "+ left.printTermSkipArg(leftPos) ;
@@ -193,7 +198,7 @@ public class JmlGenerator {
 				//System.out.println( left.printTermSkipArg(pos) + "==" + right.termToString() );
 			}//end of looping through the transition equations
 			res +="@*/" + '\n';
-			res += "public void " + bop.getName() +"("+ opArgsToString(bop, mod) +"){}" +'\n';
+			res += "public void " + bop.getName() +"("+ opArgsToString(bop, mod) +"){}" +'\n' +'\n';
 		
 		}//end of looping through the transitions 
 		

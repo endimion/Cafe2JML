@@ -90,6 +90,16 @@ public class TermParserTester {
 					//t = TermParser.parseEqTerm(s);
 		 assertEquals("",TermParser.getMainPos(s).getName(),"not");
 		
+		 
+		 s = "p(x) + 1";
+		 assertEquals("",TermParser.getMainPos(s).getName(),"+");
+		 
+		 s= "pivot(S) + 1";
+		 assertEquals("",TermParser.getMainPos(s).getName(),"+");
+		 
+		 s =" pivot(S) - 1";
+		 assertEquals("",TermParser.getMainPos(s).getName(),"-");
+		 
 	}//end of testParseTermContEq
 	
 

@@ -20,9 +20,9 @@ public class FileHelperTester {
 	
 	@Before
 	public void setUpTests(){
-		//fh = new FileHelper("src/tests.cafe");
+		fh = new FileHelper("src/tests.cafe");
 		//fh = new FileHelper("src/cafe2athena.test.txt");
-		fh = new FileHelper("src/cafe2athena.test3.txt");
+		//fh = new FileHelper("src/cafe2athena.test3.txt");
 	}
 	
 	

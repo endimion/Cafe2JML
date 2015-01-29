@@ -17,4 +17,6 @@ public interface CafeTerm {
 	
 
 	public String printTermSkipArg(int pos);
+	
+	public String printBinaryOpTermSkipArg(int pos);
 }
