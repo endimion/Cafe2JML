@@ -150,11 +150,11 @@ public class Module {
 	 * @return a Vector of constructor CafeOperators which have no arity,
 	 * e.g. init : -> Sys
 	 */
-	public Vector<CafeOperator> getHiddenConstants(){
+	public Vector<CafeOperator> getConstants(){
 		
 		Vector<CafeOperator> consts = new Vector<CafeOperator>();
 		
-		for(CafeOperator op: getConstr()){
+		for(CafeOperator op: getOps()){
 			if(op.getArity().size() == 0){
 				consts.add(op);
 			}
@@ -164,13 +164,16 @@ public class Module {
 	
 	
 	
+	
+	
+	
 	/**
 	 * 
 	 * @return all the hidden constants that have the same sort as the module,
 	 * i.e. all the initial states of the system which is defined by the module
 	 */
 	public Vector<CafeOperator> getInitialStates(){
-		Vector<CafeOperator> constants = getHiddenConstants();
+		Vector<CafeOperator> constants = getConstants();
 		Vector<CafeOperator> init = new Vector<CafeOperator>();
 		
 		for(CafeOperator op: constants){
@@ -208,7 +211,7 @@ public class Module {
 		
 		for(CafeOperator op : getOps()){
 			//if teh op contains in the arity the same sort as that of the module
-			if(isBehavioral(op) && !op.getSort().equals(classSort)){
+			if(isBehavioral(op) && !op.getSort().equals(classSort) && !op.getName().trim().startsWith("c-")){
 				obs.add(op);
 			}//end if the op is behavioral but not sorted as the module
 			
@@ -233,7 +236,6 @@ public class Module {
 		
 		for(CafeEquation eq: getEqs()){
 			posOfSysState = TermParser.getPositionOfSystemSort(eq.getLeftTerm(),this);
-			
 			if(posOfSysState >= 0){
 				Object critical = eq.getLeftTerm().getArgs().get(posOfSysState);
 				
@@ -254,6 +256,24 @@ public class Module {
 	
 	
 	
+	
+	
+	/**
+	 * 
+	 * @param opName the name of an operator
+	 * @return all equations of the module which give the value of the given
+	 * operator
+	 */
+	public Vector<CafeEquation> getEqsForOp(String opName){
+		Vector<CafeEquation> res = new Vector<CafeEquation>();
+		
+		for(CafeEquation eq: getEqs()){
+			if(eq.getLeftTerm().getOpName().equals(opName)){
+				res.add(eq);
+			}
+		}//end of for loop
+		return res;
+	}//end of getMatchingLeftEqs
 	
 	
 	
@@ -309,8 +329,9 @@ public class Module {
 	
 	
 	/**
-	 * takes as input the name of a CafeOperator and returns its sort in
+	 * takes as input the name of a CafeOperator Or Variable and returns its sort in
 	 * this module
+	 * @param name the name of an operator or variable of the module
 	 * @return
 	 */
 	public String getOpSortByName(String name){
@@ -328,8 +349,45 @@ public class Module {
 	
 	
 	
-	//TODO getVariablesOfEquations which
-	//gets a set of CafeEquations and returns all the variables which appears in them
+	/**
+	 * 
+	 * @param eq a CafeEquation
+	 * @return a vector of strings denoting all the variables which appear in 
+	 * this equation but are not System variables
+	 */
+	public Vector<String> getVariableOfEq(CafeEquation eq){
+		CafeTerm left = eq.getLeftTerm();
+		Vector<String> vars  = new Vector<String>();
+		
+		for(String s: left.getVarsOfTerm()){
+			//System.out.println("variable " + s + " of sort " + getOpSortByName(s));
+			
+			if(!getOpSortByName(s).equals(getClassSort())){
+				vars.add(s);
+			}
+		}
+		//System.out.println("!!!!!!!!sizee " + vars.size());
+		return vars;
+	}//end of getVariableOfEq
+	
+	
+	
+	
+	/**
+	 * 
+	 * @param op  a CafeOperator
+	 * @param eq  a CafeEquation
+	 * @return a Vector of Strings denoting all the variable which 
+	 * appear inside the operator op in eq
+	 */
+	public Vector<String> getVarsOfOpinEq(CafeOperator op, CafeEquation eq){
+		
+		CafeTerm t = eq.getTermInEqLeft(op.getName());
+		return  t.getVarsOfTerm();
+	}//end of getVarsOfOpinEq
+	
+	
+	
 	
 	
 }//end of class

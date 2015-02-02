@@ -26,6 +26,27 @@ public class CompTerm implements CafeTerm{
 	public Vector<Object> getArgs(){return args;}
 	public void addArg(Object arg){args.addElement(arg);}
 	
+	/**
+	 * @return a Vector containing the names of all the variables
+	 * which appear in this term
+	 */
+	@Override
+	public Vector<String> getVarsOfTerm(){
+		Vector<String> termVars = new Vector<String>();
+		for(Object o: getArgs()){
+			if(o instanceof String){
+				termVars.add((String)o);
+			}else{
+				if(o instanceof CafeTerm){
+					for(String var : ((CafeTerm)o).getVarsOfTerm() ){
+						termVars.add(var);
+					}//end of looping through the variables of the term o
+				}//end if o is a cafeterm
+			}//end of if it is not a string
+		}//end of looping through the arguments of the com term
+		return termVars;
+	}//end of getVarsOfTerm
+	
 	
 	
 	
@@ -77,11 +98,46 @@ public class CompTerm implements CafeTerm{
 	}//end of containsOp
 	
 	
+	/**
+	 * 
+	 * @param op the name of an operator
+	 * @return the CafeTerm, which is part of this term
+	 * and if defined by the given operator
+	 */
+	public CafeTerm getSubTerm(String op){
+		if(op.equals(opName)){
+			return this;
+		}else{
+			for(Object arg:getArgs()){
+				if(arg instanceof String){
+					if(arg.equals(op)){
+						BasicTerm t = new BasicTerm();
+						t.setOpName(op);
+						return t;
+					};
+				}else{
+					if(arg instanceof CafeTerm){
+						if(((CafeTerm) arg).containsOp(op)) 
+							{return getSubTerm(op);
+							}
+					}//end if the arg is an instance of CafeTerm
+				}//end if arg is not a string
+			}//end of looping through the term arguments
+		}//end if it is not the operator name
+	
+		return null;
+	}//end of getSubTerm
+	
+	
+	
+
+	
+	
 	
 		
 	/**
-	 * @pos an integer denoting the position of the system sort
-	 * @mod the module from which the system sort is retrieved
+	 * @param pos an integer denoting the position of the system sort
+	 * @param mod the module from which the system sort is retrieved
 	 * @return a string representation of the term skipping the given 
 	 * position of the arguments
 	 */
@@ -124,15 +180,15 @@ public class CompTerm implements CafeTerm{
 			
 			if(!getOpName().equals("equals")){
 				res = "(" +  ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod) +" "
-							+ getOpName() +" "
+							+ TermParser.cafe2JavaSort(getOpName()) +" "
 						  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")";
 			}else{
-				String sort = mod.getOpSortByName( ((CafeTerm) getArgs().get(1)).getOpName());
-				if(sort.equals("int")||sort.equals("boolean")){
-					res = "(" +  ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()+") == (" 
-							  + (((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")"  ;
+				String sort = TermParser.cafe2JavaSort(mod.getOpSortByName( ((CafeTerm) getArgs().get(1)).getOpName()));
+				if(sort.equals("int")||sort.equals("boolean")|| StringHelper.isInteger(((CafeTerm) getArgs().get(1)).getOpName())){
+					res =   ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()+ " == " 
+							  + (((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod)   ;
 				}else{
-					
+					System.out.println(TermParser.cafe2JavaSort(sort) + "!!!!!!");
 					res =   ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()+"." 
 							+ getOpName()+"(" 
 						  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")";

@@ -322,6 +322,15 @@ public class TermParserTester {
 		assertEquals("",((CompTerm)t.getArgs().get(0)).getOpName(),"and");		
 		assertEquals("",((BasicTerm)((CompTerm)t.getArgs().get(0)).getArgs().get(1)).getOpName(),"c-exit");
 		
+		s = " (I >= 0) and (I < getSize(A)) and (V >= 0) and "
+				+ "(getElementAt(A,I - 1) < V ) and (  ((I + 1) < getSize(A)) " 
+				+ "	and (getElementAt(A,I + 1) >= 0) and (getElementAt(A,I + 1) > V ) ) ";
+		t = TermParser.parseEqTerm(s);
+		
+		s = " (getElementAt(A,I + 1) >= 0) and (getElementAt(A,I + 1) > V )  ";
+		t = TermParser.parseEqTerm(s);
+		assertEquals("",((CompTerm)t.getArgs().get(0)).getOpName(),">=");
+							
 	}//end of testParseEqTerm
 	
 	

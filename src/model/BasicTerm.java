@@ -23,6 +23,45 @@ public class BasicTerm implements CafeTerm{
 	public void addArg(Object arg) { args.addElement((String)arg);}
 	
 	
+	@Override
+	public CafeTerm getSubTerm(String op){
+		if(op.equals(getOpName())){
+			return this;
+		}else{
+			for(String s: getArgs()){
+				if(s.equals(op)){
+					BasicTerm t = new BasicTerm();
+					t.setOpName(op);
+					return t;
+				}//end of if the name of the op is the same as that of the argument 
+			}//end of loopinig through the arguments 
+		}//end if the name of the op is not the same as that of the term
+		return null;
+	}// end of getSubTerm
+	
+	
+	/**
+	 * !!!!! ATTENTION, if the term is a constant, the name of the term will
+	 * be returned here!! additional check 
+	 * must hence be implemented in the caller method
+	 * 
+	 * @return a Vector containing the names of all the variables
+	 * which appear in this term
+	 * if the term is it shelf a variable return that term
+	 * 
+	 */
+	@Override
+	public Vector<String> getVarsOfTerm(){
+		if(getArgs().size() > 0){
+			return getArgs();
+		}else{
+			Vector<String> res = new Vector<String>();
+			res.add(getOpName());
+			return res;
+		}
+	}//end of getVarsOfTerm
+	
+	
 	
 	/**
 	 * 
@@ -85,7 +124,8 @@ public class BasicTerm implements CafeTerm{
 	public String printBinaryOpTermSkipArg(int pos, Module mod){
 		
 		if(getArgs().size() == 2){
-			String res = " (" + getArgs().get(0) + " "+ getOpName() + " "+ getArgs().get(1) + " )";
+			String res = " (" + getArgs().get(0) + " "+ 
+					TermParser.cafe2JavaSort(getOpName()) + " "+ getArgs().get(1) + " )";
 			return res;
 		}else{
 			return "This is not a binary operator!!! something went wrong!!!! "+ getOpName();

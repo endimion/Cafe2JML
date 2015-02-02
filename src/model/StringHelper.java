@@ -250,7 +250,19 @@ public class StringHelper {
 		
 	}//end of replaceSpecialChars
 	
-
+	
+	
+	/**
+	 * 
+	 * @param s a String 
+	 * @return true if the given String represents an integer
+	 */
+	public static boolean isInteger(String s){
+		try{
+			 Integer.parseInt(s);
+			return true;
+		}catch(Exception e){ return false;}
+	}//end of isInteger
 
 
 }//end of class

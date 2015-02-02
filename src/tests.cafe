@@ -775,3 +775,65 @@ ceq searchleft(S) = S if not c-searchleft(S) .
 
 }
 
+
+
+
+
+
+
+mod* MyArray  {
+
+*[ma]*
+pr(INT)
+pr(EQL)
+pr(BOOL)
+
+-- observers
+bop getElementAt : ma Int -> Int
+bop getSize : ma -> Int
+
+-- transitions
+bop setSize : ma Int -> ma
+bop setElementAt : ma Int Int -> ma 
+
+-- variables
+var A : ma
+vars I V J K: Int
+
+-- constant denoting the initial state of the array
+op initMa : -> ma
+
+
+-- initially
+eq getElementAt(initMa,I) = -1 . 
+eq getSize(initMa) = 0 .
+
+-- setSize
+
+op c-setSize :  ma Int -> Bool
+eq c-setSize(A,J) = (J >= 0) and (getSize(A) = 0) .
+
+ceq getSize(setSize(A,J)) = J if c-setSize(A,J) .
+
+ceq getElementAt(setSize(A,J),I) = getElementAt(A,I) if c-setSize(A,J)  .
+
+bceq setSize(A,J) = A if not c-setSize(A,J) .
+
+
+-- setElementAt
+
+op c-setElementAt : ma Int Int  -> Bool
+
+eq c-setElementAt(A,I,V) = (I >= 0) and (I < getSize(A)) and (V >= 0) and 
+							(getElementAt(A,I - 1) <= V ) and (  ((I + 1) < getSize(A)) 
+							and (getElementAt(A,I + 1) >= 0)  
+							and (getElementAt(A,I + 1) > V ) )   .
+
+ceq getSize(setElementAt(A,I,V)) = getSize(A) if c-setElementAt(A,I,V) .
+
+ceq getElementAt(setElementAt(A,I,V),J) = V if c-setElementAt(A,I,V) and (I = J) . 
+
+bceq setElementAt(A,I,V) = A if not c-setElementAt(A,I,V) .
+
+
+}

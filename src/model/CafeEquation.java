@@ -117,6 +117,48 @@ public class CafeEquation {
 	
 	
 	
+	/**
+	 * 
+	 * @param opName the name of a CafeOperator
+	 * @return the CafeTerm for which defined by this operator
+	 * in the lhs of the equation
+	 */
+	public CafeTerm getTermInEqLeft(String opName){
+		
+		CafeTerm lhs = getLeftTerm();
+		
+		if(lhs.getOpName().equals(opName)){
+			return lhs;
+		}else{
+			for(Object o : lhs.getArgs()){
+				if(o instanceof String){
+					BasicTerm t = new BasicTerm();
+					t.setOpName((String)o);
+				}//end of if the argument is a string
+				else{
+					if(o instanceof CompTerm){
+						if( ((CompTerm) o).getOpName().equals(opName)) {
+							return (CompTerm) o;
+						}else{
+							if(((CafeTerm)o).getSubTerm(opName) !=  null){
+								return ((CafeTerm)o).getSubTerm(opName);
+							}
+						} 
+						
+					}else{
+						if(o instanceof BasicTerm){
+							if( ((BasicTerm) o).getOpName().equals(opName)) 
+								return ((BasicTerm) o);
+						}//end if o is a BasicTerm
+					}
+				}//end of if the argument is not a string
+			}//end of looping through the arguments of the left hand side
+		}//end if the op is not the main operator of the left part of the eq
+		
+		return null;
+	}//end of getTermInEqLeft
+	
+	
 	
 	
 	

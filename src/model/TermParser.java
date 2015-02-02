@@ -255,15 +255,29 @@ public class TermParser {
 						logicConnect += c;
 						
 						if(isBinary(logicConnect.trim())){
-							mainOp = logicConnect;
-							lookForLogic = false;
-							if(openPars == 0){ 
-								//System.out.println("THE LOCATION OF " + logicConnect + " in " +  
-								//		term+" is " + j);
-								return new OpNamePos(logicConnect, j);
-							}
-							
-							
+							if(!(logicConnect.equals(">")||logicConnect.equals("<"))){
+								mainOp = logicConnect;
+								lookForLogic = false;
+								if(openPars == 0){ 
+									//System.out.println("THE LOCATION OF " + logicConnect + " in " +  
+									//		term+" is " + j);
+									return new OpNamePos(logicConnect, j);
+								}
+							}else{
+								if(j < term.toCharArray().length -2  && term.toCharArray()[j+1] == '='){
+										logicConnect += term.toCharArray()[j+1];
+										lookForLogic = false;
+										if(openPars == 0){ 
+											return new OpNamePos(logicConnect, j+1);
+										}//end if there are no open parenthesis
+								}//end if the next char is an equals
+								else{
+									if(openPars == 0){ 
+										return new OpNamePos(logicConnect, j);
+									}//end if there are no open parenthesis
+								}//end if the next char is not the equals char
+								
+							}//end if logicConnect is equal to < or >
 						}//end if and or or has been found
 					}else{
 						logicConnect="";
@@ -585,11 +599,13 @@ public class TermParser {
 	public static String cafe2JavaSort(String sort){
 		
 		switch(sort){
-		case "Int" : sort = "int";
-					 break;
-		case "Bool" : sort = "boolean";
-					  break;
-	
+		case "Int" : return "int";
+					 
+		case "Bool" : return "boolean";
+					  
+		case "and"	: return "&&";
+
+		case "or"   : return "||";
 		}
 		return sort;
 	}//end of cafe2JavaSort

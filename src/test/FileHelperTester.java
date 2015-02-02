@@ -129,7 +129,7 @@ public class FileHelperTester {
 		 fh.parseOpLine("op belong2?(_,_) : req permSet -> Bool", mod);
 		 assertEquals("",mod.getOps().get(0).getName() ,"belong2?");
 		 assertEquals("",mod.getOps().get(0).getType() ,"operator");
-		 assertEquals("",mod.getOps().get(0).getSort(),"Bool");
+		 assertEquals("",mod.getOps().get(0).getSort(),"boolean");
 		 assertEquals("",mod.getOps().get(0).getArity().get(0),"req");
 		 assertEquals("",mod.getOps().get(0).getArity().get(1),"permSet");
 		 
@@ -138,7 +138,7 @@ public class FileHelperTester {
 		 fh.parseOpLine(" op belong3?(_,_) : req cPerm -> Bool", mod);
 		 assertEquals("",mod.getOps().get(0).getName() ,"belong3?");
 		 assertEquals("",mod.getOps().get(0).getType() ,"operator");
-		 assertEquals("",mod.getOps().get(0).getSort(),"Bool");
+		 assertEquals("",mod.getOps().get(0).getSort(),"boolean");
 		 assertEquals("",mod.getOps().get(0).getArity().get(0),"req");
 		 assertEquals("",mod.getOps().get(0).getArity().get(1),"cPerm");
 		 
@@ -320,6 +320,53 @@ public class FileHelperTester {
 	}//end of testContainsLeftOp
 	
 	
+	@Test
+	public void testGetVarsofTerm(){
+		Module mod = new Module();
+		CafeEquation eq = new CafeEquation();
+		CafeOperator ini = new CafeOperator();
+		ini.setName("init");
+		ini.setSort("sys");
+		
+		mod.addOp(ini);
+		
+		
+		fh.parseEq("ceq /inFinallic(request(R , S) , L) = /inFinallic(S , L) if not c-request(S) .", mod, eq);
+		assertEquals("",mod.getVariableOfEq(eq).get(0),"R");
+		assertEquals("",mod.getVariableOfEq(eq).get(1),"S");
+		assertEquals("",mod.getVariableOfEq(eq).get(2),"L");
+		
+		
+		
+		fh.parseEq("ceq /inFinallic(request(R , init) , L) = /inFinallic(S , L) if not c-request(S) .", mod, eq);
+		
+		assertEquals("",mod.getVariableOfEq(eq).get(0),"R");
+		assertEquals("",mod.getVariableOfEq(eq).get(1),"init");
+		assertEquals("",mod.getVariableOfEq(eq).get(2),"L");
+		/*fh.parseEq("ceq getSize(setElementAt(A,I,V)) = getSize(A) if c-setElementAt(A,I,V)", mod, eq);
+		System.out.println(mod.getVariableOfEq(eq).get(0));
+		System.out.println(mod.getVariableOfEq(eq).get(1));
+		System.out.println(mod.getVariableOfEq(eq).get(2));
+		 */
+	}//end of testGetVarsofTerm
+	
+	
+	
+	@Test
+	public void testGetVarsOfOpinEq(){
+		Module mod = new Module();
+		CafeEquation eq = new CafeEquation();
+		
+		CafeOperator b = new CafeOperator();
+		b.setName("request");
+		//ini.setSort("sys");
+		
+		//mod.addOp(ini);
+		
+		fh.parseEq("ceq /inFinallic(request( R(J(xmy,n),d) , init) , L) = /inFinallic(S , L) if not c-request(S) .", mod, eq);
+		mod.getVarsOfOpinEq(b, eq);
+		
+	}//end of testGetVarsofTerm
 	
 	
 	

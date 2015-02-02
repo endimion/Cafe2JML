@@ -2,7 +2,6 @@ package test;
 
 import java.util.Vector;
 
-import model.CafeOperator;
 import model.FileHelper;
 import model.JmlGenerator;
 import model.Module;
@@ -27,11 +26,11 @@ public class JmlGeneratorTester {
 	@Test
 	public void testGenMethodSig(){
 		//CafeOperator op = mods.get(0).getOps().get(0); 
-		Module mod = mods.get(mods.size()-1);
+		//Module mod = mods.get(mods.size()-1);
 		
-		for(CafeOperator oper : mod.getOps()){
+		//for(CafeOperator oper : mod.getOps()){
 			//System.out.println(gen.genMethodSig(oper, mod));
-		}
+		//}
 	
 	
 	}//end of testGenMethodSig
@@ -43,7 +42,7 @@ public class JmlGeneratorTester {
 	@Test
 	public void testTranslateInitialStates(){
 		//CafeOperator op = mods.get(0).getOps().get(0); 
-		Module mod = mods.get(mods.size()-1);
+		//Module mod = mods.get(mods.size()-1);
 		//System.out.println(gen.translateInitStates(mod));
 		
 	}
@@ -52,7 +51,7 @@ public class JmlGeneratorTester {
 	@Test
 	public void testTranslateObservers(){
 		//CafeOperator op = mods.get(0).getOps().get(0); 
-		Module mod = mods.get(mods.size()-1);
+		//Module mod = mods.get(mods.size()-1);
 		//System.out.println(gen.translateObservers(mod));
 		//System.out.println("translated observers");
 	}
@@ -61,10 +60,10 @@ public class JmlGeneratorTester {
 	public void testTranslateTransitions(){
 		//CafeOperator op = mods.get(0).getOps().get(0); 
 		//Module mod = mods.get(mods.size()-2);
-		Module mod = mods.get(mods.size()-1);
+		//Module mod = mods.get(mods.size()-1);
 		//System.out.println(gen.translateObservers(mod));
-		System.out.println(gen.translateTransition(mod));
-		System.out.println("translated TRANSITIONS");
+		//System.out.println(gen.translateTransition(mod));
+		//System.out.println("translated TRANSITIONS");
 	}
 	
 	@Test
@@ -73,8 +72,16 @@ public class JmlGeneratorTester {
 		//Module mod = mods.get(mods.size()-2);
 		Module mod = mods.get(mods.size()-1);
 		//System.out.println(gen.translateObservers(mod));
-		System.out.println(gen.translateGuards(mod));
-		System.out.println("translated effective conditions!!!!!");
+		//System.out.println(gen.translateGuards(mod));
+		//System.out.println("translated effective conditions!!!!!");
+		
+		//System.out.println(gen.translateHiddenConstants(mod) );
+		//System.out.println(gen.translateInitStates(mod) );
+		//System.out.println(gen.translateObservers(mod));
+		//System.out.println(gen.translateGuards(mod));
+		//System.out.println(gen.translateTransition(mod) );
+		System.out.println(gen.translateSimpleModule(mod));
+	
 	}
 	
 	
