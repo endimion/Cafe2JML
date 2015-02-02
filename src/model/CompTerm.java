@@ -133,7 +133,7 @@ public class CompTerm implements CafeTerm{
 
 	
 	
-	
+	//TODO fix the number of parenthesis!!!!
 		
 	/**
 	 * @param pos an integer denoting the position of the system sort
@@ -178,25 +178,35 @@ public class CompTerm implements CafeTerm{
 			int leftPos = TermParser.getPositionOfSystemSort((CafeTerm) getArgs().get(0), mod);
 			int rightPos = TermParser.getPositionOfSystemSort((CafeTerm) getArgs().get(1), mod);
 			
-			if(!getOpName().equals("equals")){
-				res = "(" +  ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod) +" "
+			if(!getOpName().equals("equals") && !TermParser.isBinary(getOpName()) ){
+				res =  ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod) +" "
+							+ TermParser.cafe2JavaSort(getOpName()) +" "
+						  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) ;
+			}else{
+				if(!getOpName().equals("equals")){
+					res = "(" +  ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod) +" "
 							+ TermParser.cafe2JavaSort(getOpName()) +" "
 						  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")";
-			}else{
-				String sort = TermParser.cafe2JavaSort(mod.getOpSortByName( ((CafeTerm) getArgs().get(1)).getOpName()));
-				if(sort.equals("int")||sort.equals("boolean")|| StringHelper.isInteger(((CafeTerm) getArgs().get(1)).getOpName())){
-					res =   ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()+ " == " 
-							  + (((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod)   ;
 				}else{
-					System.out.println(TermParser.cafe2JavaSort(sort) + "!!!!!!");
-					res =   ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()+"." 
-							+ getOpName()+"(" 
-						  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")";
-				}
+					
+					String sort = TermParser.cafe2JavaSort(mod.getOpSortByName( ((CafeTerm) getArgs().get(1)).getOpName()));
+					if(sort.equals("int")||sort.equals("boolean")|| StringHelper.isNumber(((CafeTerm) getArgs().get(1)).getOpName())){
+						res =   ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()
+								+ " == " 
+								  + (((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod)   ;
+					}else{
+						
+						res =   ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()+"." 
+								+ getOpName()+"(" 
+							  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")";
+					}//end if the sort of the operator is not a primitive data type
+				}//end if the operator is equals
+				
 			
-			}//end of else if the name of the operator is "equals"
+			
+			}//end if the operator isBinary
 		}
-		if(res.trim().endsWith("(")){res += ")";}
+		if(res.trim().endsWith("(")){res += "$)";}
 		return res;
 	}//end of printTermNoFirstArg
 	

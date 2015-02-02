@@ -825,9 +825,9 @@ bceq setSize(A,J) = A if not c-setSize(A,J) .
 op c-setElementAt : ma Int Int  -> Bool
 
 eq c-setElementAt(A,I,V) = (I >= 0) and (I < getSize(A)) and (V >= 0) and 
-							(getElementAt(A,I - 1) <= V ) and (  ((I + 1) < getSize(A)) 
+							(getElementAt(A,I - 1) <= V ) and ((I + 1) < getSize(A)) 
 							and (getElementAt(A,I + 1) >= 0)  
-							and (getElementAt(A,I + 1) > V ) )   .
+							and (getElementAt(A,I + 1) > V ) and (I < getSize(A))    .
 
 ceq getSize(setElementAt(A,I,V)) = getSize(A) if c-setElementAt(A,I,V) .
 

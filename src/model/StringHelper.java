@@ -255,13 +255,20 @@ public class StringHelper {
 	/**
 	 * 
 	 * @param s a String 
-	 * @return true if the given String represents an integer
+	 * @return true if the given String represents an integer or float
 	 */
-	public static boolean isInteger(String s){
+	public static boolean isNumber(String s){
 		try{
 			 Integer.parseInt(s);
 			return true;
-		}catch(Exception e){ return false;}
+		}catch(Exception e){ 
+			try{
+				Float.parseFloat(s);
+				return true;
+			}catch(Exception e1){
+				return false;
+			}
+		}
 	}//end of isInteger
 
 

@@ -3,18 +3,9 @@ package model;
 import java.util.Vector;
 
 
-//TODO
-/* ATTENTION 1st PRIORITY!!!!
- * the translation must not universally quantify ALL the variables ...
- * 
- * First we retrieve the Variables which appear in the equation
- * and SEPARATE them into the ones that appear in the transition and 
- * those which do not
- * NEXT:
- * if those which DO NOT APPEAR IN THE TRANSITION should be universally quantified!!!
- * 
- * 
- */
+//TODO ADD question marks on the end of the (\forall ...); and the && 
+// i.e. add ; after the translation of each set of equations!!!
+
 
 public class JmlGenerator {
 
@@ -109,6 +100,7 @@ public class JmlGenerator {
 		Vector<CafeEquation> transEq; // = mod.getMatchingLeftEqs("");
 		
 		String res ="";
+		String forallStart="";
 		boolean isObject;
 		
 		for(CafeOperator bop : actions){
@@ -116,8 +108,8 @@ public class JmlGenerator {
 			
 			res +="/*@ ensures " + '\n'; 
 			for(int i =0; i< transEq.size();i++){
-				
-				res +=  forallDecl(mod,"@",transEq.get(i),bop) ;
+				forallStart =forallDecl(mod,"@",transEq.get(i),bop) ;
+				res +=  forallStart;
 				
 				CafeTerm left = transEq.get(i).getLeftTerm();
 				CafeTerm right = transEq.get(i).getRightTerm();
@@ -148,14 +140,16 @@ public class JmlGenerator {
 				}
 				
 				if(isObject){res += ")";}
-				if(i != transEq.size()-1){
+				
+				/*if(i != transEq.size()-1){
 					res += ") &&" +'\n';
 				}else{
 					res += ");" +'\n';
-				}
+				}*/
 				//right.termToString() + '\n';
 				
 				//System.out.println( left.printTermSkipArg(pos) + "==" + right.termToString() );
+			res += (forallStart.contains("forall"))? "));" +'\n':")"+'\n';
 			}//end of looping through the transition equations
 			res +="@*/" + '\n';
 			
@@ -221,8 +215,7 @@ public class JmlGenerator {
 					StringHelper.remLastChar(forallDecl.trim());
 			
 			forallDecl += ";" + '\n';
-			return (varsToQuant.size() > 0)? forallDecl:"";
-		
+			return (varsToQuant.size() > 0)? forallDecl:initString;
 		}else{
 			if(eq != null){
 				Vector<String> eqVars = mod.getVariableOfEq(eq);
@@ -240,11 +233,8 @@ public class JmlGenerator {
 				return (eqVars.size() > 0)? forallDecl:"";
 				
 			}//end if eq != null but action == null
-			
-			
 			return "NOEQ";
 		}//end if (eq != null && action != null)
-		
 	}//end of forallDecl
 	
 	
@@ -255,6 +245,7 @@ public class JmlGenerator {
 	 */
 	public String translateGuards(Module mod){
 		String res ="";
+		String startOfEqTrans ="";
 		Vector<CafeOperator> guards = mod.getEffectiveConditions();
 		
 		
@@ -264,13 +255,14 @@ public class JmlGenerator {
 			for(CafeEquation eq : guardEqs){
 				//System.out.println("!!!!!" + guard.getName());
 				int rightSortPos = TermParser.getPositionOfSystemSort(eq.getRightTerm(), mod);
-				res += forallDecl(mod, "/*@ensures",eq,guard);
+				startOfEqTrans = forallDecl(mod, "/*@ensures",eq,guard);
+				res += startOfEqTrans +'\n';
 				if(!isObjectByOpName(eq.getLeftTerm().getOpName(), mod)){
-					res += "@ \\result == " + eq.getRightTerm().printTermSkipArg(rightSortPos, mod) +")"+ '\n';
+					res += "@ \\result == " + eq.getRightTerm().printTermSkipArg(rightSortPos, mod);
 				}else{
-					res += "@ \\result.equals(" + eq.getRightTerm().printTermSkipArg(rightSortPos, mod) +"))"+ '\n';
+					res += "@ \\result.equals(" + eq.getRightTerm().printTermSkipArg(rightSortPos, mod) ;
 				}
-				
+				res += (startOfEqTrans.equals("/*@ensures"))? '\n':")" +'\n';   //the extra parenth is added in case a (\forall is added to the satrt of the contract
 			}//end of looping through the equations that have at the lhs an observer
 			res += "@*/" + '\n' ;
 			
