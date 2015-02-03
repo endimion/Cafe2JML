@@ -42,18 +42,19 @@ public class JmlGenerator {
 			
 			Vector<CafeEquation> matchingEqs = mod.getMatchingLeftEqs(init.getName());
 		
-			//res += forallDecl;
+		//String  forString ="";
 			
-			for(CafeEquation eq :matchingEqs){
+			for(int i = 0 ; i < matchingEqs.size() ; i++){
+				CafeEquation eq = matchingEqs.get(i);
 				CafeTerm left = eq.getLeftTerm();
 				CafeTerm right = eq.getRightTerm();
 				
-				res +=  forallDecl(mod, "initially",eq,null);
-				res += "  @ "+ left.printTermSkipArg(0,mod) + " == " + right.termToString() + '\n';
+				res +=  forallDecl(mod, " initially",eq,null);
+				res += "  @ "+ left.printTermSkipArg(0,mod) + " == " + right.termToString();
+				res +=(i != matchingEqs.size()-1)? " &&" + '\n': ");"+'\n';
 				
-			}//end of looping through the matching equations
-			res +=  ") @*/"+ '\n' +"public "+init.getName() + "(){}"  + '\n' + '\n';
-		
+			}//end of looping through the equations except form the last one
+			res += " @*/"+ '\n' + '\n' + '\n' +"public "+init.getName() + "(){}"  + '\n' + '\n';
 		}//end of looping through the inital states of the module
 
 		return res;
@@ -108,7 +109,7 @@ public class JmlGenerator {
 			
 			res +="/*@ ensures " + '\n'; 
 			for(int i =0; i< transEq.size();i++){
-				forallStart =forallDecl(mod,"@",transEq.get(i),bop) ;
+				forallStart =forallDecl(mod,"",transEq.get(i),bop) ;
 				res +=  forallStart;
 				
 				CafeTerm left = transEq.get(i).getLeftTerm();
@@ -120,7 +121,7 @@ public class JmlGenerator {
 				
 				if(cond!= null){
 					int condPos = TermParser.getPositionOfSystemSort(cond,mod);
-					res += "@ (" + cond.printTermSkipArg(condPos,mod)+ " ==> "+ '\n';
+					res += "@ (" + cond.printTermSkipArg(condPos,mod).replace("c-","c") + " ==> "+ '\n';
 					
 				}
 				
@@ -141,15 +142,11 @@ public class JmlGenerator {
 				
 				if(isObject){res += ")";}
 				
-				/*if(i != transEq.size()-1){
-					res += ") &&" +'\n';
+				if(i == transEq.size() -1){
+					res += (forallStart.contains("forall"))? "));" +'\n':")"+'\n';
 				}else{
-					res += ");" +'\n';
-				}*/
-				//right.termToString() + '\n';
-				
-				//System.out.println( left.printTermSkipArg(pos) + "==" + right.termToString() );
-			res += (forallStart.contains("forall"))? "));" +'\n':")"+'\n';
+					res += (forallStart.contains("forall"))? ")) &&" +'\n':") &&"+'\n';
+				}
 			}//end of looping through the transition equations
 			res +="@*/" + '\n';
 			
