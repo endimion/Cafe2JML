@@ -3,8 +3,19 @@ package model;
 import java.util.Vector;
 
 
-//TODO ADD question marks on the end of the (\forall ...); and the && 
-// i.e. add ; after the translation of each set of equations!!!
+//TODO 
+/* 0) projection operators are simply translated to pure methods
+ * 
+ * 1) Hidden constants are translated to 
+ * public static final S objects!!!! of the class that is 
+ * the sort of the projection op
+ * 
+ * 2.1)composite object initial states, projected to composing object constants
+ * 2.2) composite object initial states, projected to composing object initial states
+ *
+ *3)transitions:
+ */
+
 
 
 public class JmlGenerator {
@@ -49,7 +60,7 @@ public class JmlGenerator {
 				CafeTerm left = eq.getLeftTerm();
 				CafeTerm right = eq.getRightTerm();
 				
-				res +=  forallDecl(mod, " initially",eq,null);
+				res +=  forallDecl(mod, "/*@ initially",eq,null);
 				res += "  @ "+ left.printTermSkipArg(0,mod) + " == " + right.termToString();
 				res +=(i != matchingEqs.size()-1)? " &&" + '\n': ");"+'\n';
 				
@@ -91,25 +102,38 @@ public class JmlGenerator {
 	
 	
 	/**
-	 * //TODO The composite OTS rules!!!!
-	 * @param mod
+	 * @param mod the module which contains the parsing of the CafeOBJ file
+	 * @para jmod an JmlModule object that will store info about the translation
 	 * @return a String containing the translation of the transition
 	 * operations of the given module
 	 */
-	public String translateTransition(Module mod){
+	public String translateTransition(Module mod, JmlModule jmod){
 		Vector<CafeOperator> actions = mod.getActions(); 
 		Vector<CafeEquation> transEq; // = mod.getMatchingLeftEqs("");
 		
 		String res ="";
 		String forallStart="";
+		
+		String rightHS ="";
+		
 		boolean isObject;
+		
+		TransObserValues valOfObser ; 
 		
 		for(CafeOperator bop : actions){
 			transEq = mod.getMatchingLeftEqs(bop.getName());
 			
+			//first we set the transition to be the current transition
+			valOfObser = new TransObserValues();
+			
+			//if(transEq.size() > 0){
+			//	CafeTerm left = transEq.get(0).getLeftTerm();
+			//	valOfObser.setTransition(bop);
+			//}
+			
 			res +="/*@ ensures " + '\n'; 
 			for(int i =0; i< transEq.size();i++){
-				forallStart =forallDecl(mod,"",transEq.get(i),bop) ;
+				forallStart = (i == 0)?forallDecl(mod,"",transEq.get(i),bop):forallDecl(mod,"@ ",transEq.get(i),bop) ;
 				res +=  forallStart;
 				
 				CafeTerm left = transEq.get(i).getLeftTerm();
@@ -122,7 +146,6 @@ public class JmlGenerator {
 				if(cond!= null){
 					int condPos = TermParser.getPositionOfSystemSort(cond,mod);
 					res += "@ (" + cond.printTermSkipArg(condPos,mod).replace("c-","c") + " ==> "+ '\n';
-					
 				}
 				
 				res += "@ "+ left.printTermSkipArg(leftPos,mod) ;
@@ -135,12 +158,29 @@ public class JmlGenerator {
 				}
 				
 				if(StringHelper.numOf(right.printTermSkipArg(rightPos,mod), '(') > 0){
-						res += "\\old("+right.printTermSkipArg(rightPos,mod) +")" ;
+					rightHS = "\\old("+right.printTermSkipArg(rightPos,mod) +")" ;
 				}else{
-					res += right.printTermSkipArg(rightPos,mod)  ;		
+					rightHS= right.printTermSkipArg(rightPos,mod)  ;		
 				}
 				
-				if(isObject){res += ")";}
+				if(isObject){rightHS += ")";}
+				res += rightHS;
+				
+				//TODO
+				//now since the rightHS of the equation has been translated it can be stored
+				CafeTerm leftObs =  left;
+				CafeTerm trans = (CafeTerm)left.getArgs().get(leftPos); //we retrieve the sub term that denotes the transition rule
+				int sysPos = TermParser.getPositionOfSystemSort(trans, mod); //find the system sort in the transition term
+				trans.getArgs().remove(sysPos); //end remove it
+				
+				leftObs.getArgs().remove(leftPos); //we remove the system sorted argument
+				
+				valOfObser.setTransition(trans);
+				valOfObser.addObsValue(leftObs, rightHS);
+				//and we can save this information
+				
+				jmod.addTransObsVal(valOfObser);
+				
 				
 				if(i == transEq.size() -1){
 					res += (forallStart.contains("forall"))? "));" +'\n':")"+'\n';
@@ -157,13 +197,27 @@ public class JmlGenerator {
 				res += "public void " + bop.getName() +"("+ 
 						opArgsToString(bop, mod, modVarsToStringVect(mod)) +"){}" +'\n' +'\n';
 			}
-			
-			
-		
 		}//end of looping through the transitions 
 		
 		return res;
 	}//end of translateTransition
+	
+	
+	
+	/**
+	 * //TODO
+	 * @return
+	 */
+	public String getValueOfAfterTrans(){
+		
+		
+		
+		return null;
+	}
+	
+	
+	
+	
 	
 	
 	
@@ -403,18 +457,18 @@ public class JmlGenerator {
 
 
 	/**
-	 * 
+	 * @para jmod an object that store the results of the translation
 	 * @param mod
 	 * @return
 	 */
-	public String translateSimpleModule(Module mod){
+	public String translateSimpleModule(Module mod, JmlModule jmod){
 		String res ="";
 		
 		res = "public class "+ mod.getClassSort() +"{" + '\n'
 				+ translateHiddenConstants(mod)  + '\n' + 
 				translateInitStates(mod) + '\n' + translateObservers(mod) + '\n'
 				+ translateGuards(mod) + '\n'
-				+ translateTransition(mod) + '\n' + "}" + '\n'+ '\n';
+				+ translateTransition(mod, jmod) + '\n' + "}" + '\n'+ '\n';
 		return res;
 	}//end of translateModule
 	
