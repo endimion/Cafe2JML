@@ -62,6 +62,9 @@ public class CompTerm implements CafeTerm{
 			if(o instanceof BasicTerm){
 				print = print + " " + ((BasicTerm) o).termToString() + ",";
 			}else{
+				if(o instanceof String){
+					print = print + " " + (String) o + ",";
+				}else
 				print += print + ((CompTerm) o).termToString() + ",";
 			}
 		}//end of for loop
@@ -211,6 +214,21 @@ public class CompTerm implements CafeTerm{
 	}//end of printTermNoFirstArg
 	
 	
+	
+	@Override
+	public CafeTerm replaceArg(Object newArg, int pos) {
+	
+		CompTerm nt = new CompTerm();
+		nt.setOpName(getOpName());
+		for(Object s: getArgs()){nt.addArg(s);;}
+		
+		if(pos < getArgs().size()){
+			nt.getArgs().setElementAt(newArg, pos);
+			return nt;
+		}//end of replacing the argument
+		return null;
+	}//end of replaceArg
+
 	
 	
 }//end of OpExpression

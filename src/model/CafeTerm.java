@@ -29,5 +29,22 @@ public interface CafeTerm {
 	 */
 	public CafeTerm getSubTerm(String op);
 	
+	
+	
+	
+	//we need to write a method that will replace the appearance of a (CafeTerm) argument with another
+	// CafeTerm this is required for translating composite objects
+	
+	/**
+	 * 
+	 * @param newArg a new Argument that should be replaced in the existing term
+	 * @param pos the position of the argument that should be replaced
+	 * @return a new CafeTerm which in the position pos contains the new term
+	 */
+	public CafeTerm replaceArg(Object newArg, int pos);
+	
+	
+	
+	
 	//private String printBinaryOpTermSkipArg(int pos, Module mod);
 }

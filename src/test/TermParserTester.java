@@ -345,4 +345,8 @@ public class TermParserTester {
 	}//end of EqToTree test
 	
 	
+	
+	
+	
+	
 }//end of testerClass

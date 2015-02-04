@@ -369,5 +369,23 @@ public class FileHelperTester {
 	}//end of testGetVarsofTerm
 	
 	
+	@Test
+	public void testReplaceTerm(){
+		Module mod = new Module();
+		CafeEquation eq = new CafeEquation();
+		
+		fh.parseEq("ceq /inFinallic(request(R(x,y,z) , init) , L) = /inFinallic(S , L) if not c-request(S) .", mod, eq);
+		CafeTerm original = eq.getRightTerm();
+		Object newArg =  (eq.getLeftTerm().getArgs()).get(0);
+		
+		CafeTerm nt = original.replaceArg(newArg, 0);
+		System.out.println("DDDD " + ((CafeTerm) newArg).termToString() );
+		System.out.println("original "+eq.getRightTerm().termToString() + "BBB " +nt.termToString());
+		
+	}//end of testReplaceTerm
+	
+	
+	
+	
 	
 }//end of FileHelperTester

@@ -103,7 +103,7 @@ public class JmlGeneratorTester {
 					arguments += ((BasicTerm)arg).getOpName() + ", ";
 				}
 			 System.out.println("observer "	+ pair.getObs().getOpName() + 
-					 " with arguments "+ arguments +" and value " + pair.getValue());
+					 " with arguments "+ arguments +" and value " + pair.getValue().termToString());
 			}
 
 		}

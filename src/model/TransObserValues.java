@@ -31,14 +31,19 @@ public class TransObserValues {
 	public Vector<?> getTransitionArgs(){ return transition.getArgs();}
 	
 	
-	public void addObsValue(CafeTerm obs, String value){
+	public void addObsValue(CafeTerm obs, CafeTerm value){
 		observerValues.addElement(new ObsValPair(obs, value));
 	}
 	public Vector<ObsValPair> getObserversValues(){return observerValues;}
 	
 	
 	
-	
+	/**
+	 * we need to be able to replace the appearance of an argument in a CafeTerm with 
+	 * another argument cafeTerm??
+	 * 
+	 *
+	 */
 
 	
 	
@@ -46,14 +51,14 @@ public class TransObserValues {
 	
 	public class ObsValPair{
 		CafeTerm obs;
-		String val;
+		CafeTerm val;
 		
-		public ObsValPair(CafeTerm observer, String value){
+		public ObsValPair(CafeTerm observer, CafeTerm value){
 			this.obs = observer;
 			this.val = value;
 		}
 		public CafeTerm getObs(){return obs;}
-		public String getValue(){return val;}
+		public CafeTerm getValue(){return val;}
 	}//end of ObsValPair
 	
 	

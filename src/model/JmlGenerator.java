@@ -114,7 +114,7 @@ public class JmlGenerator {
 		String res ="";
 		String forallStart="";
 		
-		String rightHS ="";
+		CafeTerm rightHS ;
 		
 		boolean isObject;
 		
@@ -158,13 +158,13 @@ public class JmlGenerator {
 				}
 				
 				if(StringHelper.numOf(right.printTermSkipArg(rightPos,mod), '(') > 0){
-					rightHS = "\\old("+right.printTermSkipArg(rightPos,mod) +")" ;
+					res += "\\old("+right.printTermSkipArg(rightPos,mod) +")" ;
 				}else{
-					rightHS= right.printTermSkipArg(rightPos,mod)  ;		
+					res += right.printTermSkipArg(rightPos,mod)  ;		
 				}
 				
-				if(isObject){rightHS += ")";}
-				res += rightHS;
+				if(isObject){res += ")";}
+				//res += rightHS;
 				
 				//TODO
 				//now since the rightHS of the equation has been translated it can be stored
@@ -174,6 +174,12 @@ public class JmlGenerator {
 				trans.getArgs().remove(sysPos); //end remove it
 				
 				leftObs.getArgs().remove(leftPos); //we remove the system sorted argument
+				
+				rightHS = right;
+				sysPos = TermParser.getPositionOfSystemSort(right, mod);
+				if(sysPos >= 0){
+					rightHS.getArgs().remove(rightPos);
+				}
 				
 				valOfObser.setTransition(trans);
 				valOfObser.addObsValue(leftObs, rightHS);

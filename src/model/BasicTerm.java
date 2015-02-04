@@ -154,6 +154,37 @@ public class BasicTerm implements CafeTerm{
 		}
 		return false;
 	}//end of containsOp
+
+	
+	
+	
+	@Override
+	public CafeTerm replaceArg(Object newArg, int pos) {
+	
+		if(newArg instanceof String){
+			BasicTerm nt = new BasicTerm();
+			nt.setOpName(this.getOpName());
+			
+			//Vector<String> args = new Vector<String>();
+			for(String s: getArgs()){nt.addArg(s);;}
+			if(pos < getArgs().size()){
+				nt.getArgs().setElementAt((String) newArg, pos);
+			}//end of replacing the argument
+			return nt;
+		}else{
+			if(newArg instanceof CafeTerm){
+				CompTerm nt = new CompTerm();
+				nt.setOpName(getOpName());
+				for(String s: getArgs()){nt.addArg(s);;}
+				
+				if(pos < getArgs().size()){
+					nt.getArgs().setElementAt(newArg, pos);
+				}//end of replacing the argument
+				return nt;
+			}//end if the new argument is not a variable or constant
+		}
+		return null;
+	}//end of replaceArg
 	
 	
 	
