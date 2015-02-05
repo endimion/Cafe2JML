@@ -379,8 +379,9 @@ public class FileHelperTester {
 		Object newArg =  (eq.getLeftTerm().getArgs()).get(0);
 		
 		CafeTerm nt = original.replaceArg(newArg, 0);
-		System.out.println("DDDD " + ((CafeTerm) newArg).termToString() );
-		System.out.println("original "+eq.getRightTerm().termToString() + "BBB " +nt.termToString());
+		System.out.println("argument " + ((CafeTerm) newArg).termToString() );
+		System.out.println("original "+eq.getRightTerm().termToString() + "BBB " 
+		+nt.termToString() );
 		
 	}//end of testReplaceTerm
 	

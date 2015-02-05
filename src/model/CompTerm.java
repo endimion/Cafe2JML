@@ -59,13 +59,12 @@ public class CompTerm implements CafeTerm{
 		String print =  getOpName() + "(";
 		
 		for(Object o : getArgs()){
-			if(o instanceof BasicTerm){
-				print = print + " " + ((BasicTerm) o).termToString() + ",";
+			if(o instanceof CafeTerm){
+				print += " " + ((CafeTerm) o).termToString() + ",";
 			}else{
 				if(o instanceof String){
-					print = print + " " + (String) o + ",";
-				}else
-				print += print + ((CompTerm) o).termToString() + ",";
+					print += " " + (String) o + ",";
+				}
 			}
 		}//end of for loop
 		

@@ -166,20 +166,32 @@ public class BasicTerm implements CafeTerm{
 			nt.setOpName(this.getOpName());
 			
 			//Vector<String> args = new Vector<String>();
-			for(String s: getArgs()){nt.addArg(s);;}
-			if(pos < getArgs().size()){
-				nt.getArgs().setElementAt((String) newArg, pos);
-			}//end of replacing the argument
+			for(int i = 0; i < getArgs().size(); i++){
+				if(i != pos){
+					nt.getArgs().add(getArgs().get(i));
+				}else{
+					nt.getArgs().add((String)newArg);
+				}
+				
+			}//end of looping through the original arguments
+			
 			return nt;
 		}else{
 			if(newArg instanceof CafeTerm){
 				CompTerm nt = new CompTerm();
+			  //System.out.println("SSSS " + getOpName());	
 				nt.setOpName(getOpName());
-				for(String s: getArgs()){nt.addArg(s);;}
-				
-				if(pos < getArgs().size()){
-					nt.getArgs().setElementAt(newArg, pos);
-				}//end of replacing the argument
+				for(int i = 0; i < getArgs().size(); i++){
+					if(i != pos){
+						nt.getArgs().add(getArgs().get(i));
+						//System.out.println("KKKK " + getArgs().get(i));
+					}else{
+						nt.getArgs().add(newArg);
+						//System.out.println("DDDaaa " + ((CafeTerm) newArg).termToString());
+					}
+					
+				}//end of looping through the original arguments
+
 				return nt;
 			}//end if the new argument is not a variable or constant
 		}
