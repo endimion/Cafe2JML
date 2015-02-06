@@ -3,6 +3,7 @@ package test;
 import java.util.Vector;
 
 import model.BasicTerm;
+import model.CafeTerm;
 import model.FileHelper;
 import model.JmlGenerator;
 import model.JmlModule;
@@ -89,25 +90,46 @@ public class JmlGeneratorTester {
 		System.out.println(gen.translateSimpleModule(mod,jmod));
 		
 		
+		Vector<CafeTerm> chain = new Vector<CafeTerm>();
+		CafeTerm obs = null;
+		
 		for(TransObserValues v : jmod.getTransObsVals()){
 			String trans_args = "";
+			
+			chain.add(v.getTransition());
 			
 			for(Object t: v.getTransitionArgs()){
 				trans_args += t + ", ";
 			}//end of for loop
 			
-			System.out.println("for transition " + v.getTransitionName() + "with arguments " +trans_args );
+			
+			//System.out.println("for transition " + v.getTransitionName() + "with arguments " +trans_args );
 			for(ObsValPair pair: v.getObserversValues()){
 				String arguments ="";
 				for(Object arg : pair.getObs().getArgs()){
 					arguments += ((BasicTerm)arg).getOpName() + ", ";
 				}
-			 System.out.println("observer "	+ pair.getObs().getOpName() + 
-					 " with arguments "+ arguments +" and value " + pair.getValue().termToString());
+				//obs = pair.getValue();
+				obs = pair.getObs();
+			 //System.out.println("observer "	+ pair.getObs().getOpName() + 
+			//		 " with arguments "+ arguments +" and value " + pair.getValue().termToString());
+			
+				if(obs!= null)jmod.getObsValAfterTransCh(obs, chain);
 			}
 
 		}
-	}
+		
+		
+		//TODO write a test for getObsValAfterTransCh(CafeTerm obs, Vector<CafeTerm> trans)
+		//Vector<TransObserValues> vect = jmod.getTransObsVals();
+		
+		// jmod.getObsValAfterTransCh(obs, chain);
+		
+		//jmod.
+		
+		
+		
+	}//end of testTranslateGuards
 	
 	
 	

@@ -2,6 +2,8 @@ package model;
 
 import java.util.Vector;
 
+import model.TransObserValues.ObsValPair;
+
 /**
  * This class defines objects which correspond to operator expressions of CafeOBJ
  * For now we will assume that all arguments in such an expression are parenthesized properly
@@ -67,8 +69,7 @@ public class CompTerm implements CafeTerm{
 				}
 			}
 		}//end of for loop
-		
-		print = StringHelper.remLastChar(print);
+		if(print.endsWith(",")) print = StringHelper.remLastChar(print);
 		print += ")";
 		
 		return print;
@@ -228,6 +229,48 @@ public class CompTerm implements CafeTerm{
 		return null;
 	}//end of replaceArg
 
+	
+	/**
+	 * 
+	 * @param newValues a vector containing ObsValPair (pairs of CafeTerms, denoting name of operator and value for each such op)
+	 * @return a new CafeTerm obtained by replacing the appearance of each CafeTerm inside the original
+	 * with a the value of the matching term found in newValues
+	 */
+	public CafeTerm replaceAllMatching(Vector<ObsValPair> newValues){
+		
+		CompTerm returnTerm = new CompTerm();
+		returnTerm.setOpName(getOpName());
+		
+		boolean added ;
+		for(int i = 0; i <getArgs().size(); i++){
+			added = false;
+			for(ObsValPair nTerm : newValues){
+				if(getArgs().get(i) instanceof CafeTerm){
+					if(((CafeTerm)getArgs().get(i)).getOpName()
+							.equals(nTerm.getObs().getOpName())){
+						returnTerm.getArgs().add(nTerm.getValue());
+						added = true;
+					}//end if the name of the operator in the argument is the same as the one we are looking for
+				}else{
+					returnTerm.getArgs().add(getArgs().get(i));
+					added = true;
+				}//end if the argument is not a CafeTerm
+			}//end of looping through the input observer values pairs
+			
+			if(!added){
+				returnTerm.getArgs().add(getArgs().get(i));
+			}
+		}//end of looping through the arguments of the compTerm
+		
+		return returnTerm;
+	}//end of replaceAllMatching
+	
+	
+	
+	
+	
+	
+	
 	
 	
 }//end of OpExpression

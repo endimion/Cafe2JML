@@ -176,17 +176,16 @@ public class JmlGenerator {
 				leftObs.getArgs().remove(leftPos); //we remove the system sorted argument
 				
 				rightHS = right;
-				sysPos = TermParser.getPositionOfSystemSort(right, mod);
+				sysPos = TermParser.getPositionOfSystemSort(right, mod);//find the system sort in the rhs
 				if(sysPos >= 0){
-					rightHS.getArgs().remove(rightPos);
+					rightHS.getArgs().remove(rightPos); //end if it exists remove it
 				}
 				
-				valOfObser.setTransition(trans);
-				valOfObser.addObsValue(leftObs, rightHS);
+				valOfObser.setTransition(trans); //save the CafeTerm denoting the transition
+				valOfObser.addObsValue(leftObs, rightHS); //save the CafeTerm denoting the observer and the term denoting its value
 				//and we can save this information
 				
-				jmod.addTransObsVal(valOfObser);
-				
+				jmod.addTransObsVal(valOfObser); //add the <transition, (observer, value)> pair to the jmlmod
 				
 				if(i == transEq.size() -1){
 					res += (forallStart.contains("forall"))? "));" +'\n':")"+'\n';

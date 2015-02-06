@@ -27,7 +27,10 @@ public class TransObserValues {
 	}//end of consturctor
 	
 	public void setTransition(CafeTerm trans){this.transition = trans;}
+	public CafeTerm getTransition(){return transition;}
 	public String getTransitionName(){return this.transition.getOpName();}
+	
+	
 	public Vector<?> getTransitionArgs(){ return transition.getArgs();}
 	
 	
@@ -38,12 +41,7 @@ public class TransObserValues {
 	
 	
 	
-	/**
-	 * we need to be able to replace the appearance of an argument in a CafeTerm with 
-	 * another argument cafeTerm??
-	 * 
-	 *
-	 */
+	
 
 	
 	

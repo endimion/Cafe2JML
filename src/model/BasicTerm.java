@@ -2,6 +2,8 @@ package model;
 
 import java.util.Vector;
 
+import model.TransObserValues.ObsValPair;
+
 public class BasicTerm implements CafeTerm{
 	
 	String opName;
@@ -76,9 +78,11 @@ public class BasicTerm implements CafeTerm{
 			extra += " "+s +",";
 		}//end of looping through the term argumnets
 		
-		if(extra.length() > 0){
+		if(extra.endsWith(",")){
 			extra = StringHelper.remLastChar(extra); //we remove the last comma
 			print  += "(" + extra +")";
+		}else{
+			if(extra.length() >0)print  += "(" + extra +")";
 		}
 
 		return print;
@@ -200,6 +204,10 @@ public class BasicTerm implements CafeTerm{
 	
 	
 	
+	public CafeTerm replaceAllMatching(Vector<ObsValPair> newValues){
+		
+		return this;
+	}//end of replaceAllMatching
 	
 	
 	

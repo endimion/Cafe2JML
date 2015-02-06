@@ -2,6 +2,8 @@ package model;
 
 import java.util.Vector;
 
+import model.TransObserValues.ObsValPair;
+
 public interface CafeTerm {
 
 	
@@ -44,7 +46,7 @@ public interface CafeTerm {
 	public CafeTerm replaceArg(Object newArg, int pos);
 	
 	
-	
+	public CafeTerm replaceAllMatching(Vector<ObsValPair> newValues);
 	
 	//private String printBinaryOpTermSkipArg(int pos, Module mod);
 }
