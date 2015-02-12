@@ -2,16 +2,21 @@ package model;
 
 import java.util.Vector;
 
-import model.TransObserValues.ObsValPair;
 
 public class BasicTerm implements CafeTerm{
 	
 	String opName;
+	boolean isVarConst;
 	//Vector<BasicBlock> args = new Vector<BasicBlock>();
 	//Maybe it is better instead of a BasicBlock to have a vector of strings
 	Vector<String> args  = new Vector<String>();
 	
-	public BasicTerm(){}
+	public BasicTerm(boolean isVar){
+		isVarConst = isVar;
+	}
+	
+	public boolean isVar(){return isVarConst;}
+	public void setIsVar(boolean t){isVarConst = t;}
 	
 	public void setOpName(String name){this.opName = name;}
 	
@@ -32,7 +37,8 @@ public class BasicTerm implements CafeTerm{
 		}else{
 			for(String s: getArgs()){
 				if(s.equals(op)){
-					BasicTerm t = new BasicTerm();
+					//if the argument contains a parenthesis then it is not a constant or variable
+					BasicTerm t = (s.contains("("))?  new BasicTerm(false):new BasicTerm(true);
 					t.setOpName(op);
 					return t;
 				}//end of if the name of the op is the same as that of the argument 
@@ -71,20 +77,26 @@ public class BasicTerm implements CafeTerm{
 	 */
 	@Override
 	public String termToString(){
-		String print = getOpName();
-		String extra="";
+		String print="";
 		
-		for(String s: getArgs()){
-			extra += " "+s +",";
-		}//end of looping through the term argumnets
-		
-		if(extra.endsWith(",")){
-			extra = StringHelper.remLastChar(extra); //we remove the last comma
-			print  += "(" + extra +")";
+		if(!TermParser.isBinary(getOpName())){
+			print = getOpName();
+			String extra="";
+			
+			for(String s: getArgs()){
+				extra += " "+s +",";
+			}//end of looping through the term argumnets
+			
+			if(extra.endsWith(","))	extra = StringHelper.remLastChar(extra); //we remove the last comma
+			if(!isVar()) print  += "(" + extra +")";
+			//print  += "(" + extra +")";
+			
 		}else{
-			if(extra.length() >0)print  += "(" + extra +")";
+			String leftTerm =  (String)getArgs().get(0);  
+			String rightTerm =  getArgs().get(1);
+			print = " (" + leftTerm + " "+ getOpName() + " " + rightTerm + ")";
 		}
-
+		
 		return print;
 	}//end of termToString
 	
@@ -166,7 +178,7 @@ public class BasicTerm implements CafeTerm{
 	public CafeTerm replaceArg(Object newArg, int pos) {
 	
 		if(newArg instanceof String){
-			BasicTerm nt = new BasicTerm();
+			BasicTerm nt = new BasicTerm(isVarConst);
 			nt.setOpName(this.getOpName());
 			
 			//Vector<String> args = new Vector<String>();
@@ -205,9 +217,11 @@ public class BasicTerm implements CafeTerm{
 	
 	
 	public CafeTerm replaceAllMatching(Vector<ObsValPair> newValues){
-		
+		System.out.println("Basic term" + getOpName());
 		return this;
 	}//end of replaceAllMatching
+	
+	
 	
 	
 	

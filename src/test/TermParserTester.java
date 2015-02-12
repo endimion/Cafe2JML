@@ -106,14 +106,14 @@ public class TermParserTester {
 
 	@Test
 	public void testParseBasicExpr(){
-		BasicTerm basic = new BasicTerm();
+		BasicTerm basic = new BasicTerm(false);
 		
 		TermParser.parseBasicExpr("belong5?(R , subL)", basic);
 		assertEquals("", basic.getOpName(), "belong5?");
 		assertEquals("",basic.getArgs().get(0),"R");
 		assertEquals("",basic.getArgs().get(1),"subL");
 		
-		basic = new BasicTerm();
+		basic = new BasicTerm(false);
 		
 		 TermParser.parseBasicExpr("find4(R ,  L)", basic);
 		assertEquals("", basic.getOpName(), "find4");

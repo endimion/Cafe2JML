@@ -436,7 +436,7 @@ public class TermParser {
 		OpNamePos mainOp = TermParser.getMainPos(term);
 		
 		if(TermParser.isBasicTerm(term)){
-			BasicTerm t = new BasicTerm();
+			BasicTerm t = (term.contains("("))? new BasicTerm(false):new BasicTerm(true);
 			TermParser.parseBasicExpr(term, t);
 			return t;
 		}else{ //end if it is a basic term
@@ -536,7 +536,7 @@ public class TermParser {
 		line = StringHelper.remEnclosingParenthesis(line);
 		
 		if(TermParser.isBasicTerm(line)){
-			BasicTerm t = new BasicTerm();
+			BasicTerm t = (line.contains("("))?new BasicTerm(false):new BasicTerm(true);
 			TermParser.parseBasicExpr(line, t);
 			//System.out.println("Basic term " + line);
 			return t;

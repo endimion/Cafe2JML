@@ -2,7 +2,6 @@ package model;
 
 import java.util.Vector;
 
-import model.TransObserValues.ObsValPair;
 
 public interface CafeTerm {
 

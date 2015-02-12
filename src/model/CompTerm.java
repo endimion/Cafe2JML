@@ -2,7 +2,6 @@ package model;
 
 import java.util.Vector;
 
-import model.TransObserValues.ObsValPair;
 
 /**
  * This class defines objects which correspond to operator expressions of CafeOBJ
@@ -58,20 +57,28 @@ public class CompTerm implements CafeTerm{
 	 */
 	@Override
 	public String termToString(){
-		String print =  getOpName() + "(";
+		String print ;  
 		
-		for(Object o : getArgs()){
-			if(o instanceof CafeTerm){
-				print += " " + ((CafeTerm) o).termToString() + ",";
-			}else{
-				if(o instanceof String){
-					print += " " + (String) o + ",";
+		
+		if(!TermParser.isBinary(getOpName()))
+		{
+			print = getOpName() + "(";
+			for(Object o : getArgs()){
+				if(o instanceof CafeTerm){
+					print += " " + ((CafeTerm) o).termToString() + ",";
+				}else{
+					if(o instanceof String){
+						print += " " + (String) o + ",";
+					}
 				}
-			}
-		}//end of for loop
-		if(print.endsWith(",")) print = StringHelper.remLastChar(print);
-		print += ")";
-		
+			}//end of for loop
+			if(print.endsWith(",")) print = StringHelper.remLastChar(print);
+			print += ")";
+		}else{
+			String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(): (String)getArgs().get(0);  
+			String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(): (String) getArgs().get(1);
+			print = "(" + leftTerm + " "+ getOpName() + " " + rightTerm + ")";
+		}
 		return print;
 		
 	}//end of printTerm
@@ -114,7 +121,9 @@ public class CompTerm implements CafeTerm{
 			for(Object arg:getArgs()){
 				if(arg instanceof String){
 					if(arg.equals(op)){
-						BasicTerm t = new BasicTerm();
+						//if teh argument contains a parenthesis then it is not a const or variable
+						BasicTerm t = (((String) arg).contains("("))?
+								new BasicTerm(false): new BasicTerm(true);
 						t.setOpName(op);
 						return t;
 					};
@@ -244,6 +253,7 @@ public class CompTerm implements CafeTerm{
 		boolean added ;
 		for(int i = 0; i <getArgs().size(); i++){
 			added = false;
+			
 			for(ObsValPair nTerm : newValues){
 				if(getArgs().get(i) instanceof CafeTerm){
 					if(((CafeTerm)getArgs().get(i)).getOpName()

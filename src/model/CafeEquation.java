@@ -76,7 +76,7 @@ public class CafeEquation {
 			for(Object arg : args){
 				if(arg instanceof String){
 					if(arg.equals(opName)){
-						BasicTerm b = new BasicTerm();
+						BasicTerm b = (((String) arg).contains("("))? new BasicTerm(false): new BasicTerm(true);
 						b.setOpName(opName);
 						return b;
 					}
@@ -132,7 +132,7 @@ public class CafeEquation {
 		}else{
 			for(Object o : lhs.getArgs()){
 				if(o instanceof String){
-					BasicTerm t = new BasicTerm();
+					BasicTerm t = (((String) o).contains("("))?new BasicTerm(false):new BasicTerm(true);
 					t.setOpName((String)o);
 				}//end of if the argument is a string
 				else{

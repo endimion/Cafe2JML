@@ -2,7 +2,7 @@ package model;
 
 import java.util.Vector;
 
-import model.TransObserValues.ObsValPair;
+
 
 /**
  * store the content after translating a CafeOBJ module to a JML module
@@ -37,6 +37,23 @@ public class JmlModule {
 	}//end of getTransObsVals
 	
 	
+	/**
+	 * 
+	 * @return a Vector<CafeTerm> containing all the observers of the module
+	 */
+	public Vector<CafeTerm> getModuleObservers(){
+		Vector<CafeTerm> obser = new Vector<CafeTerm>();
+		Vector<ObsValPair> pairs = getTransObsVals().get(0).getObserversValues();
+		
+		for(ObsValPair ov : pairs){
+			obser.add(ov.getObs());
+		}
+		return obser;
+	}//end of getModuleObservers
+	
+	
+	
+	
 	
 	
 	/**
@@ -46,10 +63,9 @@ public class JmlModule {
 	 * @return
 	 */
 	public Vector<ObsValPair> getObsValues(CafeTerm trans){
-		
 		for(TransObserValues v : getTransObsVals()){
 			if(v.getTransitionName().equals(trans.getOpName())){
-				//System.out.println("AAAAADDDBBBB " + v.getObserversValues().size());
+				//System.out.println("THE TRANSITION WAS:"+ trans.getOpName());
 				return v.getObserversValues();
 			}
 		}
@@ -76,69 +92,48 @@ public class JmlModule {
 	
 	
 	
-	/*
-	public Vector<CafeTerm> getObsTerms(CafeTerm trans){
-		 Vector<CafeTerm> result = new Vector<CafeTerm>();
-		 
-		for(TransObserValues v : getTransObsVals()){
-			if(v.getTransitionName().equals(trans.getOpName())){
-				for(ObsValPair pair : v.getObserversValues()){
-					result.add(pair.getValue());
-				}
-			}
-		}
-		return result;
-	}//end of getObsValues
-	*/
-	
 	
 	
 	/**
 	 * this methods takes as input a Vector<CafeTerms> denoting a sequence of
-	 * transitions and an observer and returns the value of that observer
-	 * after the execution of the chain of transitions
+	 * transitions and returns a Vector<ObsValPair> denoting the values of all the
+	 * observers of the module after the execution of all the transitions
+	 * @param chain a Vector<CafeTerms> denoting an execution chain of transitions
 	 */
-	public void getObsValAfterTransCh(CafeTerm obs, Vector<CafeTerm> trans){
-		
-		CafeTerm currentTrans;
-		//System.out.println("sizeeeee " + trans.size());
-		//CafeTerm updatedVal = null;
-		
-		
-		// 1) first we get the values of all the observers after the execution of the 
-		//  	last transition of the chain!!! and store that in a vector say, oldObsVals
-		
-		//TODO add a check if the vector of transitions is greater than zero
-		Vector<ObsValPair> oldObsVals = getObsValues(trans.get(trans.size()-1)); 
-		
-		
-		for(int i=trans.size()-2; i >=0; i--){
-			currentTrans = trans.get(i);
-			System.out.println("transition is ::: " + trans.get(i).termToString());
-			//System.out.println("the observer is ::: " + obs.termToString());
-			
-			//TODO
-			//2)  for each next transition in the chain we calculate the values of all
-			// 		the observers by replacing the each appearance of an observer call
-			// 		with its value stored in oldObsVals THIS WILL BE A CAFETERM METHOD
-			//  	and store that info in oldObsVals
-			if(obs instanceof CompTerm){
-				System.out.println("OBSERVER Is ::: " + obs.termToString());
-				System.out.println("OLD VALUE IS ::: " + getValOfObs(obs, oldObsVals).termToString());
-				
-				CafeTerm newObsVal = ((CafeTerm)getValOfObs(obs, oldObsVals)).replaceAllMatching(oldObsVals);
+	public Vector<ObsValPair>  getObsValAfterTransCh(Vector<CafeTerm> chain){
 
-				System.out.println("NEW IS ::: " + newObsVal.termToString());
-			}//end if obs is a compTerm
-			
-			 
-			
-			
-			CafeTerm val = getValOfObs(obs, getObsValues(currentTrans));
-			//System.out.println("the value of the given observer : " + obs.termToString() + " is " +val.termToString());
-			
-		}//end of for loop
+		CafeTerm currentTrans;
+		Vector<ObsValPair> origObsValP ; 
+		Vector<ObsValPair> replacePairs;
+		Vector<ObsValPair> newPairs;
+		ObsValPair newP;
+
+		replacePairs = getObsValues(chain.get(chain.size()-1));
 		
+		
+		for(int i=chain.size()-2; i >=0; i--){
+			currentTrans = chain.get(i);
+			origObsValP = getObsValues(currentTrans);
+			
+			System.out.println("TRANSITION IS "+  i +" ::: " + currentTrans.termToString());
+			newPairs = new Vector<ObsValPair>();
+			
+			for(CafeTerm obsrv : getModuleObservers()){
+				CafeTerm newObsVal = 
+						((CafeTerm)getValOfObs(obsrv, replacePairs)).replaceAllMatching(origObsValP);
+				newP = new ObsValPair(obsrv, newObsVal);
+				newPairs.add(newP);
+				
+				System.out.println("OBSERVER Is ::: " + obsrv.termToString());
+				System.out.println("PREVIOUS VALUE IS ::: " + getValOfObs(obsrv, replacePairs).termToString());
+				System.out.println("ORIGINAL VALUE IS ::: " + getValOfObs(obsrv, origObsValP).termToString());
+				System.out.println("NEW IS ::: " + newObsVal.termToString());
+			}//end of looping through the observers of the module
+			
+			replacePairs = newPairs;
+		}//end of for loop through the chains
+		
+		return replacePairs;
 	}//end of retrieveValAfterTrans
 	
 	

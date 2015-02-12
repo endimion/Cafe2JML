@@ -103,7 +103,7 @@ public class JmlGenerator {
 	
 	/**
 	 * @param mod the module which contains the parsing of the CafeOBJ file
-	 * @para jmod an JmlModule object that will store info about the translation
+	 * @param jmod an JmlModule object that will store info about the translation
 	 * @return a String containing the translation of the transition
 	 * operations of the given module
 	 */
@@ -125,11 +125,6 @@ public class JmlGenerator {
 			
 			//first we set the transition to be the current transition
 			valOfObser = new TransObserValues();
-			
-			//if(transEq.size() > 0){
-			//	CafeTerm left = transEq.get(0).getLeftTerm();
-			//	valOfObser.setTransition(bop);
-			//}
 			
 			res +="/*@ ensures " + '\n'; 
 			for(int i =0; i< transEq.size();i++){
@@ -187,6 +182,9 @@ public class JmlGenerator {
 				
 				jmod.addTransObsVal(valOfObser); //add the <transition, (observer, value)> pair to the jmlmod
 				
+				
+				
+				
 				if(i == transEq.size() -1){
 					res += (forallStart.contains("forall"))? "));" +'\n':")"+'\n';
 				}else{
@@ -209,16 +207,7 @@ public class JmlGenerator {
 	
 	
 	
-	/**
-	 * //TODO
-	 * @return
-	 */
-	public String getValueOfAfterTrans(){
-		
-		
-		
-		return null;
-	}
+	
 	
 	
 	
