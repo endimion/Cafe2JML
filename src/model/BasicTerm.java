@@ -217,12 +217,61 @@ public class BasicTerm implements CafeTerm{
 	
 	
 	public CafeTerm replaceAllMatching(Vector<ObsValPair> newValues){
-		System.out.println("Basic term" + getOpName());
 		return this;
 	}//end of replaceAllMatching
 	
 	
+	/**
+	 * returns true whether or not the given terms are equal
+	 */
+	public boolean isEqual(CafeTerm t){
+		if(!(t instanceof BasicTerm || !t.getOpName().equals(getOpName()))){
+			return false;
+		}else{
+			Vector<String> foreignArgs = ((BasicTerm)t).getArgs();
+			int max = (foreignArgs.size() >= getArgs().size())?getArgs().size():foreignArgs.size();
+			for(int i =0; i < max; i++){
+				if( !foreignArgs.get(i).equals(getArgs().get(i))) return false;
+			}//end of looping through the arguments
+		
+			return true;
+		}//end of if the names match and the given term is a BasicTerm
+		
+	}//end of equals
 	
+	
+	
+	
+	@Override
+	public CafeTerm replaceTerm(Object orig , Object repl){
+		
+		//System.out.println("should replace " + orig + " with " + repl + " in "+ getOpName());
+		
+		boolean v = ( !((String)repl).contains("(") && !isVar())? true:false;
+		BasicTerm returnTerm = new BasicTerm(v);
+		
+		if(getArgs().size()>0) {
+			returnTerm.setOpName(getOpName());
+		}else{
+			if(repl instanceof CafeTerm){
+				return (CafeTerm)repl;
+			}else{
+				returnTerm.setOpName((String)repl);
+				return returnTerm;
+			}
+		}//end if the current term has no arguments
+		
+		
+		for(String arg: getArgs()){
+			//System.out.println("should replace " + orig + " with " + repl + " and found " +arg);
+			if(!arg.equals(orig)){
+				returnTerm.addArg(arg);
+			}else{
+				returnTerm.addArg(repl);
+			}
+		}
+		return returnTerm;
+	}//end of replaceTerm
 	
 	
 }//end of BasicOpExpr

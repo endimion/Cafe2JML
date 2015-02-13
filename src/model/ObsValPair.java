@@ -12,5 +12,8 @@ public class ObsValPair{
 	public CafeTerm getObs(){return obs;}
 	public CafeTerm getValue(){return val;}
 
+	
+	
+	
 
 }//end of ObsValPair

@@ -3,7 +3,7 @@ package test;
 import java.util.Vector;
 
 import model.BasicTerm;
-
+import model.CafeTerm;
 import model.FileHelper;
 import model.JmlGenerator;
 import model.JmlModule;
@@ -52,7 +52,37 @@ public class JmlModuleTester {
 		
 	}//end of testGetValofObs
 	
-	
+	@Test
+	public void testGetObsValAfterTransCh(){
+		Vector<CafeTerm> chain = new Vector<CafeTerm>();
+		
+		chain.add(jmod.getTransObsVals().get(0).getTransition());
+		chain.add(jmod.getTransObsVals().get(2).getTransition());
+		chain.add(jmod.getTransObsVals().get(2).getTransition());
+		chain.add(jmod.getTransObsVals().get(0).getTransition());
+		jmod.getObsValAfterTransCh(chain);
+		
+		
+		BasicTerm t1 = new BasicTerm(false);
+		t1.setOpName("setElementAt");
+		//t1.addArg("A");
+		t1.addArg("I");
+		t1.addArg("V");
+		
+		BasicTerm t2 = new BasicTerm(false);
+		t2.setOpName("setElementAt");
+		//t2.addArg("A");
+		t2.addArg("J");
+		t2.addArg("Q");
+		
+		chain.removeAllElements();
+		chain.add(t2);
+		chain.add(t1);
+		
+		jmod.getObsValAfterTransCh(chain);
+		
+		
+	}//end of testGetObsValAfterTransCh
 	
 	
 	

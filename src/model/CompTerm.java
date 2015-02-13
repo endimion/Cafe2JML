@@ -142,10 +142,7 @@ public class CompTerm implements CafeTerm{
 	
 	
 	
-
 	
-	
-	//TODO fix the number of parenthesis!!!!
 		
 	/**
 	 * @param pos an integer denoting the position of the system sort
@@ -279,7 +276,103 @@ public class CompTerm implements CafeTerm{
 	
 	
 	
+	/**
+	 * returns true whether or not the given terms are equal
+	 */
+	public boolean isEqual(CafeTerm t){
+		if(!(t instanceof CompTerm || !t.getOpName().equals(getOpName()))){
+			return false;
+		}else{
+			Vector<Object> foreignArgs = ((CompTerm)t).getArgs();
+			
+			int max = (foreignArgs.size() >= getArgs().size())?getArgs().size():foreignArgs.size();
+			for(int i =0; i < max; i++){
+				if(foreignArgs.get(i) instanceof CafeTerm){
+					if(getArgs().get(i) instanceof CafeTerm){
+						if( ! ((CafeTerm)foreignArgs.get(i)).isEqual((CafeTerm)getArgs().get(i))) return false;
+					}else{
+						if( ((CafeTerm)foreignArgs.get(i)).getArgs().size() > 0){
+							return false;
+						}else{
+							if( ((CafeTerm)foreignArgs.get(i)).getOpName().equals(getArgs().get(i))){
+								return false;
+							}
+						}
+					}
+					
+				}else{
+					if(foreignArgs.get(i) instanceof String){
+						if( !foreignArgs.get(i).equals(getArgs().get(i))) return false;
+					}
+				}//end if foreignArgs.get(i) isnot a cafeTErm
+			}//end of looping through the arguments
+		
+			return true;
+		}//end of if the names match and the given term is a BasicTerm
+		
+	}//end of equals
 	
+	
+
+	
+	//TODO 
+	// there is an error replacing arguments in the term if they do not already exist
+	
+	
+	@Override
+	public CafeTerm replaceTerm(Object orig , Object repl){
+		
+		//System.out.println("should replace " + orig + " with " + repl + " in Compt "+ termToString());
+		
+		CompTerm returnTerm = new CompTerm();
+		returnTerm.setOpName(getOpName());
+		
+		if(orig instanceof String){
+			//System.out.println("STRRRRRINNNNG orig " + orig );
+		}else{
+			//System.out.println("CAFFEEE orig " + ((CafeTerm)orig).termToString() );
+		}
+		
+		int pos = -1;
+		for(int i=0; i < getArgs().size(); i++){
+			Object arg = getArgs().get(i);
+			
+			if(arg instanceof CafeTerm){
+				//System.out.println("Cafe!!!!!!! " + ((CafeTerm)arg).termToString());
+				
+				if(orig instanceof CafeTerm &&((CafeTerm)arg).isEqual((CafeTerm)orig)){
+					pos = i;
+				//	System.out.println("OISS" + pos);
+				}else{
+					if(orig instanceof String && ((CafeTerm) arg).getArgs().size() == 0){
+						if(orig.equals(((CafeTerm) arg).getOpName())){
+							pos = i;
+							//System.out.println("555555555" + pos);
+						}
+					}
+				}
+				
+				
+			}else{
+				if(arg instanceof String ){
+					//System.out.println("String!!!!!!! " + arg);
+					if( orig instanceof String &&  (((String) arg).trim()).equals(((String) orig).trim())){
+						pos = i;
+						//System.out.println("IIIOISS" + pos);
+					}
+				}
+			}
+			
+		}//end of looping through the arguments of the term
+		
+		if(pos >= 0){
+			return replaceArg(repl, pos);
+		}else{
+			return this;
+		}
+		
+		
+	}//end of replaceTerm
 	
 	
 	

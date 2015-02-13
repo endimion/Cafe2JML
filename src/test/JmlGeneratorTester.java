@@ -1,9 +1,6 @@
 package test;
 
 import java.util.Vector;
-
-
-import model.CafeTerm;
 import model.FileHelper;
 import model.JmlGenerator;
 import model.JmlModule;
@@ -87,27 +84,6 @@ public class JmlGeneratorTester {
 		//System.out.println(gen.translateGuards(mod));
 		//System.out.println(gen.translateTransition(mod) );
 		System.out.println(gen.translateSimpleModule(mod,jmod));
-		
-		
-		Vector<CafeTerm> chain = new Vector<CafeTerm>();
-		
-		
-		//for(TransObserValues v : jmod.getTransObsVals()){
-		//	chain.add(v.getTransition());
-		//	System.out.println("added to chains" + v.getTransition().getOpName());
-		//}
-		
-		chain.add(jmod.getTransObsVals().get(0).getTransition());
-		System.out.println("added to chains " + jmod.getTransObsVals().get(0).getTransition().getOpName());
-		chain.add(jmod.getTransObsVals().get(2).getTransition());
-		System.out.println("added to chains " + jmod.getTransObsVals().get(2).getTransition().getOpName());
-		chain.add(jmod.getTransObsVals().get(2).getTransition());
-		System.out.println("added to chains " + jmod.getTransObsVals().get(2).getTransition().getOpName());
-		chain.add(jmod.getTransObsVals().get(0).getTransition());
-		System.out.println("added to chains " + jmod.getTransObsVals().get(0).getTransition().getOpName());
-		//System.out.println("added to chains" + jmod.getTransObsVals().get(0).getTransition().getOpName());
-		jmod.getObsValAfterTransCh(chain);
-		
 		
 	}//end of testTranslateSimpleModule
 	

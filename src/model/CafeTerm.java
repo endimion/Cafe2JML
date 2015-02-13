@@ -48,4 +48,20 @@ public interface CafeTerm {
 	public CafeTerm replaceAllMatching(Vector<ObsValPair> newValues);
 	
 	//private String printBinaryOpTermSkipArg(int pos, Module mod);
+	/**
+	 * 
+	 * @param t another CafeTerm
+	 * @return true if the two CafeTerms have the same op name and the same arguments
+	 */
+	public boolean isEqual(CafeTerm t);
+	
+	/**
+	 * 
+	 * @param orig the object that will be replaced
+	 * @param repl the object we are replacing it with
+	 * @return the CafeTerm obtained by replacing each appearence of the orig object in the arguments
+	 * of the term with the repl
+	 */
+	public CafeTerm replaceTerm(Object orig , Object repl);
+	
 }

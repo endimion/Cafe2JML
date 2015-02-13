@@ -831,7 +831,7 @@ eq c-setElementAt(A,I,V) = (I >= 0) and (I < getSize(A)) and (V >= 0) and
 
 ceq getSize(setElementAt(A,I,V)) = getSize(A) if c-setElementAt(A,I,V) .
 
-ceq getElementAt(setElementAt(A,I,V),J) = V if c-setElementAt(A,I,V) and (I = J) . 
+ceq getElementAt(setElementAt(A,I,V),I) = V if c-setElementAt(A,I,V) and (I = J) . 
 
 bceq setElementAt(A,I,V) = A if not c-setElementAt(A,I,V) .
 
