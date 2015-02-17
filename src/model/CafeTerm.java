@@ -12,7 +12,7 @@ public interface CafeTerm {
 	
 	public void addArg(Object arg);
 	
-	public String termToString();
+	public String termToString(Module mod);
 	
 	public boolean containsOp(String op);
 	
@@ -57,11 +57,11 @@ public interface CafeTerm {
 	
 	/**
 	 * 
-	 * @param orig the object that will be replaced
-	 * @param repl the object we are replacing it with
-	 * @return the CafeTerm obtained by replacing each appearence of the orig object in the arguments
-	 * of the term with the repl
+	 * @param orig the vector of objects that will be replaced
+	 * @param repl the vector of object we are replacing them with
+	 * @return the CafeTerm obtained by replacing each appearence of the orig.get(i) object in the arguments
+	 * of the term with the repl.get(i)
 	 */
-	public CafeTerm replaceTerm(Object orig , Object repl);
+	public CafeTerm replaceTerms(Vector<Object> orig , Vector<Object> repl);
 	
 }

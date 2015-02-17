@@ -388,6 +388,13 @@ public class Module {
 	
 	
 	
-	
+	public boolean isOperator(String opName){
+		for(CafeOperator op: getOps()){
+			if(op.getName().equals(opName)){
+				return true;
+			}
+		}
+		return false;
+	}//end of isOperator
 	
 }//end of class

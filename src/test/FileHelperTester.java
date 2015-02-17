@@ -281,7 +281,7 @@ public class FileHelperTester {
 		//assertEquals("",eq.getCondition().getOpName(),"belong3?");
 		
 		if(ct instanceof CompTerm){
-			System.out.println(((CompTerm) ct).termToString());
+			System.out.println(((CompTerm) ct).termToString(mod));
 		}
 		
 		fh.parseEq("eq (L = L) = true",mod,eq);
@@ -379,9 +379,9 @@ public class FileHelperTester {
 		Object newArg =  (eq.getLeftTerm().getArgs()).get(0);
 		
 		CafeTerm nt = original.replaceArg(newArg, 0);
-		System.out.println("argument " + ((CafeTerm) newArg).termToString() );
-		System.out.println("original "+eq.getRightTerm().termToString() + "BBB " 
-		+nt.termToString() );
+		System.out.println("argument " + ((CafeTerm) newArg).termToString(mod) );
+		System.out.println("original "+eq.getRightTerm().termToString(mod) + "BBB " 
+		+nt.termToString(mod) );
 		
 	}//end of testReplaceTerm
 	

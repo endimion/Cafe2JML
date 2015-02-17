@@ -61,7 +61,7 @@ public class JmlGenerator {
 				CafeTerm right = eq.getRightTerm();
 				
 				res +=  forallDecl(mod, "/*@ initially",eq,null);
-				res += "  @ "+ left.printTermSkipArg(0,mod) + " == " + right.termToString();
+				res += "  @ "+ left.printTermSkipArg(0,mod) + " == " + right.termToString(mod);
 				res +=(i != matchingEqs.size()-1)? " &&" + '\n': ");"+'\n';
 				
 			}//end of looping through the equations except form the last one

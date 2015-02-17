@@ -76,7 +76,7 @@ public class BasicTerm implements CafeTerm{
 	 * @return a string representation of the term
 	 */
 	@Override
-	public String termToString(){
+	public String termToString(Module mod){
 		String print="";
 		
 		if(!TermParser.isBinary(getOpName())){
@@ -88,7 +88,7 @@ public class BasicTerm implements CafeTerm{
 			}//end of looping through the term argumnets
 			
 			if(extra.endsWith(","))	extra = StringHelper.remLastChar(extra); //we remove the last comma
-			if(!isVar()) print  += "(" + extra +")";
+			if(mod.isOperator(getOpName())) print  += "(" + extra +")";
 			//print  += "(" + extra +")";
 			
 		}else{
@@ -225,51 +225,65 @@ public class BasicTerm implements CafeTerm{
 	 * returns true whether or not the given terms are equal
 	 */
 	public boolean isEqual(CafeTerm t){
-		if(!(t instanceof BasicTerm || !t.getOpName().equals(getOpName()))){
+		if(!t.getOpName().equals(getOpName())){
 			return false;
 		}else{
-			Vector<String> foreignArgs = ((BasicTerm)t).getArgs();
-			int max = (foreignArgs.size() >= getArgs().size())?getArgs().size():foreignArgs.size();
-			for(int i =0; i < max; i++){
-				if( !foreignArgs.get(i).equals(getArgs().get(i))) return false;
-			}//end of looping through the arguments
-		
+			int i = 0;
+			for(String arg: getArgs()){
+				if(!arg.equals(t.getArgs().get(i))){
+					return false;
+				}
+				i ++;
+			}//end of looping through the arguments of the term
+			
 			return true;
-		}//end of if the names match and the given term is a BasicTerm
-		
-	}//end of equals
+		}
+	}//end of isEquals
 	
 	
+	
+
 	
 	
 	@Override
-	public CafeTerm replaceTerm(Object orig , Object repl){
+	public CafeTerm replaceTerms(Vector<Object> origV , Vector<Object> replV){
 		
-		//System.out.println("should replace " + orig + " with " + repl + " in "+ getOpName());
+		//boolean v = ( !((String)repl).contains("(") && !isVar())? true:false;
+		BasicTerm returnTerm = new BasicTerm(true);
+
+		//System.out.println("REPLACING INSIDE " + getOpName());
 		
-		boolean v = ( !((String)repl).contains("(") && !isVar())? true:false;
-		BasicTerm returnTerm = new BasicTerm(v);
+		returnTerm.setOpName(getOpName());
+		int i = 0;
+		for(Object orig : origV){
+			if(getArgs().size() == 0) {
+				if(orig instanceof CafeTerm){
+					if( ((CafeTerm)orig).getOpName().equals(getOpName())){
+						return (CafeTerm)replV.get(i);
+					}
+				}else{
+					if( ((String)orig).equals(getOpName())){
+						returnTerm.setOpName((String)replV.get(i));
+						return returnTerm;
+					}
+				}
+			}//end if the current term has no arguments
+			i++;
+		}//end if looping through the origV elements
 		
-		if(getArgs().size()>0) {
-			returnTerm.setOpName(getOpName());
-		}else{
-			if(repl instanceof CafeTerm){
-				return (CafeTerm)repl;
-			}else{
-				returnTerm.setOpName((String)repl);
-				return returnTerm;
+		i = 0;
+		for(Object orig: origV){
+			for(String arg: getArgs()){
+				//System.out.println("should replace " + orig + " with " + repl + " and found " +arg);
+				if(!arg.equals(orig)){
+					returnTerm.addArg(arg);
+				}else{
+					returnTerm.addArg(replV.get(i));
+				}
 			}
-		}//end if the current term has no arguments
+			i++;
+		}//end of looping through the origV elements
 		
-		
-		for(String arg: getArgs()){
-			//System.out.println("should replace " + orig + " with " + repl + " and found " +arg);
-			if(!arg.equals(orig)){
-				returnTerm.addArg(arg);
-			}else{
-				returnTerm.addArg(repl);
-			}
-		}
 		return returnTerm;
 	}//end of replaceTerm
 	
