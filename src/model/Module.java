@@ -321,7 +321,7 @@ public class Module {
 			if(termMainOp.equals(op.getName())) return op.getSort();
 		}
 		
-		return null;
+		return "";
 	}//end of getTermSort
 	
 	

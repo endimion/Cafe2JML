@@ -79,15 +79,22 @@ public class BasicTerm implements CafeTerm{
 	public String termToString(Module mod){
 		String print="";
 		
+		//for(CafeVariable v : mod.getVars()){
+		//	System.out.println("var " + v.getName() + " " + v.getSort());
+		//}
+		
+		
 		if(!TermParser.isBinary(getOpName())){
 			print = getOpName();
 			String extra="";
 			
 			for(String s: getArgs()){
-				extra += " "+s +",";
+				if(!mod.getOpSortByName(s).trim().equals(mod.getClassSort().trim())){
+					extra += s +", ";
+				}
 			}//end of looping through the term argumnets
 			
-			if(extra.endsWith(","))	extra = StringHelper.remLastChar(extra); //we remove the last comma
+			if(extra.endsWith(", "))	extra = StringHelper.remLastChar(extra.trim()); //we remove the last comma
 			if(mod.isOperator(getOpName())) print  += "(" + extra +")";
 			//print  += "(" + extra +")";
 			

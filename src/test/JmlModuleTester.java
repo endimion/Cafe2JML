@@ -93,9 +93,14 @@ public class JmlModuleTester {
 		t5.addArg("A");
 		t5.addArg("L");
 		
+		BasicTerm t6 = new BasicTerm(false);
+		t6.setOpName("setSize");
+		//t1.addArg("A");
+		t6.addArg("W2");
 		
 		chain.removeAllElements();
 		chain.add(t3);
+		chain.addElement(t6);
 		chain.add(t5);
 		chain.add(t2);
 		chain.add(t4);

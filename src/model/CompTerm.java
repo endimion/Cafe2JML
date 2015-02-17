@@ -59,16 +59,17 @@ public class CompTerm implements CafeTerm{
 	public String termToString(Module mod){
 		String print ;  
 		
-		
 		if(!TermParser.isBinary(getOpName()))
 		{
 			print = getOpName() + "(";
 			for(Object o : getArgs()){
 				if(o instanceof CafeTerm){
-					print +=  ((CafeTerm) o).termToString(mod) + ", ";
+					if(!mod.getOpSortByName(((CafeTerm)o).getOpName()).equals(mod.getClassSort()))
+						print +=  ((CafeTerm) o).termToString(mod) + ", ";
 				}else{
 					if(o instanceof String){
-						print +=   (String) o + ", ";
+						if(!mod.getOpSortByName((String)o).equals(mod.getClassSort()))
+							print +=   (String) o + ", ";
 					}
 				}
 			}//end of for loop
@@ -313,14 +314,6 @@ public class CompTerm implements CafeTerm{
 		for(Object arg: getArgs()){
 			returnTerm.addArg(arg);
 		}
-		
-		
-		//int k= 0;
-		//for(Object org : origV){
-		//	System.out.println("@@@@@have ot replace " + org + " with " +replV.get(k));
-		//	k++;
-		//}
-		
 		
 		
 		int j = 0;
