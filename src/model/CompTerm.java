@@ -56,7 +56,7 @@ public class CompTerm implements CafeTerm{
 	 * @return a string representation of the term object
 	 */
 	@Override
-	public String termToString(Module mod){
+	public String termToString(Module mod, JmlGenerator gen){
 		String print ;  
 		
 		if(!TermParser.isBinary(getOpName()))
@@ -64,11 +64,14 @@ public class CompTerm implements CafeTerm{
 			print = getOpName() + "(";
 			for(Object o : getArgs()){
 				if(o instanceof CafeTerm){
-					if(!mod.getOpSortByName(((CafeTerm)o).getOpName()).equals(mod.getClassSort()))
-						print +=  ((CafeTerm) o).termToString(mod) + ", ";
+					if(!mod.getOpSortByName(((CafeTerm)o).getOpName()).equals(mod.getClassSort())
+						&& !((CafeTerm)o).getOpName().equals("")
+						)
+						print +=  ((CafeTerm) o).termToString(mod, gen) + ", ";
 				}else{
 					if(o instanceof String){
-						if(!mod.getOpSortByName((String)o).equals(mod.getClassSort()))
+						if(!mod.getOpSortByName((String)o).equals(mod.getClassSort())
+							)
 							print +=   (String) o + ", ";
 					}
 				}
@@ -76,8 +79,8 @@ public class CompTerm implements CafeTerm{
 			if(print.endsWith(", ")) print = StringHelper.remLastChar(print.trim());
 			print += ")";
 		}else{
-			String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod): (String)getArgs().get(0);  
-			String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(mod): (String) getArgs().get(1);
+			String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod,gen): (String)getArgs().get(0);  
+			String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(mod,gen): (String) getArgs().get(1);
 			print = "(" + leftTerm + " "+ getOpName() + " " + rightTerm + ")";
 		}
 		return print;

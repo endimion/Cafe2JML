@@ -1,5 +1,7 @@
 package test;
 
+import static org.junit.Assert.*;
+
 import java.util.Vector;
 
 import model.BasicTerm;
@@ -33,21 +35,24 @@ public class JmlModuleTester {
 	
 	
 	
-	//Test
+	@Test
 	public void testGetObsValbyTrans(){
 		BasicTerm trans1 = new BasicTerm(false);
 		trans1.setOpName("setElementAt");
 		Vector<ObsValPair> pairs  = jmod.getObsValbyTrans(trans1,mod);
 		
 		for(ObsValPair p : pairs){
-		//	System.out.println(p.getObs().getOpName() + " value " + p.getValue().termToString(mod));
+			//System.out.println(p.getObs().getOpName() + " value " + p.getValue().termToString(mod));
+			if(p.getObs().getOpName().equals("getSize")) assertEquals("",p.getValue().termToString(mod,null),"getSize()");	
+			if(p.getObs().getOpName().equals("getElementAt")) assertEquals("",p.getValue().termToString(mod,null),"V");
 		}
 		
 		trans1.setOpName("setSize");
 		pairs  = jmod.getObsValbyTrans(trans1,mod);
 		
 		for(ObsValPair p : pairs){
-			//System.out.println(p.getObs().getOpName() + " value " + p.getValue().termToString(mod));
+			if(p.getObs().getOpName().equals("getSize")) assertEquals("",p.getValue().termToString(mod,null),"(d + getSize())");	
+			if(p.getObs().getOpName().equals("getElementAt")) assertEquals("",p.getValue().termToString(mod,null),"getElementAt()");
 		}
 		
 	}//end of testGetValofObs
@@ -90,7 +95,7 @@ public class JmlModuleTester {
 		
 		BasicTerm t5 = new BasicTerm(false);
 		t5.setOpName("setElementAt");
-		t5.addArg("A");
+		t5.addArg("h");
 		t5.addArg("L");
 		
 		BasicTerm t6 = new BasicTerm(false);
@@ -107,8 +112,14 @@ public class JmlModuleTester {
 		chain.add(t1);
 		
 		
-		jmod.getObsValAfterTransCh(chain,mod);
-		
+		Vector<ObsValPair> newP = jmod.getObsValAfterTransCh(chain,mod);
+		for(ObsValPair p: newP){
+			//System.out.println("final val of " + p.getObs().termToString(mod) + " is " + p.getValue().termToString(mod));
+			if(p.getObs().termToString(mod,null).equals("getSize()")) assertEquals("",p.getValue().termToString(mod,null),"(d + (d + getSize()))");	
+			if(p.getObs().termToString(mod,null).equals("getElementAt(I)")) assertEquals("",p.getValue().termToString(mod,null),"V");
+			if(p.getObs().termToString(mod,null).equals("getElementAt(J)")) assertEquals("",p.getValue().termToString(mod,null),"Q");
+			if(p.getObs().termToString(mod,null).equals("getElementAt(h)")) assertEquals("",p.getValue().termToString(mod,null),"L");
+		}
 		
 	}//end of testGetObsValAfterTransCh
 	

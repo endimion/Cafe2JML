@@ -387,8 +387,13 @@ public class Module {
 	}//end of getVarsOfOpinEq
 	
 	
-	
-	public boolean isOperator(String opName){
+
+	/**
+	 * 
+	 * @param opName
+	 * @return
+	 */
+	public  boolean isOperator(String opName){
 		for(CafeOperator op: getOps()){
 			if(op.getName().equals(opName)){
 				return true;
@@ -396,5 +401,49 @@ public class Module {
 		}
 		return false;
 	}//end of isOperator
+	
+	
+	
+	
+	
+	/**
+	 * This method returns all the projection operators of the module, i.e. all hidden sorted 
+	 * 	operators whose hidden sort is that of another module of the specification
+	 * @param specMods a vector<Module> which denotes the rest of the modules of the 
+	 * specification
+	 * @return a Vector<CafeOperator> which are projection operators
+	 */
+	public Vector<CafeOperator> getProjections(Vector<Module> specMods){
+		
+		Vector<CafeOperator> proj = new Vector<CafeOperator>();
+		
+		for(CafeOperator op: getOps()){
+			for(Module m : specMods){
+				if(op.getSort().equals(m.getClassSort()) && !op.getSort().equals(getClassSort()) ){
+					proj.add(op);
+					break;
+				}//end if the op  has the same sort as anothe module
+			}//end of looping through the other modules
+		}//end of looping through the operators of the module
+		
+		return proj;
+		
+	}//end of getProjections
+	
+	
+	/**
+	 * 
+	 * @param specMods a Vector<Module> denoting the other modules of the spec file
+	 * @param opName the name of an operator
+	 * @return true if the given operator is a projection operator for the given module
+	 * under the given set of other modules
+	 */
+	public boolean isProjection(Vector<Module> specMods, String opName){
+		for(CafeOperator op : getProjections(specMods)){
+			if(op.getName().equals(opName)) return true;
+		}//end of looping through the projection ops
+		
+		return false;
+	}//end of isProjection
 	
 }//end of class

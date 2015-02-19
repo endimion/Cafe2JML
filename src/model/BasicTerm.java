@@ -76,13 +76,8 @@ public class BasicTerm implements CafeTerm{
 	 * @return a string representation of the term
 	 */
 	@Override
-	public String termToString(Module mod){
+	public String termToString(Module mod, JmlGenerator gen){
 		String print="";
-		
-		//for(CafeVariable v : mod.getVars()){
-		//	System.out.println("var " + v.getName() + " " + v.getSort());
-		//}
-		
 		
 		if(!TermParser.isBinary(getOpName())){
 			print = getOpName();
@@ -96,6 +91,7 @@ public class BasicTerm implements CafeTerm{
 			
 			if(extra.endsWith(", "))	extra = StringHelper.remLastChar(extra.trim()); //we remove the last comma
 			if(mod.isOperator(getOpName())) print  += "(" + extra +")";
+			
 			//print  += "(" + extra +")";
 			
 		}else{

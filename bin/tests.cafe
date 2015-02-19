@@ -766,7 +766,7 @@ ceq return(searchleft(S)) = -1 if c-searchleft(S)
 
 
 eq value(searchleft(S)) = value(S) .
-eq arr(searchleft(S)) = arr(S) .
+eq arr(searchleft(S)) = arr( setElementAt(setElementAt(S,I,V),J,K) ) .
 
 ceq searchleft(S) = S if not c-searchleft(S) .  
  

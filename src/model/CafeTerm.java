@@ -12,7 +12,7 @@ public interface CafeTerm {
 	
 	public void addArg(Object arg);
 	
-	public String termToString(Module mod);
+	public String termToString(Module mod, JmlGenerator gen);
 	
 	public boolean containsOp(String op);
 	

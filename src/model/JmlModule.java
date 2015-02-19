@@ -130,7 +130,7 @@ public class JmlModule {
 	 * @param pairs a vector contain the pairs of observers and values for them
 	 * @return a CafeTerm denoting the value of the given observer based on the given set of pairs
 	 */
-	public CafeTerm getValOfObs(CafeTerm obs, Vector<ObsValPair> pairs){
+	private CafeTerm getValOfObs(CafeTerm obs, Vector<ObsValPair> pairs){
 		for(ObsValPair p : pairs){
 			//System.out.println(" is Equal ? "+ obs.getOpName() + " with " + p.getObs().getOpName());
 			if(obs.isEqual(p.getObs())){
@@ -158,12 +158,10 @@ public class JmlModule {
 		CafeTerm currentTrans;
 		Vector<ObsValPair> origObsValP ;  // the pairs obtained after the individual trans rule
 		Vector<ObsValPair> replacePairs;  // the pairs we should use to replace the appearence of the obs with
-
 		Vector<ObsValPair> newPairs;
 		ObsValPair newP;
 
 		replacePairs = getObsValbyTrans(chain.get(chain.size()-1),mod);
-		
 		Vector<CafeTerm> allObs =  getObFromPairVect(replacePairs); //stores all observer expressions that have appeared
 		
 		for(int i=chain.size()-2; i >=0; i--){
@@ -181,11 +179,6 @@ public class JmlModule {
 				if(!match){allObs.add(origObsValP.get(k).getObs()); }
 			}//end of looping through origObsValP
 			
-			System.out.println("TRANSITION IS "+  i +" ::: " + currentTrans.termToString(mod));
-			//for(ObsValPair p : origObsValP){
-			//	System.out.println("##### " + p.getObs().termToString(mod) + " " + p.getValue().termToString(mod));
-			//}
-
 			newPairs = new Vector<ObsValPair>();
 			
 			for(CafeTerm obsrv : allObs){
@@ -200,7 +193,7 @@ public class JmlModule {
 				CafeTerm original =  getValOfObs(obsrv, origObsValP);
 			
 				if(prevVal instanceof BasicTerm && original != null){
-					if(! original.termToString(mod).equals(obsrv.termToString(mod))){
+					if(! original.termToString(mod,null).equals(obsrv.termToString(mod,null))){
 						newP = new ObsValPair(obsrv, original);
 					}else{newP = new ObsValPair(obsrv, prevVal);}
 				}else{
@@ -212,13 +205,13 @@ public class JmlModule {
 				//newP = new ObsValPair(obsrv, newObsVal);
 				newPairs.add(newP);
 				
-				System.out.println("OBSERVER Is ::: " + obsrv.termToString(mod));
-				if(getValOfObs(obsrv, replacePairs) != null)System.out.println("PREVIOUS VALUE IS ::: " + getValOfObs(obsrv, replacePairs).termToString(mod));
+				//System.out.println("OBSERVER Is ::: " + obsrv.termToString(mod));
+				//if(getValOfObs(obsrv, replacePairs) != null)System.out.println("PREVIOUS VALUE IS ::: " + getValOfObs(obsrv, replacePairs).termToString(mod));
 				//if(getValOfObs(obsrv, origObsValP) != null) System.out.println("ORIGINAL VALUE IS ::: " + getValOfObs(obsrv, origObsValP).termToString(mod));
-				if(newP.getValue() != null)System.out.println("NEW IS ::: " + newP.getValue().termToString(mod));
+				//if(newP.getValue() != null)System.out.println("NEW IS ::: " + newP.getValue().termToString(mod));
+			
 			}//end of looping through the observers of the module
 			
-			System.out.println();
 			replacePairs = newPairs;
 		}//end of for loop through the chains
 		
@@ -236,7 +229,7 @@ public class JmlModule {
 	 * @param repl the new term which will replace the original
 	 * @return
 	 */
-	public Vector<ObsValPair> replaceInValues(Vector<ObsValPair> pairs, 
+	private Vector<ObsValPair> replaceInValues(Vector<ObsValPair> pairs, 
 			Vector<Object> orig, Vector<Object> repl, Module mod){
 		
 		Vector<ObsValPair> newPairs = new Vector<ObsValPair>();
@@ -259,7 +252,7 @@ public class JmlModule {
 	 * @param pairs a Vector<ObsValPair>
 	 * @return a vector of CafeTerms containing all the observers which appear in pairs
 	 */
-	public Vector<CafeTerm> getObFromPairVect(Vector<ObsValPair> pairs){
+	private Vector<CafeTerm> getObFromPairVect(Vector<ObsValPair> pairs){
 		Vector<CafeTerm> obser = new Vector<CafeTerm>();
 		for(ObsValPair p: pairs){
 			obser.add(p.getObs());
@@ -268,4 +261,7 @@ public class JmlModule {
 	}//end of getObserversByTransition
 	
 
+	
+	
+	
 }//end of JmlModule

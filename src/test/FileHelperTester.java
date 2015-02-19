@@ -228,6 +228,7 @@ public class FileHelperTester {
 	@Test
 	public void testParseEq(){
 		Module mod = new Module();
+		mod.setClassSort("");
 		CafeEquation eq = new CafeEquation();
 		CafeTerm ct2;
 		
@@ -281,7 +282,7 @@ public class FileHelperTester {
 		//assertEquals("",eq.getCondition().getOpName(),"belong3?");
 		
 		if(ct instanceof CompTerm){
-			System.out.println(((CompTerm) ct).termToString(mod));
+			System.out.println(((CompTerm) ct).termToString(mod,null));
 		}
 		
 		fh.parseEq("eq (L = L) = true",mod,eq);
@@ -372,6 +373,7 @@ public class FileHelperTester {
 	@Test
 	public void testReplaceTerm(){
 		Module mod = new Module();
+		mod.setClassSort("");
 		CafeEquation eq = new CafeEquation();
 		
 		fh.parseEq("ceq /inFinallic(request(R(x,y,z) , init) , L) = /inFinallic(S , L) if not c-request(S) .", mod, eq);
@@ -379,9 +381,9 @@ public class FileHelperTester {
 		Object newArg =  (eq.getLeftTerm().getArgs()).get(0);
 		
 		CafeTerm nt = original.replaceArg(newArg, 0);
-		System.out.println("argument " + ((CafeTerm) newArg).termToString(mod) );
-		System.out.println("original "+eq.getRightTerm().termToString(mod) + "BBB " 
-		+nt.termToString(mod) );
+		System.out.println("argument " + ((CafeTerm) newArg).termToString(mod,null) );
+		System.out.println("original "+eq.getRightTerm().termToString(mod,null) + "BBB " 
+		+nt.termToString(mod,null) );
 		
 	}//end of testReplaceTerm
 	

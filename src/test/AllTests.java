@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ FileHelperTester.class, TermParserTester.class, JmlGeneratorTester.class ,
-	StringHelperTester.class})
+	StringHelperTester.class, JmlModuleTester.class})
 
 
 
