@@ -766,7 +766,7 @@ ceq return(searchleft(S)) = -1 if c-searchleft(S)
 
 
 eq value(searchleft(S)) = value(S) .
-eq arr(searchleft(S)) = setElementAt(setElementAt(setSize(setElementAt(arr(S),J,Q),W),I,V),J,K)  .
+eq arr(searchleft(S)) = setElementAt(setElementAt(setSize(setSize(arr(S),Q),W),I,V),J,K)  .
 
 ceq searchleft(S) = S if not c-searchleft(S) .  
  
@@ -813,7 +813,7 @@ eq getSize(initMa) = 0 .
 op c-setSize :  ma Int -> Bool
 eq c-setSize(A,J) = (J >= 0) and (getSize(A) = 0) .
 
-ceq getSize(setSize(A,J)) = d(J) + getSize(A) if c-setSize(A,J) .
+ceq getSize(setSize(A,J)) = J + getSize(A) if c-setSize(A,J) .
 
 ceq getElementAt(setSize(A,J),I) = getElementAt(A,I) if c-setSize(A,J)  .
 

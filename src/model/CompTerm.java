@@ -187,7 +187,7 @@ public class CompTerm implements CafeTerm{
 			//if(!res.trim().endsWith("(")) res = StringHelper.remLastChar(res);
 				
 				
-		}else{ //if the term has as a many operator a binary term
+		}else{ //if the term has as a main operator a binary term
 			int leftPos = TermParser.getPositionOfSystemSort((CafeTerm) getArgs().get(0), mod);
 			int rightPos = TermParser.getPositionOfSystemSort((CafeTerm) getArgs().get(1), mod);
 			
@@ -202,7 +202,8 @@ public class CompTerm implements CafeTerm{
 						  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")";
 				}else{
 					
-					String sort = TermParser.cafe2JavaSort(mod.getOpSortByName( ((CafeTerm) getArgs().get(1)).getOpName()));
+					String sort = TermParser.cafe2JavaSort(mod.getOpSortByName( ((CafeTerm) getArgs().get(0)).getOpName()));
+					//System.out.println("SOOOOORTTT " + sort + " term " + ((CafeTerm) getArgs().get(1)).getOpName() );
 					if(sort.equals("int")||sort.equals("boolean")|| StringHelper.isNumber(((CafeTerm) getArgs().get(1)).getOpName())){
 						res =   ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()
 								+ " == " 

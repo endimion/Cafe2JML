@@ -94,7 +94,7 @@ public class JmlGeneratorTester {
 		
 		mod = mods.get(mods.size()-2);
 		jmod = new JmlModule(mod.getClassSort()); 
-		gen.translateSimpleModule(mod, jmod);
+		System.out.println(gen.translateSimpleModule(mod, jmod));
 		
 	}//end of testTranslateSimpleModule
 	
