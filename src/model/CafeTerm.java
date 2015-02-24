@@ -53,7 +53,7 @@ public interface CafeTerm {
 	 * @param t another CafeTerm
 	 * @return true if the two CafeTerms have the same op name and the same arguments
 	 */
-	public boolean isEqual(CafeTerm t);
+	public boolean isEqual(Object t);
 	
 	/**
 	 * 

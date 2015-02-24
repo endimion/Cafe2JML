@@ -20,6 +20,7 @@ public class JmlGeneratorTester {
 
 	FileHelper fh;
 	Vector<Module> mods ;
+	Vector<JmlModule> jmods ;
 	JmlGenerator gen;
 	
 	@Before
@@ -78,7 +79,7 @@ public class JmlGeneratorTester {
 		//CafeOperator op = mods.get(0).getOps().get(0); 
 		//Module mod = mods.get(mods.size()-2);
 		Module mod = mods.get(mods.size()-1);
-		JmlModule jmod = new JmlModule(); 
+		JmlModule jmod = new JmlModule(mod.getClassSort()); 
 		
 		//System.out.println(gen.translateObservers(mod));
 		//System.out.println(gen.translateGuards(mod));
@@ -92,7 +93,7 @@ public class JmlGeneratorTester {
 		System.out.println(gen.translateSimpleModule(mod,jmod));
 		
 		mod = mods.get(mods.size()-2);
-		jmod = new JmlModule(); 
+		jmod = new JmlModule(mod.getClassSort()); 
 		gen.translateSimpleModule(mod, jmod);
 		
 	}//end of testTranslateSimpleModule
@@ -128,7 +129,7 @@ public class JmlGeneratorTester {
 		t1.setOpName("t1");
 		t1.addArg(t3);
 		
-		chain = gen.buildChainFromTerm(chain, t1,mod);
+		chain = gen.buildChainFromTerm(chain, t1,mod,"","");
 		
 		int i=0;
 		for(CafeTerm t : chain){

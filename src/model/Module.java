@@ -318,10 +318,11 @@ public class Module {
 		String termMainOp = t.getOpName();
 		
 		for(CafeOperator op: ops){
-			if(termMainOp.equals(op.getName())) return op.getSort();
+			//System.out.println("checking..." + op.getName());
+			if(termMainOp.equals(op.getName())) { return op.getSort();}
 		}
 		
-		return "";
+		return "error";
 	}//end of getTermSort
 	
 	

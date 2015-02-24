@@ -283,26 +283,33 @@ public class CompTerm implements CafeTerm{
 	/**
 	 * returns true whether or not the given terms are equal
 	 */
-	public boolean isEqual(CafeTerm t){
+	public boolean isEqual(Object o){
 		
-		if(!t.getOpName().equals(getOpName())){
-			return false;
-		}else{
-			int i = 0;
-			for(Object arg : getArgs()){
-				if(arg instanceof CafeTerm){
-					try{
-						if(!((CafeTerm)arg).isEqual( (CafeTerm)t.getArgs().get(i))) return false;
-					}catch(Exception e){return false; }//the ex will be trhown if t.getArgs.get(i) canno be cast to (CafeTerm)
-				}else{ //end if arg is a CafeTerm
-					if(!arg.equals(t.getArgs().get(i))){return false;}
-				}//end if arg is not a CafeTerm
+		CafeTerm t;
+		if(o instanceof CafeTerm){
+			t = (CafeTerm) o;
+			if(!t.getOpName().equals(getOpName())){
+				return false;
+			}else{
+				int i = 0;
+				for(Object arg : getArgs()){
+					if(arg instanceof CafeTerm){
+						try{
+							if(!((CafeTerm)arg).isEqual( (CafeTerm)t.getArgs().get(i))) return false;
+						}catch(Exception e){return false; }//the ex will be trhown if t.getArgs.get(i) canno be cast to (CafeTerm)
+					}else{ //end if arg is a CafeTerm
+						if(!arg.equals(t.getArgs().get(i))){return false;}
+					}//end if arg is not a CafeTerm
+					
+					i++;
+				}//end of looping through the arguments
 				
-				i++;
-			}//end of looping through the arguments
+				return true;
+			}//end if the names of the operators match	
+		}else{
+			return false;
 			
-			return true;
-		}//end if the names of the operators match	
+		}//end if o is not a CafeTerm
 	}//end of equals
 	
 	

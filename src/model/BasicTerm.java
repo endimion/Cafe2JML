@@ -90,7 +90,12 @@ public class BasicTerm implements CafeTerm{
 			}//end of looping through the term argumnets
 			
 			if(extra.endsWith(", "))	extra = StringHelper.remLastChar(extra.trim()); //we remove the last comma
-			if(mod.isOperator(getOpName())) print  += "(" + extra +")";
+			if(gen == null){
+				if(mod.isOperator(getOpName())) print  += "(" + extra +")";
+			}else{
+				if(gen.isOperator(getOpName()))
+				print  += "(" + extra +")";
+			}
 			
 			//print  += "(" + extra +")";
 			
@@ -227,20 +232,27 @@ public class BasicTerm implements CafeTerm{
 	/**
 	 * returns true whether or not the given terms are equal
 	 */
-	public boolean isEqual(CafeTerm t){
-		if(!t.getOpName().equals(getOpName())){
-			return false;
+	public boolean isEqual(Object o){
+		CafeTerm t ;
+		if(o instanceof CafeTerm){
+			t =(CafeTerm)o;
+			if(!t.getOpName().equals(getOpName())){
+				return false;
+			}else{
+				int i = 0;
+				for(String arg: getArgs()){
+					if(!arg.equals(t.getArgs().get(i))){
+						return false;
+					}
+					i ++;
+				}//end of looping through the arguments of the term
+				
+				return true;
+			}
 		}else{
-			int i = 0;
-			for(String arg: getArgs()){
-				if(!arg.equals(t.getArgs().get(i))){
-					return false;
-				}
-				i ++;
-			}//end of looping through the arguments of the term
-			
-			return true;
-		}
+			return false;
+		}//end if o is not a CafeTerm
+		
 	}//end of isEquals
 	
 	
@@ -266,7 +278,11 @@ public class BasicTerm implements CafeTerm{
 					}
 				}else{
 					if( ((String)orig).equals(getOpName())){
-						returnTerm.setOpName((String)replV.get(i));
+						if(replV.get(i) instanceof String){
+							returnTerm.setOpName((String)replV.get(i));
+						}else{
+							returnTerm.setOpName( ((CafeTerm)replV.get(i)).getOpName());
+						}
 						return returnTerm;
 					}
 				}

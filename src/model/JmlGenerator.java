@@ -21,10 +21,11 @@ import java.util.Vector;
 public class JmlGenerator {
 
 	Vector<Module> modules;
-	
+	Vector<JmlModule> jModules;
 	
 	public JmlGenerator(Vector<Module> mod){
 		this.modules = mod;
+		this.jModules = new Vector<JmlModule>();
 	}//end of constructor
 	
 	
@@ -180,12 +181,61 @@ public class JmlGenerator {
 	
 	
 	
+	
+	/**
+	 * Returns a CafeTerm which does not contain any arguments of the given projection sort
+	 * 
+	 * @param projSort a Sort denoting a projection operator sort
+	 * @param trans a CafeTerm denoting a transition rule
+	 * @return a new CafeTerm obtained by trans by not including any proSorted arguments
+	 */
+	public CafeTerm removeProjectSort(String projSort, CafeTerm trans){
+		if(trans instanceof BasicTerm){
+			BasicTerm temp = new BasicTerm(false);
+			temp.setOpName(trans.getOpName());
+			for(String arg: ((BasicTerm)trans).getArgs()){
+				BasicTerm b = new BasicTerm(false);
+				b.setOpName(arg);
+				if(!getTermSort(b).equals(projSort)){
+					temp.addArg(arg);
+				}
+			}
+			trans = temp;
+			
+		}else{
+			CompTerm temp = new CompTerm();
+			temp.setOpName(trans.getOpName());
+			for(Object arg : trans.getArgs()){
+				
+				
+				if(arg instanceof String){
+					BasicTerm b = new BasicTerm(false);
+					b.setOpName((String)arg);
+					if(!getTermSort(b).equals(projSort)){
+						temp.addArg(arg);
+					}
+				}else{
+					if(!getTermSort(((CafeTerm)arg)).equals(projSort)){
+						temp.addArg(arg);
+					}
+				}//end if arg is not a String
+				trans = temp;
+			}//end of looping through the args
+		}//end if trans is a CompTerm
+
+		return trans;
+	}//end of removeProjectSort
+	
+	
+	
+	
 	//TODO
 	/**
 	 * 
 	 * @return a JML contract for translating a projection operator equation
 	 */
-	public String translateProjectEquation(CafeTerm rightHS,  int rightPos, Module mod){
+	public String translateProjectEquation(CafeTerm rightHS,  int rightPos, Module mod,
+			String projSort, String projName, JmlModule jmod){
 		String res="";
 		
 		Object transS = rightHS.getArgs().get(rightPos);
@@ -198,19 +248,34 @@ public class JmlGenerator {
 		}else{
 			//it is a CafeTerm
 			System.out.println("the transitions chain is a CafeTerm");
-			System.out.println("rightHs is " + rightHS.termToString(mod,this) + "and chain is "+ ((CafeTerm)transS).termToString(mod,this) );
+			//System.out.println("rightHs is " + rightHS.termToString(mod,this) + "and chain is "+ ((CafeTerm)transS).termToString(mod,this) );
 			
 			Vector<CafeTerm> chain = new Vector<CafeTerm>();
-			buildChainFromTerm(chain,(CafeTerm)transS, mod);
+			buildChainFromTerm(chain,rightHS, mod,projSort,projName);
 			int i= 0;
+			
+			
+			Vector<CafeTerm> temp = new Vector<CafeTerm>();
 			for(CafeTerm t : chain){
+				temp.add(removeProjectSort(projSort, t));
 				System.out.println(i + " "+t.termToString(mod,this));
 				i++;
 			}
+			chain  = temp;
+			
+			
+			
+			
+			
+			
 			//TODO add in this class a method to check if a term denotes an 
 			//operator in ANY of the spec file modules
-			
-			
+					
+			Vector<ObsValPair>  obsValP = jmod.getObsValAfterTransCh(chain, getModBySort(projSort));
+			for(ObsValPair p: obsValP){
+				System.out.println(" pair " + p.getObs().termToString(mod, null) + " with " 
+						+ p.getValue().termToString(mod, this));
+			}
 			
 		}//end if the transitions of the rightHs system sorted term 
 		
@@ -219,19 +284,79 @@ public class JmlGenerator {
 	
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * 
+	 * @param sort the sort of the module we are searching for
+	 * @return the Module object which defines the given sort 
+	 */
+	public Module getModBySort(String sort){
+		
+		//System.out.println("looking for sort " + sort);
+		for(Module mod : modules){
+			if(mod.getClassSort() != null)
+			if(mod.getClassSort().equals(sort)){   
+				//System.out.println("found it a " + mod.getName()) ;
+				return mod;
+			}
+		}
+		return null;
+	}//end of getModBySort
+	
+	/**
+	 * 
+	 * @param sort the sort of the module we are searching for
+	 * @return the JmlModule object which defines the given sort 
+	 */
+	public JmlModule getJModBySort(String sort){
+		
+		//System.out.println("looking for sort " + sort);
+		for(JmlModule mod : jModules){
+			if(mod.getSort() != null)
+			if(mod.getSort().equals(sort)){   
+				return mod;
+			}
+		}
+		return null;
+	}//end of getModBySort
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * Generates a chain of cafeTerms from the given term 
 	 * @param chain a Vector<CafeTerm>
 	 * @param term a CafeTerm
+	 * @param projModSort the sort of the module we are projecting to
+	 * @param projName 	the name of the projection operator
 	 * @return a Vector<CafeTerm> which contains all the arguments of the given term  including the term itself
 	 */
-	public Vector<CafeTerm> buildChainFromTerm(Vector<CafeTerm> chain, CafeTerm term, Module mod){
-		chain.add(term);
+	public Vector<CafeTerm> buildChainFromTerm(Vector<CafeTerm> chain, CafeTerm term, 
+			Module mod, String projModSort, String projName){
+		
+		if( getTermSort(term).equals(projModSort) 
+				&& !(term).getOpName().equals(projName))
+		{ chain.add(term);}
+		
+		
 		
 		for(Object arg: term.getArgs() ){
 			if(arg instanceof CafeTerm){ 
-				if( mod.getTermSort((CafeTerm)arg).equals(mod.getClassSort()))
-				buildChainFromTerm(chain, (CafeTerm) arg,mod);
+				if( getTermSort((CafeTerm)arg).equals(projModSort))
+				{	buildChainFromTerm(chain, (CafeTerm) arg,mod, projModSort,projName);
+					//System.out.println("##sort of " + ((CafeTerm)arg).termToString(mod, null) + " is " + getTermSort((CafeTerm)arg));
+				}
+				
 			}
 		}//end for loop
 		return chain;
@@ -286,7 +411,11 @@ public class JmlGenerator {
 				}else{
 					//TODO
 					//translate the projection equation
-					translateProjectEquation(right, rightPos,mod);
+					
+					
+					String projSort = mod.getTermSort(left);
+					translateProjectEquation(right, rightPos,mod,projSort,left.getOpName(),
+							getJModBySort(projSort));
 					
 					
 					
@@ -559,6 +688,8 @@ public class JmlGenerator {
 	 */
 	public String translateSimpleModule(Module mod, JmlModule jmod){
 		String res ="";
+		jModules.add(jmod);
+		
 		
 		res = "public class "+ mod.getClassSort() +"{" + '\n'
 				+ translateHiddenConstants(mod)  + '\n' + 
@@ -586,26 +717,35 @@ public class JmlGenerator {
 	
 
 	/**
-	 * 
-	 * @param opName
-	 * @return
+	 * returns whether or not the given term is an operator in any module of the spec file
+	 * @param opName the name of the operator
+	 * @return true if opName denotes an operator in any Module of the spec file
 	 */
 	public  boolean isOperator(String opName){
 		
-		Vector<CafeOperator> allOps = new Vector<CafeOperator>();
+		//Vector<CafeOperator> allOps = new Vector<CafeOperator>();
 		for(Module mod : modules){
 			for(CafeOperator op: mod.getOps()){
-				allOps.add(op);
+				if(op.getName().equals(opName)){ return true;}
 			}
 		}
 		
-		for(CafeOperator op: allOps){
-			if(op.getName().equals(opName)){
-				return true;
-			}
-		}
 		return false;
 	}//end of isOperator
+	
+	
+	/**
+	 * Returns the sort of a CafeTerm regardless of which module that term is defined in
+	 * in the specification file 
+	 * @param t a CafeTerm whose sort we are looking for
+	 * @return the sort of the CafeTerm
+	 */
+	public String getTermSort(CafeTerm t){
+		for(Module mod : modules){
+			if(!mod.getOpSortByName(t.getOpName()).equals("")) return mod.getOpSortByName(t.getOpName()); 
+		}
+		return "noSortError";
+	}//end of getTermSort
 	
 	
 	

@@ -28,7 +28,7 @@ public class JmlModuleTester {
 		mods = fh.getModules();
 		gen = new JmlGenerator(mods);
 		mod = mods.get(mods.size()-1);
-		jmod = new JmlModule(); 
+		jmod = new JmlModule(mod.getClassSort()); 
 		gen.translateSimpleModule(mod,jmod);
 	}
 	
@@ -39,6 +39,8 @@ public class JmlModuleTester {
 	public void testGetObsValbyTrans(){
 		BasicTerm trans1 = new BasicTerm(false);
 		trans1.setOpName("setElementAt");
+		trans1.addArg("I");
+		trans1.addArg("V");
 		Vector<ObsValPair> pairs  = jmod.getObsValbyTrans(trans1,mod);
 		
 		for(ObsValPair p : pairs){
@@ -48,6 +50,7 @@ public class JmlModuleTester {
 		}
 		
 		trans1.setOpName("setSize");
+		trans1.addArg("K");
 		pairs  = jmod.getObsValbyTrans(trans1,mod);
 		
 		for(ObsValPair p : pairs){
