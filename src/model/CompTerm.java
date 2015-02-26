@@ -69,32 +69,79 @@ public class CompTerm implements CafeTerm{
 			}
 			return print + ")";
 		}else{
-			
-			if(!TermParser.isBinary(getOpName()))
-			{
-				print = getOpName() + "(";
-				for(Object o : getArgs()){
-					if(o instanceof CafeTerm){
-						if(!mod.getOpSortByName(((CafeTerm)o).getOpName()).equals(mod.getClassSort())
-							&& !((CafeTerm)o).getOpName().equals("")
-							)
-							print +=  ((CafeTerm) o).termToString(mod, gen) + ", ";
-					}else{
-						if(o instanceof String){
-							if(!mod.getOpSortByName((String)o).equals(mod.getClassSort())
+			if(gen == null){
+				if(!TermParser.isBinary(getOpName()))
+				{
+					print = getOpName() + "(";
+					for(Object o : getArgs()){
+						if(o instanceof CafeTerm){
+							if(!mod.getOpSortByName(((CafeTerm)o).getOpName()).equals(mod.getClassSort())
+								&& !((CafeTerm)o).getOpName().equals("")
 								)
-								print +=   (String) o + ", ";
+								print +=  ((CafeTerm) o).termToString(mod, gen) + ", ";
+						}else{
+							if(o instanceof String){
+								if(!mod.getOpSortByName((String)o).equals(mod.getClassSort())
+									)
+									print +=   (String) o + ", ";
+							}
 						}
-					}
-				}//end of for loop
-				if(print.endsWith(", ")) print = StringHelper.remLastChar(print.trim());
-				print += ")";
-			}else{
-				String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod,gen): (String)getArgs().get(0);  
-				String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(mod,gen): (String) getArgs().get(1);
-				print = "(" + leftTerm + " "+ getOpName() + " " + rightTerm + ")";
-			}
-		
+					}//end of for loop
+					if(print.endsWith(", ")) print = StringHelper.remLastChar(print.trim());
+					print += ")";
+				}else{
+					String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod,gen): (String)getArgs().get(0);  
+					String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(mod,gen): (String) getArgs().get(1);
+					String pred = (getOpName().equals("equals"))? " == ": getOpName();
+					pred = (pred.equals("and"))? " && " :pred;
+					pred = (pred.equals("or"))? " || " :pred;
+					print = "(" + leftTerm + " "+ pred + " " + rightTerm + ")";
+				}
+			}//end if gen is null
+			else{
+				if(!TermParser.isBinary(getOpName()))
+				{
+					print = getOpName() + "(";
+					for(Object o : getArgs()){
+						if(o instanceof CafeTerm){
+							if(!mod.getOpSortByName(((CafeTerm)o).getOpName()).equals(mod.getClassSort())
+								&& !((CafeTerm)o).getOpName().equals("")
+								){
+									String argSort = gen.getTermSort((CafeTerm) o);
+									Module argMod = gen.getModBySort(argSort);
+									if(argMod != null){ //i.e. o is a projection operator
+										String s = getOpName() ;
+										print = print.split(s)[0];
+										print += ((CafeTerm)o).termToString(mod, gen) + "."+ getOpName() +"(";
+									}else{
+										
+										print +=  ((CafeTerm) o).termToString(mod, gen) + ", ";
+									}
+								
+							}
+						}else{
+							if(o instanceof String){
+								if(!mod.getOpSortByName((String)o).equals(mod.getClassSort())
+									)
+									print +=   (String) o + ", ";
+							}
+						}
+					}//end of for loop
+					if(print.endsWith(", ")) print = StringHelper.remLastChar(print.trim());
+					print += ")";
+					
+				}else{
+					String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod,gen): (String)getArgs().get(0);  
+					String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(mod,gen): (String) getArgs().get(1);
+					
+					String pred = (getOpName().equals("equals"))? " == ": getOpName();
+					pred = (pred.equals("and"))? " && " :pred;
+					pred = (pred.equals("or"))? " || " :pred;
+					print = "(" + leftTerm + " "+ pred + " " + rightTerm + ")";
+				}
+
+			}//end if gen is not null
+			
 			return print;
 		}
 	}//end of printTerm

@@ -127,9 +127,11 @@ public class JmlGenerator {
 		}
 		
 		if(StringHelper.numOf(right.printTermSkipArg(rightPos,mod), '(') > 0){
-			res += "\\old("+right.printTermSkipArg(rightPos,mod) +")" ;
+			//res += "\\old("+right.printTermSkipArg(rightPos,mod) +")" ;
+			res += "\\old("+right.termToString(mod, this) +")" ;
 		}else{
-			res += right.printTermSkipArg(rightPos,mod)  ;		
+			//res += right.printTermSkipArg(rightPos,mod)  ;
+			res += right.termToString(mod, this) ;	
 		}
 		
 		if(isObject){res += ")";}
@@ -143,6 +145,26 @@ public class JmlGenerator {
 		
 		trans.getArgs().remove(sysPos); //end remove it
 		
+		if(left instanceof BasicTerm){
+			BasicTerm temp = new BasicTerm(false);
+			temp.setOpName(left.getOpName());
+			int k = 0;
+			for(Object o: left.getArgs()){
+				if(k!= leftPos)temp.addArg(o);
+				k++;
+			}
+			leftObs = temp;
+		}else{
+			CompTerm temp = new CompTerm();
+			temp.setOpName(left.getOpName());
+			int k = 0;
+			for(Object o: left.getArgs()){
+				if(k!= leftPos)temp.addArg(o);
+				k++;
+			}
+			leftObs = temp;
+		}
+		//TODO
 		//leftObs.getArgs().remove(leftPos); //we remove the system sorted argument
 		
 		CafeTerm rightHS = right;
@@ -393,7 +415,7 @@ public class JmlGenerator {
 	 * @param sort the sort of the module we are searching for
 	 * @return the Module object which defines the given sort 
 	 */
-	private Module getModBySort(String sort){
+	public Module getModBySort(String sort){
 		
 		//System.out.println("looking for sort " + sort);
 		for(Module mod : modules){
@@ -528,9 +550,9 @@ public class JmlGenerator {
 				int rightPos = TermParser.getPositionOfSystemSort(left,mod);
 				
 				if(cond!= null){
-					int condPos = TermParser.getPositionOfSystemSort(cond,mod);
 					if(!res.endsWith("@ ")) res +="@";
-					res += "(" + cond.printTermSkipArg(condPos,mod).replace("c-","c") + " ==> "+ '\n';
+					//res += "(" + cond.printTermSkipArg(condPos,mod).replace("c-","c") + " ==> "+ '\n';
+					res += "(" + cond.termToString(mod, this).replace("c-","c") + " ==> "+ '\n';
 				}
 				
 				if(!mod.isProjection(modules, left.getOpName())){
