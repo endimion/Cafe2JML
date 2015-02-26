@@ -236,16 +236,16 @@ public class Module {
 		
 		for(CafeEquation eq: getEqs()){
 			posOfSysState = TermParser.getPositionOfSystemSort(eq.getLeftTerm(),this);
+
 			if(posOfSysState >= 0){
 				Object critical = eq.getLeftTerm().getArgs().get(posOfSysState);
-				
-				if(critical instanceof String && critical.equals(opName)){
-					res.add(eq);
+				if(critical instanceof String ){
+					if(((String) critical).contains(opName))res.add(eq);
 				}else{
-					//System.out.println("CRITICAL " + ((CafeTerm)critical).getOpName() + " "+opName);
-					if(critical instanceof CafeTerm && ((CafeTerm) critical).getOpName().equals(opName))
-					{	//System.out.println("CRITICAL " + ((CafeTerm)critical).getOpName() + " "+opName);
-						res.add(eq);
+					if(critical instanceof CafeTerm )
+					{	if(((CafeTerm) critical).getOpName().equals(opName)){
+							res.add(eq);
+						}
 					}
 				}//end if the critical term is not a string
 			}//end if equation has on its left hand side a system sorted term
@@ -253,6 +253,11 @@ public class Module {
 		
 		return res;
 	}//end of getMatchingLeftEqs
+	
+	
+	
+	
+	
 	
 	
 	

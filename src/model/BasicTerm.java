@@ -79,6 +79,18 @@ public class BasicTerm implements CafeTerm{
 	public String termToString(Module mod, JmlGenerator gen){
 		String print="";
 		
+		if(mod == null){
+			print +=  getOpName()+"( ";
+			for(Object arg : getArgs()){
+				if(arg instanceof String){ print +=  " "+(String)arg;}
+				else{
+					print += " "+((CafeTerm)arg).termToString(mod, gen);
+				}
+			}
+			return print + ")";
+		}
+		
+		
 		if(!TermParser.isBinary(getOpName())){
 			print = getOpName();
 			String extra="";

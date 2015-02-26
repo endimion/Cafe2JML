@@ -57,34 +57,46 @@ public class CompTerm implements CafeTerm{
 	 */
 	@Override
 	public String termToString(Module mod, JmlGenerator gen){
-		String print ;  
+		String print="" ;  
 		
-		if(!TermParser.isBinary(getOpName()))
-		{
-			print = getOpName() + "(";
-			for(Object o : getArgs()){
-				if(o instanceof CafeTerm){
-					if(!mod.getOpSortByName(((CafeTerm)o).getOpName()).equals(mod.getClassSort())
-						&& !((CafeTerm)o).getOpName().equals("")
-						)
-						print +=  ((CafeTerm) o).termToString(mod, gen) + ", ";
-				}else{
-					if(o instanceof String){
-						if(!mod.getOpSortByName((String)o).equals(mod.getClassSort())
-							)
-							print +=   (String) o + ", ";
-					}
+		if(mod == null){
+			print +=  getOpName()+"( ";
+			for(Object arg : getArgs()){
+				if(arg instanceof String){ print += (String)arg;}
+				else{
+					print += " "+((CafeTerm)arg).termToString(mod, gen);
 				}
-			}//end of for loop
-			if(print.endsWith(", ")) print = StringHelper.remLastChar(print.trim());
-			print += ")";
+			}
+			return print + ")";
 		}else{
-			String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod,gen): (String)getArgs().get(0);  
-			String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(mod,gen): (String) getArgs().get(1);
-			print = "(" + leftTerm + " "+ getOpName() + " " + rightTerm + ")";
-		}
-		return print;
+			
+			if(!TermParser.isBinary(getOpName()))
+			{
+				print = getOpName() + "(";
+				for(Object o : getArgs()){
+					if(o instanceof CafeTerm){
+						if(!mod.getOpSortByName(((CafeTerm)o).getOpName()).equals(mod.getClassSort())
+							&& !((CafeTerm)o).getOpName().equals("")
+							)
+							print +=  ((CafeTerm) o).termToString(mod, gen) + ", ";
+					}else{
+						if(o instanceof String){
+							if(!mod.getOpSortByName((String)o).equals(mod.getClassSort())
+								)
+								print +=   (String) o + ", ";
+						}
+					}
+				}//end of for loop
+				if(print.endsWith(", ")) print = StringHelper.remLastChar(print.trim());
+				print += ")";
+			}else{
+				String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod,gen): (String)getArgs().get(0);  
+				String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(mod,gen): (String) getArgs().get(1);
+				print = "(" + leftTerm + " "+ getOpName() + " " + rightTerm + ")";
+			}
 		
+			return print;
+		}
 	}//end of printTerm
 	
 	
@@ -202,8 +214,7 @@ public class CompTerm implements CafeTerm{
 						  + ( ((CafeTerm) getArgs().get(1))).printTermSkipArg(rightPos,mod) + ")";
 				}else{
 					
-					String sort = TermParser.cafe2JavaSort(mod.getOpSortByName( ((CafeTerm) getArgs().get(0)).getOpName()));
-					//System.out.println("SOOOOORTTT " + sort + " term " + ((CafeTerm) getArgs().get(1)).getOpName() );
+					String sort = TermParser.cafe2JavaSort(mod.getOpSortByName( ((CafeTerm) getArgs().get(1)).getOpName()));
 					if(sort.equals("int")||sort.equals("boolean")|| StringHelper.isNumber(((CafeTerm) getArgs().get(1)).getOpName())){
 						res =   ((CafeTerm) getArgs().get(0)).printTermSkipArg(leftPos,mod).trim()
 								+ " == " 

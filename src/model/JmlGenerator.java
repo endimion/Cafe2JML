@@ -3,20 +3,6 @@ package model;
 import java.util.Vector;
 
 
-//TODO 
-/* 0) projection operators are simply translated to pure methods
- * 
- * 1) Hidden constants are translated to 
- * public static final S objects!!!! of the class that is 
- * the sort of the projection op
- * 
- * 2.1)composite object initial states, projected to composing object constants
- * 2.2) composite object initial states, projected to composing object initial states
- *
- *3)transitions:
- */
-
-
 
 public class JmlGenerator {
 
@@ -154,11 +140,12 @@ public class JmlGenerator {
 		CafeTerm leftObs =  left;
 		CafeTerm trans = (CafeTerm)left.getArgs().get(leftPos); //we retrieve the sub term that denotes the transition rule
 		int sysPos = TermParser.getPositionOfSystemSort(trans, mod); //find the system sort in the transition term
+		
 		trans.getArgs().remove(sysPos); //end remove it
 		
-		leftObs.getArgs().remove(leftPos); //we remove the system sorted argument
+		//leftObs.getArgs().remove(leftPos); //we remove the system sorted argument
 		
-		 CafeTerm rightHS = right;
+		CafeTerm rightHS = right;
 		sysPos = TermParser.getPositionOfSystemSort(right, mod);//find the system sort in the rhs
 		if(sysPos >= 0){
 			rightHS.getArgs().remove(rightPos); //end if it exists remove it
@@ -259,6 +246,63 @@ public class JmlGenerator {
 	}//end of getVarsOfObsList
 	
 	
+	/**
+	 * 
+	 * @param projSort the sort of the module of the projection
+	 * @param mod the module we found the projection equation inside
+	 * @param project the CafeTerm denoting the projection operator
+	 * @return a String representation of the translation of a projection equation which does not change
+	 * the state of the projected object
+	 */
+	private String projNoStateChangeTranslation(String projSort, Module mod, CafeTerm project){
+		String res="";
+		Module projMod = getModBySort(projSort);
+		
+		int j = 0;
+		for(CafeOperator op : projMod.getObservers()){
+			
+			String varsDecl="";
+			
+			if(op.getArity().size() > 0){
+				if(op.getArity().size() == 1 && op.getArity().get(0).equals(projSort)){
+					res += "@";
+				}else{res += "@( \\forall ";}
+				
+				String aVar ="";
+				String sort="";
+				Vector<String> vars = new Vector<String>();
+				
+				for(CafeVariable v : projMod.getVars()){
+					vars.add(v.getName());
+				}//end of looping through the variables of the module
+				
+				for(int i = 0; i < op.getArity().size();i++){
+					sort = TermParser.cafe2JavaSort(op.getArity().get(i));
+					if(!(sort.equals(mod.getClassSort()) || sort.equals(projSort) ) ){
+						aVar = getVarBySort(op.getArity().get(i), projMod, "", vars);
+						res +=  sort +  " " 
+								+ aVar + ", ";
+						varsDecl += aVar +", ";
+					}//end if sort is equal to the module sort or the sort equals to the projected module sort
+				}//end of looping through the arity of the operator
+				if(res.endsWith(", ")){res = StringHelper.remLastChar(res.trim()) + ";";}
+				res +='\n';
+			}//end if op.getArity().size() > 0
+			
+			if(varsDecl.endsWith(", ")){varsDecl = StringHelper.remLastChar(varsDecl.trim());}
+			res += "@ "+ project.termToString(mod, this) +"."+ op.getName() + "("+ varsDecl +") "
+					+ "==" + "\\old(" +    project.termToString(mod, this) +"."+ op.getName() + "("+ varsDecl +")) " ; 
+			
+			
+			if(!(op.getArity().size() <= 1 && op.getArity().get(0).equals(projSort))){
+				res += ")";
+			}
+			if(j < projMod.getObservers().size()-1) res += " && " + '\n';
+			j++;
+		}//end of looping through the observers
+		
+		return res;
+	}//end of projNoStateChange
 	
 	
 	
@@ -268,21 +312,24 @@ public class JmlGenerator {
 	 * 
 	 * @return a JML contract for translating a projection operator equation
 	 */
-	public String translateProjectEquation(CafeTerm rightHS,  int rightPos, Module mod,
+	public String translateProjectEquation(CafeTerm rightHS,  CafeTerm leftHS,int rightPos, Module mod,
 			String projSort, CafeTerm project, JmlModule jmod){
+		
+		Module projMod = getModBySort(projSort);
 		String res="";
 		
-		Object transS = rightHS.getArgs().get(rightPos);
-		if(transS instanceof String){
-			//System.out.println("the transitions chain is a String" );
-			//System.out.println("rightHs is " + rightHS.termToString(mod) + "and chain is "+ transS );
-			if(!getSortbyVarName((String)transS, mod).equals(mod.getClassSort())){
-				System.out.println("problem found");
-			}
+		
+		if(rightHS.termToString(mod, this).equals(leftHS.termToString(mod, this))){
+			res += projNoStateChangeTranslation(projSort, mod, project);
 		}else{
-			//it is a CafeTerm
 			Vector<CafeTerm> chain = new Vector<CafeTerm>();
+			
+			//TODO
+			Vector<CafeTerm> guards = buildGuardChain(rightHS, mod, projSort,project.getOpName());
 			buildChainFromTerm(chain,rightHS, mod,projSort,project.getOpName());
+			
+			
+			//res += chain.size();
 			
 			
 			Vector<CafeTerm> temp = new Vector<CafeTerm>();
@@ -307,7 +354,7 @@ public class JmlGenerator {
 			if(res.endsWith(", ")) res = StringHelper.remLastChar(res.trim()) + "; " + '\n';
 			
 			
-			Module projMod = getModBySort(projSort);
+			
 			
 			for(int j =0 ; j< obsValP.size(); j++){
 				ObsValPair p  = obsValP.get(j);
@@ -322,9 +369,9 @@ public class JmlGenerator {
 				if(j <  obsValP.size()-1) res += " &&"+'\n';
 				
 			}//end of looping through  the new values of the observers
-			res += ");" +'\n';
+			res += ")" ;
 			
-			System.out.println(res);
+			
 			
 		}//end if the transitions of the rightHs system sorted term 
 		
@@ -392,24 +439,54 @@ public class JmlGenerator {
 	 */
 	public Vector<CafeTerm> buildChainFromTerm(Vector<CafeTerm> chain, CafeTerm term, 
 			Module mod, String projModSort, String projName){
-		
 		if( getTermSort(term).equals(projModSort) 
 				&& !(term).getOpName().equals(projName))
 		{ chain.add(term);}
 		
-		
-		
 		for(Object arg: term.getArgs() ){
 			if(arg instanceof CafeTerm){ 
 				if( getTermSort((CafeTerm)arg).equals(projModSort))
-				{	buildChainFromTerm(chain, (CafeTerm) arg,mod, projModSort,projName);
-					//System.out.println("##sort of " + ((CafeTerm)arg).termToString(mod, null) + " is " + getTermSort((CafeTerm)arg));
+				{	
+					buildChainFromTerm(chain, (CafeTerm) arg,mod, projModSort,projName);
 				}
-				
 			}
 		}//end for loop
 		return chain;
 	}//end of buildChainFromTerm
+	
+	
+	
+	//TODO
+	public Vector<CafeTerm> buildGuardChain(CafeTerm term, Module mod, String projSort, String projName){
+		Module projMod = getModBySort(projSort);
+		
+		Vector<CafeTerm> guardChain =new Vector<CafeTerm>();
+		Vector<CafeTerm> terms =  new Vector<CafeTerm>();
+		buildChainFromTerm(terms, term, mod, projSort, projName);
+		
+		for(CafeTerm t : terms){
+			Vector<CafeEquation> matchEqs =  projMod.getMatchingLeftEqs(t.getOpName());
+			
+			for(CafeEquation eq : matchEqs){
+				if(eq.getCondition()!= null){ 
+					guardChain.add(eq.getCondition());
+				}
+			}//end of looping through the equations that have on their lhs the term 
+		}//end of looping through the given terms
+		
+
+		for(int i=1; i < guardChain.size() -1; i++){
+			if(guardChain.get(i).isEqual(guardChain.get(i+1))){
+				guardChain.remove(i);
+			}
+		}//end of cleaning up the guards vector
+		
+		for(CafeTerm g : guardChain){
+			System.out.println("GUARD CHAIN" + g.termToString(null, null));
+		}
+		
+		return guardChain;
+	}//end of buildGuardChain
 	
 	
 	
@@ -459,15 +536,18 @@ public class JmlGenerator {
 				if(!mod.isProjection(modules, left.getOpName())){
 					res += translateSimpleEquation(mod, left, right, leftPos, rightPos,  valOfObser, rightPos, jmod, transEq, forallStart); 
 				}else{
-					//TODO
-					//translate the condition part of the transitions
-					
 					
 					String projSort = mod.getTermSort(left);
-					res += translateProjectEquation(right, rightPos,mod,projSort,left,
+					
+					//System.out.println("LEEEEFFFFT " + left.getOpName()+ left.termToString(null, null));
+					res += translateProjectEquation(right, left,rightPos,mod,projSort,left,
 							getJModBySort(projSort));
 					
-					
+					if(cond!=null){
+						res += ");" + '\n';
+					}else{
+						res += ";" + '\n';
+					}
 					
 				}//end if the leftHS main operator (i.e. observer) of the equation is a projection
 			
