@@ -37,6 +37,18 @@ public class FileHelper {
 		
 	}//end of constructor
 	
+	/**
+	 * polymorphic version of the String constructor
+	 * @param f the file which should contain the CafeOBJ specification
+	 */
+	public FileHelper(File f){
+		try{
+			cafeFile = f;
+		}catch(Exception ex1){ex1.printStackTrace();}
+	}//end of constructor
+	
+	
+	
 	
 	/*
 	 * returns the size of the cafeobj file
@@ -49,6 +61,31 @@ public class FileHelper {
 		}
 		return size;
 	}//end of getSize
+	
+	/**
+	 * 
+	 * @return a String representation of the 
+	 * given CafeOBJ file as a String
+	 */
+	public String readFileAsTxt(){
+		String res="";
+		
+		try {
+			FileInputStream fis = new FileInputStream(cafeFile);
+			InputStreamReader isr = new InputStreamReader(fis);
+			BufferedReader br = new BufferedReader(isr); 
+			String line = (br.readLine()).trim();
+			
+			while(line != null){
+				 res += line.trim() + '\n';
+				 line = br.readLine();
+			 }
+			 br.close();
+		}catch(Exception e){e.printStackTrace();}
+		
+		return res;
+	}//end redFileAsTxt
+	
 	
 	
 

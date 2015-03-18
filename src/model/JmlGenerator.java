@@ -332,6 +332,14 @@ public class JmlGenerator {
 	//TODO add the guards of the transitions of the projected object
 	/**
 	 * 
+	 * @param rightHS the righths of the equation we are translating
+	 * @param leftHS the lefths of the equation
+	 * @param rightPos the position of the system sort in the righths term
+	 * @param mod the module which contains this equation
+	 * @param projSort the sort of the module the projection takes us to
+	 * @param project the projection operator
+	 * @param jmod the module containing some of the parsing results
+	 * @param arityVars a vector containing the variables that appear in the lhs of the equation
 	 * @return a JML contract for translating a projection operator equation
 	 */
 	public String translateProjectEquation(CafeTerm rightHS,  CafeTerm leftHS,int rightPos, 
@@ -347,7 +355,6 @@ public class JmlGenerator {
 			Vector<CafeTerm> chain = new Vector<CafeTerm>();
 			buildChainFromTerm(chain,rightHS, mod,projSort,project.getOpName());
 			
-			//TODO
 			Vector<CafeTerm> guards = buildGuardChain(rightHS, mod, projSort,project.getOpName());
 			String  guardString = "";
 			for(CafeTerm guard : guards){
@@ -363,7 +370,7 @@ public class JmlGenerator {
 			
 			Vector<ObsValPair>  obsValP = jmod.getObsValAfterTransCh(chain, getModBySort(projSort));
 			Vector<String> varList = getVarsOfObsList(obsValP);
-			//TODO cleanUP, i.e. remove variables which appear in the arity of the method
+
 			for(String var1: varList){
 				for(String arVar : arityVars){
 					if(arVar.equals(var1)){
@@ -383,9 +390,6 @@ public class JmlGenerator {
 			
 			if(res.endsWith(", ")) res = StringHelper.remLastChar(res.trim()) + "; " + '\n';
 			
-			
-			
-			
 			for(int j =0 ; j< obsValP.size(); j++){
 				ObsValPair p  = obsValP.get(j);
 				res += "@ " + project.termToString(mod, this)+"."+p.getObs().termToString(mod, this);
@@ -395,13 +399,9 @@ public class JmlGenerator {
 				}else{
 					res +=  ".equals(" +" \\old(" + p.getValue().termToString(mod, this) + "))";
 				}//end if it is not an object		
-						
 				if(j <  obsValP.size()-1) res += " &&"+'\n';
-				
 			}//end of looping through  the new values of the observers
 			res += ")" ;
-			
-			
 			
 		}//end if the transitions of the rightHs system sorted term 
 		
@@ -486,7 +486,15 @@ public class JmlGenerator {
 	
 	
 	
-	//TODO
+	/**
+	 * 
+	 * @param term a given CafeTerm 
+	 * @param mod the module we are translating the term in
+	 * @param projSort the sort of the projection operator
+	 * @param projName  the name of the projection operator
+	 * @return a Vector of CafeTerms that denotes all the effective conditions of the terms
+	 * that appear in the given parameter term when that is a chain of operators
+	 */
 	public Vector<CafeTerm> buildGuardChain(CafeTerm term, Module mod, String projSort, String projName){
 		Module projMod = getModBySort(projSort);
 		
@@ -510,8 +518,6 @@ public class JmlGenerator {
 				guardChain.remove(i);
 			}
 		}//end of cleaning up the guards vector
-		
-		
 		
 		return guardChain;
 	}//end of buildGuardChain
@@ -558,7 +564,7 @@ public class JmlGenerator {
 				if(cond!= null){
 					if(!res.endsWith("@ ")) res +="@";
 					//res += "(" + cond.printTermSkipArg(condPos,mod).replace("c-","c") + " ==> "+ '\n';
-					res += "(" + cond.termToString(mod, this).replace("c-","c") + " ==> "+ '\n';
+					res += "( \\old(" + cond.termToString(mod, this).replace("c-","c") + ") ==> "+ '\n';
 				}
 				
 				if(!mod.isProjection(modules, left.getOpName())){
