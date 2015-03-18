@@ -189,7 +189,7 @@ public class JmlGenerator {
 		if(i == transEq.size() -1){
 			res += (forallStart.contains("forall"))? "));" +'\n':");"+'\n';
 		}else{
-			if(cond == null)res += (forallStart.contains("forall"))? "));" +'\n':'\n';
+			if(cond == null) res += (forallStart.contains("forall"))? "));" +'\n':'\n';
 			else res += (forallStart.contains("forall"))? "));" +'\n':");"+'\n';
 			res += "@ also" + '\n';
 		}
@@ -288,50 +288,50 @@ public class JmlGenerator {
 	private String projNoStateChangeTranslation(String projSort, Module mod, CafeTerm project){
 		String res="";
 		Module projMod = getModBySort(projSort);
-		
-		int j = 0;
-		for(CafeOperator op : projMod.getObservers()){
-			
-			String varsDecl="";
-			
-			if(op.getArity().size() > 0){
-				if(op.getArity().size() == 1 && op.getArity().get(0).equals(projSort)){
-					res += "@";
-				}else{res += "@( \\forall ";}
+		if(projMod.getEqs().size() > 0){
+			int j = 0;
+			for(CafeOperator op : projMod.getObservers()){
 				
-				String aVar ="";
-				String sort="";
-				Vector<String> vars = new Vector<String>();
+				String varsDecl="";
 				
-				for(CafeVariable v : projMod.getVars()){
-					vars.add(v.getName());
-				}//end of looping through the variables of the module
+				if(op.getArity().size() > 0){
+					if(op.getArity().size() == 1 && op.getArity().get(0).equals(projSort)){
+						res += "@";
+					}else{res += "@( \\forall ";}
+					
+					String aVar ="";
+					String sort="";
+					Vector<String> vars = new Vector<String>();
+					
+					for(CafeVariable v : projMod.getVars()){
+						vars.add(v.getName());
+					}//end of looping through the variables of the module
+					
+					for(int i = 0; i < op.getArity().size();i++){
+						sort = TermParser.cafe2JavaSort(op.getArity().get(i));
+						if(!(sort.equals(mod.getClassSort()) || sort.equals(projSort) ) ){
+							aVar = getVarBySort(op.getArity().get(i), projMod, "", vars);
+							res +=  sort +  " " 
+									+ aVar + ", ";
+							varsDecl += aVar +", ";
+						}//end if sort is equal to the module sort or the sort equals to the projected module sort
+					}//end of looping through the arity of the operator
+					if(res.endsWith(", ")){res = StringHelper.remLastChar(res.trim()) + ";";}
+					res +='\n';
+				}//end if op.getArity().size() > 0
 				
-				for(int i = 0; i < op.getArity().size();i++){
-					sort = TermParser.cafe2JavaSort(op.getArity().get(i));
-					if(!(sort.equals(mod.getClassSort()) || sort.equals(projSort) ) ){
-						aVar = getVarBySort(op.getArity().get(i), projMod, "", vars);
-						res +=  sort +  " " 
-								+ aVar + ", ";
-						varsDecl += aVar +", ";
-					}//end if sort is equal to the module sort or the sort equals to the projected module sort
-				}//end of looping through the arity of the operator
-				if(res.endsWith(", ")){res = StringHelper.remLastChar(res.trim()) + ";";}
-				res +='\n';
-			}//end if op.getArity().size() > 0
-			
-			if(varsDecl.endsWith(", ")){varsDecl = StringHelper.remLastChar(varsDecl.trim());}
-			res += "@ "+ project.termToString(mod, this) +"."+ op.getName() + "("+ varsDecl +") "
-					+ "==" + "\\old(" +    project.termToString(mod, this) +"."+ op.getName() + "("+ varsDecl +")) " ; 
-			
-			
-			if(!(op.getArity().size() <= 1 && op.getArity().get(0).equals(projSort))){
-				res += ")";
-			}
-			if(j < projMod.getObservers().size()-1) res += " && " + '\n';
-			j++;
-		}//end of looping through the observers
-		
+				if(varsDecl.endsWith(", ")){varsDecl = StringHelper.remLastChar(varsDecl.trim());}
+				res += "@ "+ project.termToString(mod, this) +"."+ op.getName() + "("+ varsDecl +") "
+						+ "==" + "\\old(" +    project.termToString(mod, this) +"."+ op.getName() + "("+ varsDecl +")) " ; 
+				
+				
+				if(!(op.getArity().size() <= 1 && op.getArity().get(0).equals(projSort))){
+					res += ")";
+				}
+				if(j < projMod.getObservers().size()-1) res += " && " + '\n';
+				j++;
+			}//end of looping through the observers
+		}//end if the proj module contains transitions
 		return res;
 	}//end of projNoStateChange
 	
@@ -357,63 +357,63 @@ public class JmlGenerator {
 		Module projMod = getModBySort(projSort);
 		String res="";
 		
-		
-		if(rightHS.termToString(mod, this).equals(leftHS.termToString(mod, this))){
-			res += projNoStateChangeTranslation(projSort, mod, project);
-		}else{
-			Vector<CafeTerm> chain = new Vector<CafeTerm>();
-			buildChainFromTerm(chain,rightHS, mod,projSort,project.getOpName());
-			
-			Vector<CafeTerm> guards = buildGuardChain(rightHS, mod, projSort,project.getOpName());
-			String  guardString = "";
-			for(CafeTerm guard : guards){
-				guardString += guard.termToString(projMod, this) + "&& ";
-			}//end of looping through the guards
-			if(guardString.endsWith("&& ")) guardString = StringHelper.remLastChar(StringHelper.remLastChar(guardString.trim()));
-			
-			Vector<CafeTerm> temp = new Vector<CafeTerm>();
-			for(CafeTerm t : chain){
-				temp.add(removeProjectSort(projSort, t));
-			}
-			chain  = temp;
-			
-			Vector<ObsValPair>  obsValP = jmod.getObsValAfterTransCh(chain, getModBySort(projSort));
-			Vector<String> varList = getVarsOfObsList(obsValP);
-
-			for(String var1: varList){
-				for(String arVar : arityVars){
-					if(arVar.equals(var1)){
-						varList.remove(var1);
-						break;
-					}
-				}
-			}//end of looping through the varList
-			
-			res += "@" +guardString + "==>" +'\n';
-			res += "@ (\\forall ";
-			BasicTerm b = new BasicTerm(false);
-			for(String var : varList){
-				b.setOpName(var);
-				res += TermParser.cafe2JavaSort(getTermSort(b)) + " " + var + ", ";
-			}
-			
-			if(res.endsWith(", ")) res = StringHelper.remLastChar(res.trim()) + "; " + '\n';
-			
-			for(int j =0 ; j< obsValP.size(); j++){
-				ObsValPair p  = obsValP.get(j);
-				res += "@ " + project.termToString(mod, this)+"."+p.getObs().termToString(mod, this);
+		if(projMod.getEqs().size() > 0){
+			if(rightHS.termToString(mod, this).equals(leftHS.termToString(mod, this))){
+				res += projNoStateChangeTranslation(projSort, mod, project);
+			}else{
+				Vector<CafeTerm> chain = new Vector<CafeTerm>();
+				buildChainFromTerm(chain,rightHS, mod,projSort,project.getOpName());
 				
-				if(!isObjectByOpName(p.getObs().getOpName(), projMod)){
-					res +=  "==" +" \\old(" + p.getValue().termToString(mod, this) + ")";
-				}else{
-					res +=  ".equals(" +" \\old(" + p.getValue().termToString(mod, this) + "))";
-				}//end if it is not an object		
-				if(j <  obsValP.size()-1) res += " &&"+'\n';
-			}//end of looping through  the new values of the observers
-			res += ")" ;
-			
-		}//end if the transitions of the rightHs system sorted term 
-		
+				Vector<CafeTerm> guards = buildGuardChain(rightHS, mod, projSort,project.getOpName());
+				String  guardString = "";
+				for(CafeTerm guard : guards){
+					guardString += guard.termToString(projMod, this) + "&& ";
+				}//end of looping through the guards
+				if(guardString.endsWith("&& ")) guardString = StringHelper.remLastChar(StringHelper.remLastChar(guardString.trim()));
+				
+				Vector<CafeTerm> temp = new Vector<CafeTerm>();
+				for(CafeTerm t : chain){
+					temp.add(removeProjectSort(projSort, t));
+				}
+				chain  = temp;
+				
+				Vector<ObsValPair>  obsValP = jmod.getObsValAfterTransCh(chain, getModBySort(projSort));
+				Vector<String> varList = getVarsOfObsList(obsValP);
+	
+				for(String var1: varList){
+					for(String arVar : arityVars){
+						if(arVar.equals(var1)){
+							varList.remove(var1);
+							break;
+						}
+					}
+				}//end of looping through the varList
+				
+				res += "@" +guardString + "==>" +'\n';
+				res += "@ (\\forall ";
+				BasicTerm b = new BasicTerm(false);
+				for(String var : varList){
+					b.setOpName(var);
+					res += TermParser.cafe2JavaSort(getTermSort(b)) + " " + var + ", ";
+				}
+				
+				if(res.endsWith(", ")) res = StringHelper.remLastChar(res.trim()) + "; " + '\n';
+				
+				for(int j =0 ; j< obsValP.size(); j++){
+					ObsValPair p  = obsValP.get(j);
+					res += "@ " + project.termToString(mod, this)+"."+p.getObs().termToString(mod, this);
+					
+					if(!isObjectByOpName(p.getObs().getOpName(), projMod)){
+						res +=  "==" +" \\old(" + p.getValue().termToString(mod, this) + ")";
+					}else{
+						res +=  ".equals(" +" \\old(" + p.getValue().termToString(mod, this) + "))";
+					}//end if it is not an object		
+					if(j <  obsValP.size()-1) res += " &&"+'\n';
+				}//end of looping through  the new values of the observers
+				res += ")" ;
+				
+			}//end if the transitions of the rightHs system sorted term 
+		}//end if the projection module has equations
 		return res;
 	}//end of translateProjectEquation
 	
@@ -603,21 +603,16 @@ public class JmlGenerator {
 					if(!res.endsWith("@ ")) res +="@";
 					//res += "(" + cond.printTermSkipArg(condPos,mod).replace("c-","c") + " ==> "+ '\n';
 					String append =  "( \\old(" + cond.termToString(mod, this).replace("c-","c") + ") ==> "+ '\n';;
-					
 					if(effCond !=null){
 						CafeTerm condNoEff = cond.removeArg(effCond.getOpName());
-						//System.out.println("The old condition of EQ is " + cond.termToString(mod, this));
-						//System.out.println("The new condition fo EQ is " + condNoEff.termToString(mod, this));
 						if(!condNoEff.termToString(mod, this).equals(effCond.termToString(mod, this))){
 							append = "( \\old(" + condNoEff.termToString(mod, this).replace("c-","c") + ") ==> "+ '\n';
 						}else{
 							append = "(" + '\n';
 						}
-					
-					}
+					}//end if effective condition is not null
 						res += append;
-					
-				}
+				}//end if cond is not null
 				
 				if(!mod.isProjection(modules, left.getOpName())){
 					res += translateSimpleEquation(mod, left, right, leftPos, rightPos,  
