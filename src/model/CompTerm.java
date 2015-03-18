@@ -131,13 +131,26 @@ public class CompTerm implements CafeTerm{
 					print += ")";
 					
 				}else{
-					String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod,gen): (String)getArgs().get(0);  
-					String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(mod,gen): (String) getArgs().get(1);
-					
-					String pred = (getOpName().equals("equals"))? " == ": getOpName();
-					pred = (pred.equals("and"))? " && " :pred;
-					pred = (pred.equals("or"))? " || " :pred;
-					print = "(" + leftTerm + " "+ pred + " " + rightTerm + ")";
+					try{
+						if(getArgs().size() > 1){
+							String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod,gen): (String)getArgs().get(0);  
+							String rightTerm = (getArgs().get(1) instanceof CafeTerm)? ((CafeTerm)getArgs().get(1)).termToString(mod,gen): (String) getArgs().get(1);
+							
+							String pred = (getOpName().equals("equals"))? " == ": getOpName();
+							pred = (pred.equals("and"))? " && " :pred;
+							pred = (pred.equals("or"))? " || " :pred;
+							print = "(" + leftTerm + " "+ pred + " " + rightTerm + ")";
+						}else{
+							if(getArgs().size() == 1){
+								String leftTerm = (getArgs().get(0) instanceof CafeTerm)? ((CafeTerm)getArgs().get(0)).termToString(mod,gen): (String)getArgs().get(0);
+								print = leftTerm;
+							}else{
+								print = "true";
+							} 
+						
+						}
+						
+					}catch(Exception e){e.printStackTrace();}
 				}
 
 			}//end if gen is not null
@@ -423,6 +436,39 @@ public class CompTerm implements CafeTerm{
 		
 		return returnTerm;
 	}//end of replaceTerm
+	
+	
+	
+	
+	/**
+	 * Returns a CafeTerm identical to this but without the given argument
+	 * @param argName the name of the argument we want to remove
+	 * @return CafeTerm identical to this but without the given argument
+	 */
+	public CafeTerm removeArg(String argName){
+		CompTerm t = new CompTerm();
+		t.setOpName(opName);
+		
+		for(Object arg :getArgs()){
+			if(arg instanceof CafeTerm){
+				if(!((CafeTerm)arg).getOpName().equals(argName)){
+					t.addArg(arg);
+				}
+			}else{
+				if(!((String)arg).equals(argName))
+					t.addArg(arg);
+			}
+			
+		}
+		
+		return t;
+	}//end of removeArg
+	
+	
+	
+	
+	
+	
 	
 	
 	

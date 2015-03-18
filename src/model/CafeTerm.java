@@ -64,4 +64,7 @@ public interface CafeTerm {
 	 */
 	public CafeTerm replaceTerms(Vector<Object> orig , Vector<Object> repl);
 	
+	
+	public CafeTerm removeArg(String argName);
+	
 }

@@ -187,10 +187,11 @@ public class JmlGenerator {
 		jmod.addTransObsVal(valOfObser); //add the <transition, (observer, value)> pair to the jmlmod
 		
 		if(i == transEq.size() -1){
-			res += (forallStart.contains("forall"))? "));" +'\n':")"+'\n';
+			res += (forallStart.contains("forall"))? "));" +'\n':");"+'\n';
 		}else{
-			if(cond == null)res += (forallStart.contains("forall"))? ")) &&" +'\n':" &&"+'\n';
-			else res += (forallStart.contains("forall"))? ")) &&" +'\n':") &&"+'\n';
+			if(cond == null)res += (forallStart.contains("forall"))? "));" +'\n':'\n';
+			else res += (forallStart.contains("forall"))? "));" +'\n':");"+'\n';
+			res += "@ also" + '\n';
 		}
 		
 		return res;
@@ -554,11 +555,40 @@ public class JmlGenerator {
 		for(CafeOperator bop : actions){
 			transEq = mod.getMatchingLeftEqs(bop.getName());
 			
+			//TODO find the effective condition for the transition
+			// and make the contracts so as to include a requires clause
+			// maybe it is easier of each transition!!!
+			
+			CafeTerm effCond = null;
+			
+			for(CafeEquation eq : transEq ){
+				CafeTerm cond = eq.getCondition();
+				if(cond != null){
+					for(Object arg :cond.getArgs()){
+						if(arg instanceof CafeTerm){
+							if(((CafeTerm) arg).getOpName().equals("c-"+bop.getName())){
+								effCond = (CafeTerm)arg;
+							}//end if the condition term argument contains the same String as that of the opName
+							
+						}//end if the argument is a CafeTerm
+					}//end of looping through the arguments of the condt of eq
+
+				}//end if cond is not null
+			}// end of looping through the equations of the transition
+			//if(effCond !=null)System.out.println("the effective condition is" + effCond.termToString(mod, this));
+			
+			
 			//first we set the transition to be the current transition
 			valOfObser = new TransObserValues();
 			
-			res +="/*@ ensures " + '\n'; 
+			
 			for(int i =0; i< transEq.size();i++){
+				if(effCond !=null){ 
+					if(i == 0) res +="/*@ requires " + effCond.termToString(mod, this).replace("c-","c") + ";"+ '\n';
+					else res +="@ requires " + effCond.termToString(mod, this).replace("c-","c")+ ";" + '\n';
+				} 
+				res +=(i ==0 && effCond == null)?"/*@ ensures " + '\n': "@ ensures " + '\n' ; 
+				
 				forallStart = (i == 0)?forallDecl(mod,"",transEq.get(i),bop):forallDecl(mod,"@ ",transEq.get(i),bop) ;
 				if(!forallStart.equals("@ "))res +=  forallStart;
 				
@@ -572,7 +602,21 @@ public class JmlGenerator {
 				if(cond!= null){
 					if(!res.endsWith("@ ")) res +="@";
 					//res += "(" + cond.printTermSkipArg(condPos,mod).replace("c-","c") + " ==> "+ '\n';
-					res += "( \\old(" + cond.termToString(mod, this).replace("c-","c") + ") ==> "+ '\n';
+					String append =  "( \\old(" + cond.termToString(mod, this).replace("c-","c") + ") ==> "+ '\n';;
+					
+					if(effCond !=null){
+						CafeTerm condNoEff = cond.removeArg(effCond.getOpName());
+						//System.out.println("The old condition of EQ is " + cond.termToString(mod, this));
+						//System.out.println("The new condition fo EQ is " + condNoEff.termToString(mod, this));
+						if(!condNoEff.termToString(mod, this).equals(effCond.termToString(mod, this))){
+							append = "( \\old(" + condNoEff.termToString(mod, this).replace("c-","c") + ") ==> "+ '\n';
+						}else{
+							append = "(" + '\n';
+						}
+					
+					}
+						res += append;
+					
 				}
 				
 				if(!mod.isProjection(modules, left.getOpName())){
@@ -591,7 +635,8 @@ public class JmlGenerator {
 							getJModBySort(projSort), arityVars);
 					
 					if(cond!=null){
-						res += ");" + '\n';
+						if(i != transEq.size()-1 ) res += ");" + '\n' + "@ also "+ '\n';
+						else res += ");" + '\n';
 					}else{
 						res += ";" + '\n';
 					}

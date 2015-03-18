@@ -26,7 +26,8 @@ public class Cafe2JML extends JFrame{
 	
 	public static void main(String[] args){
 		 try{ 
-		        UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel"); 
+		        //UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel"); 
+		 	UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		    }catch(Exception e){e.printStackTrace();}
 		
 		

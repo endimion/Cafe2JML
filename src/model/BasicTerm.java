@@ -318,5 +318,25 @@ public class BasicTerm implements CafeTerm{
 		return returnTerm;
 	}//end of replaceTerm
 	
+	/**
+	 * Returns a CafeTerm identical to this but without the given argument
+	 * @param argName the name of the argument we want to remove
+	 * @return CafeTerm identical to this but without the given argument
+	 */
+	public CafeTerm removeArg(String argName){
+		BasicTerm t = new BasicTerm(false);
+		t.setOpName(opName);
+		
+		for(String s: getArgs()){
+			if(!s.equals(argName)){
+				t.addArg(s);
+			}
+		}
+		
+		return t;
+	}//end of removeArg
+	
+	
+	
 	
 }//end of BasicOpExpr
