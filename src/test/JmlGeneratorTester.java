@@ -90,11 +90,11 @@ public class JmlGeneratorTester {
 		//System.out.println(gen.translateObservers(mod));
 		//System.out.println(gen.translateGuards(mod));
 		//System.out.println(gen.translateTransition(mod) );
-		System.out.println(gen.translateSimpleModule(mod,jmod));
+		System.out.println(gen.translateModule(mod,jmod));
 		
 		mod = mods.get(mods.size()-2);
 		jmod = new JmlModule(mod.getClassSort()); 
-		System.out.println(gen.translateSimpleModule(mod, jmod));
+		System.out.println(gen.translateModule(mod, jmod));
 		
 	}//end of testTranslateSimpleModule
 	

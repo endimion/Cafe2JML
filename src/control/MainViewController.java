@@ -57,7 +57,7 @@ public class MainViewController {
 				
 				for(Module mod : mods){
 					JmlModule jmod = new JmlModule(mod.getClassSort());
-					translation += gen.translateSimpleModule(mod, jmod);
+					translation += gen.translateModule(mod, jmod);
 				
 				}
 				//File oldFile = fh.getFile();

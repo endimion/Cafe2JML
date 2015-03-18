@@ -42,15 +42,23 @@ public class JmlGenerator {
 		
 		//String  forString ="";
 			
+			if(matchingEqs.size() > 0){ res += "/*@ initially" +'\n';}
+			
 			for(int i = 0 ; i < matchingEqs.size() ; i++){
 				CafeEquation eq = matchingEqs.get(i);
 				CafeTerm left = eq.getLeftTerm();
 				CafeTerm right = eq.getRightTerm();
-				
-				res +=  forallDecl(mod, "/*@ initially",eq,null);
-				res += "  @ "+ left.printTermSkipArg(0,mod) + " == " + right.termToString(mod,this);
+				CafeTerm cond = eq.getCondition();
+				if(cond == null){
+					res +=  forallDecl(mod, " @",eq,null);
+					res += "  @ "+ left.printTermSkipArg(0,mod) + " == " + right.termToString(mod,this);
+				}else{
+					res +=  forallDecl(mod, " @",eq,null);
+					res += " @" +cond.termToString(mod, this) + " ==> " +
+							left.printTermSkipArg(0,mod) + " == " + right.termToString(mod,this);
+				}
 				res +=(i != matchingEqs.size()-1)? " &&" + '\n': ");"+'\n';
-				
+
 			}//end of looping through the equations except form the last one
 			res += " @*/"+ '\n' + '\n' + '\n' +"public "+init.getName() + "(){}"  + '\n' + '\n';
 		}//end of looping through the inital states of the module
@@ -859,7 +867,7 @@ public class JmlGenerator {
 	 * @param mod
 	 * @return
 	 */
-	public String translateSimpleModule(Module mod, JmlModule jmod){
+	public String translateModule(Module mod, JmlModule jmod){
 		String res ="";
 		jModules.add(jmod);
 		

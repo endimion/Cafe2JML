@@ -1,6 +1,8 @@
 package view;
 
-import javax.swing.BoxLayout;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -38,18 +40,21 @@ public class MainView {
 		
 		JPanel topp = new JPanel();
 		
-		BoxLayout mBox = new BoxLayout(mainp,  BoxLayout.Y_AXIS);
+		
+		//BoxLayout mBox = new BoxLayout(mainp,  BoxLayout.Y_AXIS);
+		BorderLayout mBox = new BorderLayout();
 		mainp.setLayout(mBox);
 		
-		BoxLayout tBox = new BoxLayout(textP,BoxLayout.X_AXIS);
+		//BoxLayout tBox = new BoxLayout(textP,BoxLayout.X_AXIS);
+		GridLayout tBox = new GridLayout(0,2);
 		textP.setLayout(tBox);
 		
 		textP.add(leftp);
 		textP.add(rightp);
 		topp.add(translate);
 		
-		mainp.add(textP);
-		mainp.add(topp);
+		mainp.add(textP, BorderLayout.CENTER);
+		mainp.add(topp,  BorderLayout.PAGE_END);
 		
 		frame.setJMenuBar(menu);
 		mainp.revalidate();

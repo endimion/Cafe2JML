@@ -29,7 +29,7 @@ public class JmlModuleTester {
 		gen = new JmlGenerator(mods);
 		mod = mods.get(mods.size()-1);
 		jmod = new JmlModule(mod.getClassSort()); 
-		gen.translateSimpleModule(mod,jmod);
+		gen.translateModule(mod,jmod);
 	}
 	
 	
