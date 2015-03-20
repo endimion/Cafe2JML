@@ -452,4 +452,24 @@ public class Module {
 		return false;
 	}//end of isProjection
 	
+	
+	/**
+	 * 
+	 * @param opName the name of an operator	
+	 * @return true if the given operator declares a variable in the give module
+	 */
+	public boolean isVariable(String opName){
+		for(CafeVariable var : getVars()){
+			if(var.getName().equals(opName))
+				return true;
+		}//end of for loop
+		return false;
+	}//end of isVariable
+	
+
+	
+	
+	
+	
+	
 }//end of class

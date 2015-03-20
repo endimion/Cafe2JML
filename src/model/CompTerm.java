@@ -59,6 +59,15 @@ public class CompTerm implements CafeTerm{
 	public String termToString(Module mod, JmlGenerator gen){
 		String print="" ;  
 		
+		if(getArgs().size() == 0 && (mod.getOpSortByName(getOpName()).equals("String") 
+										||
+									 mod.getOpSortByName(getOpName()).equals("Integer")
+									    ||
+									 mod.getOpSortByName(getOpName()).equals("boolean")
+				)){
+			return getOpName();
+		}
+		
 		if(mod == null){
 			print +=  getOpName()+"( ";
 			for(Object arg : getArgs()){
