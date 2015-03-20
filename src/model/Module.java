@@ -467,7 +467,42 @@ public class Module {
 	}//end of isVariable
 	
 
+	/**
+	 * @param opName the name of an operator which is included in the given module
+	 * @return a Vector<String> containing the names of the variables which are 
+	 * declared in this module and whose sort match those of the given operator
+	 */
+	public Vector<String> getVarsForOps(String opName){
+		Vector<String> result = new Vector<String>();
+		
+		Vector<CafeVariable> vars = new Vector<CafeVariable>();
+		for(CafeVariable v: getVars()){
+			vars.add(v);
+		}//end of looping through the variables of the module
+		
+		
+		CafeOperator op = null;
+		for(CafeOperator o : getOps()){
+			if(o.getName().equals(opName))
+				op = o;
+		}//end of looping throught the operators
+		
+		
+		for(String sort : op.getArity()){
+			for(CafeVariable v: vars){
+				if(v.getSort().equals(sort) && !sort.equals(getClassSort())){
+					result.add(v.getName());
+					//vars.remove(v);
+					break;
+				}
+			}//end of loopingthrough the variables of the module
+		}//end of looping through the arity of the given operator
+		
+		return result;
+	}//end of getVarsForOps
 	
+	
+
 	
 	
 	

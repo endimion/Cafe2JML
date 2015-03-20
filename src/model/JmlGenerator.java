@@ -364,7 +364,27 @@ public class JmlGenerator {
 				if(mod.isVariable(rightHS.getOpName())){
 					//TODO if the given right Term is a variable instead of
 					System.out.println("dude this is a variable");
-
+					Vector<CafeOperator> projObs = projMod.getObservers();
+					for(CafeOperator obs: projObs){
+						Vector<String> vars = projMod.getVarsForOps(obs.getName());
+						String forall ="";
+						String varsDec = "";
+						for(String v: vars){
+							forall += projMod.getOpSortByName(v) + " " + v + ", ";
+							varsDec += v + ", ";
+						}
+						if(forall.length() >0) forall = StringHelper.remLastChar(forall.trim());
+						if(varsDec.length() >0) varsDec = StringHelper.remLastChar(varsDec.trim());
+						
+						res += (vars.size()>0)? "@(\\forall " +  forall + ";"+'\n':"";
+						res += "@" + leftHS.termToString(mod, this)+"." + obs.getName() 
+								+"("+ varsDec+" ) == "+
+								rightHS.getOpName()+"." + obs.getName()+"("+ varsDec+")" + '\n';
+					}
+					
+					
+					
+					
 					
 					
 					
