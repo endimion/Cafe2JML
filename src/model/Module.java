@@ -503,6 +503,19 @@ public class Module {
 	
 	
 
+	/**
+	 * 
+	 * @param opName the name of an operator
+	 * @return true the given op denotes an initial state in this module
+	 */
+	public boolean isInitial(String opName){
+		
+		Vector<CafeOperator> initStates = getInitialStates();
+		for(CafeOperator op : initStates){
+			if(op.getName().equals(opName)) return true;
+		}
+			return false;
+	}//end of is initial
 	
 	
 	
