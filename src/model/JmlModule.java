@@ -179,55 +179,65 @@ public class JmlModule {
 		replacePairs = getObsValbyTrans(chain.get(chain.size()-1),mod);
 		Vector<CafeTerm> allObs =  getObFromPairVect(replacePairs); //stores all observer expressions that have appeared
 		
+		//TODO
+		// Correct if there exists an inital state in the chain 
+		
 		for(int i=chain.size()-2; i >=0; i--){
 			currentTrans = chain.get(i);
 			
-			origObsValP = getObsValbyTrans(currentTrans,mod);
+			if(mod.isInitial(chain.get(i+1).getOpName())){
+				System.out.println("found an inital state in the chain!");
 			
-			for(int k=0; k < origObsValP.size();k++){
-				boolean match = false;
-				for(CafeTerm obs : allObs){
-					if(obs.isEqual(origObsValP.get(k).getObs())){
-						match = true;
+			}else{
+				
+				origObsValP = getObsValbyTrans(currentTrans,mod);
+				
+				for(int k=0; k < origObsValP.size();k++){
+					boolean match = false;
+					for(CafeTerm obs : allObs){
+						if(obs.isEqual(origObsValP.get(k).getObs())){
+							match = true;
+						}
+					}//end of for loop through allObs
+					if(!match){allObs.add(origObsValP.get(k).getObs()); }
+				}//end of looping through origObsValP
+				
+				newPairs = new Vector<ObsValPair>();
+				
+				for(CafeTerm obsrv : allObs){
+				
+					CafeTerm newObsVal =  ((CafeTerm)getValOfObs(obsrv, replacePairs));
+					if(newObsVal != null) newObsVal = newObsVal.replaceAllMatching(origObsValP);
+					else{
+						newObsVal =getValOfObs(obsrv, origObsValP);
+					}//end if newObsVal was null
+					
+					CafeTerm prevVal = getValOfObs(obsrv, replacePairs);
+					CafeTerm original =  getValOfObs(obsrv, origObsValP);
+				
+					if(prevVal instanceof BasicTerm && original != null){
+						if(! original.termToString(mod,null).equals(obsrv.termToString(mod,null))){
+							newP = new ObsValPair(obsrv, original);
+						}else{newP = new ObsValPair(obsrv, prevVal);}
+					}else{
+						newP = new ObsValPair(obsrv, newObsVal);
 					}
-				}//end of for loop through allObs
-				if(!match){allObs.add(origObsValP.get(k).getObs()); }
-			}//end of looping through origObsValP
-			
-			newPairs = new Vector<ObsValPair>();
-			
-			for(CafeTerm obsrv : allObs){
-			
-				CafeTerm newObsVal =  ((CafeTerm)getValOfObs(obsrv, replacePairs));
-				if(newObsVal != null) newObsVal = newObsVal.replaceAllMatching(origObsValP);
-				else{
-					newObsVal =getValOfObs(obsrv, origObsValP);
-				}//end if newObsVal was null
+							
+					
+					
+					//newP = new ObsValPair(obsrv, newObsVal);
+					newPairs.add(newP);
+					
+					//System.out.println("OBSERVER Is ::: " + obsrv.termToString(mod,null));
+					//if(getValOfObs(obsrv, replacePairs) != null)System.out.println("PREVIOUS VALUE IS ::: " + getValOfObs(obsrv, replacePairs).termToString(mod,null));
+					//if(getValOfObs(obsrv, origObsValP) != null) System.out.println("ORIGINAL VALUE IS ::: " + getValOfObs(obsrv, origObsValP).termToString(mod,null));
+					//if(newP.getValue() != null)System.out.println("NEW IS ::: " + newP.getValue().termToString(mod,null));
 				
-				CafeTerm prevVal = getValOfObs(obsrv, replacePairs);
-				CafeTerm original =  getValOfObs(obsrv, origObsValP);
-			
-				if(prevVal instanceof BasicTerm && original != null){
-					if(! original.termToString(mod,null).equals(obsrv.termToString(mod,null))){
-						newP = new ObsValPair(obsrv, original);
-					}else{newP = new ObsValPair(obsrv, prevVal);}
-				}else{
-					newP = new ObsValPair(obsrv, newObsVal);
-				}
-						
-				
-				
-				//newP = new ObsValPair(obsrv, newObsVal);
-				newPairs.add(newP);
-				
-				//System.out.println("OBSERVER Is ::: " + obsrv.termToString(mod,null));
-				//if(getValOfObs(obsrv, replacePairs) != null)System.out.println("PREVIOUS VALUE IS ::: " + getValOfObs(obsrv, replacePairs).termToString(mod,null));
-				//if(getValOfObs(obsrv, origObsValP) != null) System.out.println("ORIGINAL VALUE IS ::: " + getValOfObs(obsrv, origObsValP).termToString(mod,null));
-				//if(newP.getValue() != null)System.out.println("NEW IS ::: " + newP.getValue().termToString(mod,null));
-			
-			}//end of looping through the observers of the module
-			
-			replacePairs = newPairs;
+				}//end of looping through the observers of the module
+				replacePairs = newPairs;
+
+			}//end if it is not an inital state
+		
 		}//end of for loop through the chains
 		
 		

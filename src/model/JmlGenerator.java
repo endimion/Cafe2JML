@@ -23,12 +23,17 @@ public class JmlGenerator {
 	 * @return  a string consisting of the translation of the initial states
 	 * for the given module
 	 */
-	public String translateInitStates(Module mod){
+	public String translateInitStates(Module mod, JmlModule jmod){
 		String res = "";
 		Vector<CafeOperator> initStates = mod.getInitialStates();
+		TransObserValues valOfObser = new TransObserValues();
 		
+		//and we can save this information
+		
+	
 //		String forallDecl="";
 		
+		BasicTerm initTerm = new BasicTerm(false);
 		
 		
 		for(CafeOperator init : initStates){
@@ -39,8 +44,12 @@ public class JmlGenerator {
 			// == with the translation of the right part of the equation)
 			
 			Vector<CafeEquation> matchingEqs = mod.getMatchingLeftEqs(init.getName());
-		
-		//String  forString ="";
+			
+			initTerm.setOpName(init.getName());
+			valOfObser.setTransition(initTerm); //save the CafeTerm denoting the transition
+			
+			
+			 //save the CafeTerm denoting the observer and the term denoting its value
 			
 			if(matchingEqs.size() > 0){ res += "/*@ initially" +'\n';}
 			
@@ -59,10 +68,15 @@ public class JmlGenerator {
 				}
 				res +=(i != matchingEqs.size()-1)? " &&" + '\n': ");"+'\n';
 
+				valOfObser.addObsValue(left, right);
+				System.out.println(valOfObser.getTransitionName() + " ####" + left.termToString(mod, this)) ;
+				
 			}//end of looping through the equations except form the last one
 			res += " @*/"+ '\n' + '\n' + '\n' +"public "+init.getName() + "(){}"  + '\n' + '\n';
 		}//end of looping through the inital states of the module
 
+		
+		jmod.addTransObsVal(valOfObser);
 		return res;
 	}//end of translateInitStates
 	
@@ -185,6 +199,13 @@ public class JmlGenerator {
 		//and we can save this information
 		
 		jmod.addTransObsVal(valOfObser); //add the <transition, (observer, value)> pair to the jmlmod
+		//TODO
+		if(trans.termToString(null, null).contains("init")){
+			System.out.println("INITIAL VALUE ADDED");
+			System.out.println("for "+trans.termToString(null, null) + "with val " + rightHS.termToString(null, null));
+			
+		}
+		
 		
 		if(i == transEq.size() -1){
 			res += (forallStart.contains("forall"))? "));" +'\n':");"+'\n';
@@ -390,6 +411,11 @@ public class JmlGenerator {
 						Vector<CafeTerm> chain = new Vector<CafeTerm>();
 						buildChainFromTerm(chain,rightHS, mod,projSort,project.getOpName());
 						
+						for(CafeTerm c : chain){
+							System.out.println("CHAIN ITEM " + c.termToString(projMod, this));
+						}
+						System.out.println("-------------- " );
+						
 						Vector<CafeTerm> guards = buildGuardChain(rightHS, mod, projSort,project.getOpName());
 						String  guardString = "";
 						for(CafeTerm guard : guards){
@@ -522,9 +548,11 @@ public class JmlGenerator {
 	 */
 	public Vector<CafeTerm> buildChainFromTerm(Vector<CafeTerm> chain, CafeTerm term, 
 			Module mod, String projModSort, String projName){
+		
 		if( getTermSort(term).equals(projModSort) 
 				&& !(term).getOpName().equals(projName))
-		{ chain.add(term);}
+		{ chain.add(term); }
+		
 		
 		for(Object arg: term.getArgs() ){
 			if(arg instanceof CafeTerm){ 
@@ -532,7 +560,15 @@ public class JmlGenerator {
 				{	
 					buildChainFromTerm(chain, (CafeTerm) arg,mod, projModSort,projName);
 				}
-			}
+			}else{
+				Module projMod = getModBySort(projModSort);
+				if( projMod.isInitial((String)arg)){
+					//System.out.println("Found a INITIAL STATE " + ((String)arg));
+					BasicTerm t = new BasicTerm(false);
+					t.setOpName((String)arg);
+					buildChainFromTerm(chain, t,mod, projModSort,projName);
+				}//end if the argument denotes an initial state of the projected object
+			}//end if the argument is not a CafeTerm
 		}//end for loop
 		return chain;
 	}//end of buildChainFromTerm
@@ -954,7 +990,7 @@ public class JmlGenerator {
 		
 		res = "public class "+ mod.getClassSort() +"{" + '\n'
 				+ translateHiddenConstants(mod)  + '\n' + 
-				translateInitStates(mod) + '\n' + translateObservers(mod) + '\n'
+				translateInitStates(mod,jmod) + '\n' + translateObservers(mod) + '\n'
 				+ translateGuards(mod) + '\n'
 				+ translateTransition(mod, jmod) + '\n' + "}" + '\n'+ '\n';
 		return res;
