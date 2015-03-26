@@ -81,14 +81,14 @@ public class JmlModule {
 				//System.out.println("Transition match! "+ v.getTransitionName() );
 				
 				Vector<ObsValPair> returnPairs = v.getObserversValues();
-				
 				CafeTerm savedTrans = v.getTransition(); //the CafeTerm transition for which 
 		
 				Vector<Object> origVal = new Vector<Object>();
 				Vector<Object> replVal = new Vector<Object>();
 				
-				int max = (savedTrans.getArgs().size() > trans.getArgs().size())?savedTrans.getArgs().size():trans.getArgs().size();
-				
+				int max = (savedTrans.getArgs().size() > trans.getArgs().size())?
+							savedTrans.getArgs().size():trans.getArgs().size();
+							
 				for(int i=0; i < max; i++){
 					Object o = trans.getArgs().get(i);
 					if(o instanceof CafeTerm ){
@@ -98,14 +98,9 @@ public class JmlModule {
 							//must write a method that takes a vectorOfObsValPair
 							// and replaces each occurrence of a given argument with another
 							//System.out.println("i will replace " + ((CafeTerm)savedTrans.getArgs().get(i)).termToString(mod) + " with " + ((CafeTerm)o).termToString(mod));
-							
 							origVal.add(savedTrans.getArgs().get(i));
 							replVal.add(o);
-							
-							//returnPairs = replaceInValues(returnPairs, savedTrans.getArgs().get(i),o,mod);
-							
 						}//end if we found non matching arguments in the transition
-
 					}else{
 						if( !((String)o).equals((String) savedTrans.getArgs().get(i))){
 							// them the non matching arguments 
@@ -117,8 +112,26 @@ public class JmlModule {
 				
 				}//end of looping through the arguments of the transition rule
 
+				
+				for(ObsValPair p: returnPairs){
+					System.out.println("**0000**The value of the " + mod.getClassSort() +" " +p.getObs().termToString(mod, null) 
+							+ "with arguments size "+ p.getObs().getArgs().size() + " "
+							+ " obsrv returned is" + p.getValue().termToString(mod, null) 
+							+ " for trans " + trans.termToString(mod, null));
+					
+				}
+				//if(!trans.getOpName().contains("init"))
 				returnPairs = replaceInValues(returnPairs, origVal,replVal,mod);
-				return returnPairs;//v.getObserversValues();
+				
+				//TOOD
+				for(ObsValPair p: returnPairs){
+					System.out.println("**111**The value of the " + mod.getClassSort() +" " +p.getObs().termToString(mod, null) 
+							+ " obsrv returned is" + p.getValue().termToString(mod, null));
+					
+				}
+				
+				
+				return returnPairs;
 			
 			}//end if the name of the trans is equal to that of v and they have the same number of args
 			else{
@@ -127,7 +140,6 @@ public class JmlModule {
 							+"with " + v.getTransition().termToString(mod, null)	);
 				}
 			}
-		
 		}//end of looping through the getTransObsVals() elements v
 		
 		System.out.println("*********NO matching transitions found with " + trans.termToString(mod, null)
@@ -149,6 +161,7 @@ public class JmlModule {
 		for(ObsValPair p : pairs){
 			//System.out.println(" is Equal ? "+ obs.getOpName() + " with " + p.getObs().getOpName());
 			if(obs.isEqual(p.getObs())){
+			//if(obs.getOpName().equals(p.getObs().getOpName())){	
 				return p.getValue();
 			}
 			
@@ -177,7 +190,15 @@ public class JmlModule {
 		ObsValPair newP;
 
 		replacePairs = getObsValbyTrans(chain.get(chain.size()-1),mod);
+				
 		Vector<CafeTerm> allObs =  getObFromPairVect(replacePairs); //stores all observer expressions that have appeared
+		
+		//System.out.println("ALLOBS contains:");
+		//for(CafeTerm ob: allObs){
+			//System.out.println(ob.termToString(mod, null) + "with arg no " + ob.getArgs().size());
+		//}
+		
+		
 		
 		//TODO
 		// Correct if there exists an inital state in the chain 
@@ -185,18 +206,23 @@ public class JmlModule {
 		for(int i=chain.size()-2; i >=0; i--){
 			currentTrans = chain.get(i);
 			
-			if(mod.isInitial(chain.get(i+1).getOpName())){
-				System.out.println("found an inital state in the chain!");
-			
-			}else{
+			//TODO fix when there is an initial state in the chain!!!!!
+			//if(mod.isInitial(chain.get(i+1).getOpName())){
+			//}//else{
 				
 				origObsValP = getObsValbyTrans(currentTrans,mod);
 				
 				for(int k=0; k < origObsValP.size();k++){
 					boolean match = false;
 					for(CafeTerm obs : allObs){
-						if(obs.isEqual(origObsValP.get(k).getObs())){
+						if( obs.isEqual(origObsValP.get(k).getObs())){
 							match = true;
+						}else{
+							System.out.println("!!!--> No match found betweeen " + 
+										obs.termToString(mod, null) + " and " + origObsValP.get(k).getObs().termToString(mod, null));
+							System.out.println(obs instanceof BasicTerm);
+							System.out.println("!!! " + 
+									obs.termToString(null, null) + " and " + origObsValP.get(k).getObs().termToString(null, null));
 						}
 					}//end of for loop through allObs
 					if(!match){allObs.add(origObsValP.get(k).getObs()); }
@@ -204,11 +230,12 @@ public class JmlModule {
 				
 				newPairs = new Vector<ObsValPair>();
 				
+
 				for(CafeTerm obsrv : allObs){
-				
 					CafeTerm newObsVal =  ((CafeTerm)getValOfObs(obsrv, replacePairs));
 					if(newObsVal != null) newObsVal = newObsVal.replaceAllMatching(origObsValP);
 					else{
+						System.out.println("NULL FOUND for obs" + obsrv.termToString(mod, null));
 						newObsVal =getValOfObs(obsrv, origObsValP);
 					}//end if newObsVal was null
 					
@@ -228,18 +255,17 @@ public class JmlModule {
 					//newP = new ObsValPair(obsrv, newObsVal);
 					newPairs.add(newP);
 					
-					//System.out.println("OBSERVER Is ::: " + obsrv.termToString(mod,null));
-					//if(getValOfObs(obsrv, replacePairs) != null)System.out.println("PREVIOUS VALUE IS ::: " + getValOfObs(obsrv, replacePairs).termToString(mod,null));
-					//if(getValOfObs(obsrv, origObsValP) != null) System.out.println("ORIGINAL VALUE IS ::: " + getValOfObs(obsrv, origObsValP).termToString(mod,null));
-					//if(newP.getValue() != null)System.out.println("NEW IS ::: " + newP.getValue().termToString(mod,null));
+					System.out.println("OBSERVER Is ::: " + obsrv.termToString(mod,null) + " " +(obsrv instanceof BasicTerm));
+					if(getValOfObs(obsrv, replacePairs) != null)System.out.println("PREVIOUS VALUE IS ::: " + getValOfObs(obsrv, replacePairs).termToString(mod,null));
+					if(getValOfObs(obsrv, origObsValP) != null) System.out.println("ORIGINAL VALUE IS ::: " + getValOfObs(obsrv, origObsValP).termToString(mod,null));
+					if(newP.getValue() != null)System.out.println("NEW IS ::: " + newP.getValue().termToString(mod,null));
 				
 				}//end of looping through the observers of the module
 				replacePairs = newPairs;
 
-			}//end if it is not an inital state
+			//}//end if it is not an inital state
 		
 		}//end of for loop through the chains
-		
 		
 		return replacePairs;
 	}//end of retrieveValAfterTrans
@@ -261,14 +287,20 @@ public class JmlModule {
 		 //first we add the original pairs
 		
 		 for(int i =0; i< pairs.size();i++){
+			//TODO 
+			//System.out.println("observer -----> " +pairs.get(i).getObs().termToString(mod, null) );
 			
 			CafeTerm obs = pairs.get(i).getObs().replaceTerms(orig, repl);
+			//System.out.println("replaced-----> "+pairs.get(i).getObs().replaceTerms(orig, repl).termToString(mod, null) );
+			
+			//if(obs.getOpName().equals("refersTo")){System.out.println(obs.getArgs().size() + " " + (obs instanceof BasicTerm));}
+			
 			CafeTerm val = pairs.get(i).getValue().replaceTerms(orig, repl);
 			
 			newPairs.add(new ObsValPair(obs, val));
 		}//end of looping through the pairs
 		 
-		 return newPairs;
+		 return  newPairs ;
 	}//end of replaceInValues
 	
 	

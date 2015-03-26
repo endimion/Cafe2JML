@@ -79,7 +79,7 @@ public class BasicTerm implements CafeTerm{
 	public String termToString(Module mod, JmlGenerator gen){
 		String print="";
 		
-		if(getArgs().size() == 0 && (mod.getOpSortByName(getOpName()).equals("String") 
+		if(mod!=null && getArgs().size() == 0 && (mod.getOpSortByName(getOpName()).equals("String") 
 										||
 									 mod.getOpSortByName(getOpName()).equals("Integer")
 									    ||
@@ -255,16 +255,30 @@ public class BasicTerm implements CafeTerm{
 	 */
 	public boolean isEqual(Object o){
 		CafeTerm t ;
+		
+		// instanceof CafeTerm) System.out.println("Comparing "+ opName + " with " + ((CafeTerm)o).getOpName() );
+		//else{ System.out.println("String given to compare with " +opName + " -- " + o);}
+		
 		if(o instanceof CafeTerm){
 			t =(CafeTerm)o;
+			
 			if(!t.getOpName().equals(getOpName())){
 				return false;
 			}else{
 				int i = 0;
 				for(String arg: getArgs()){
-					if(!arg.equals(t.getArgs().get(i))){
-						return false;
-					}
+					//TODO
+					//if(t.getArgs().size()!= getArgs().size() || !arg.equals(t.getArgs().get(i))){
+					if(t.getArgs().get(i) instanceof String){
+						if(!arg.equals(t.getArgs().get(i))){	
+							return false;
+						}
+					}else{
+						if( ((CafeTerm)t.getArgs().get(i)).getArgs().size() == 0 
+								&& !((CafeTerm)t.getArgs().get(i)).getOpName().equals(arg)){
+							return false;
+						}
+					}//end if the argument of the given term is not a string
 					i ++;
 				}//end of looping through the arguments of the term
 				
@@ -285,11 +299,17 @@ public class BasicTerm implements CafeTerm{
 	public CafeTerm replaceTerms(Vector<Object> origV , Vector<Object> replV){
 		
 		//boolean v = ( !((String)repl).contains("(") && !isVar())? true:false;
-		BasicTerm returnTerm = new BasicTerm(true);
-
 		//System.out.println("REPLACING INSIDE " + getOpName());
-		
+		BasicTerm returnTerm = new BasicTerm(true);
 		returnTerm.setOpName(getOpName());
+
+		for(Object arg: getArgs()){
+			returnTerm.addArg(arg);
+		}
+		System.out.println("---<>" + returnTerm.opName + " " +returnTerm.getArgs().size() );
+		
+		
+		
 		int i = 0;
 		for(Object orig : origV){
 			if(getArgs().size() == 0) {
@@ -324,7 +344,7 @@ public class BasicTerm implements CafeTerm{
 			i++;
 		}//end of looping through the origV elements
 		
-		return returnTerm;
+		return returnTerm ;
 	}//end of replaceTerm
 	
 	/**

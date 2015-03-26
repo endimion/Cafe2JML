@@ -28,11 +28,6 @@ public class JmlGenerator {
 		Vector<CafeOperator> initStates = mod.getInitialStates();
 		TransObserValues valOfObser = new TransObserValues();
 		
-		//and we can save this information
-		
-	
-//		String forallDecl="";
-		
 		BasicTerm initTerm = new BasicTerm(false);
 		
 		
@@ -44,6 +39,8 @@ public class JmlGenerator {
 			// == with the translation of the right part of the equation)
 			
 			Vector<CafeEquation> matchingEqs = mod.getMatchingLeftEqs(init.getName());
+			//TODO
+			
 			
 			initTerm.setOpName(init.getName());
 			valOfObser.setTransition(initTerm); //save the CafeTerm denoting the transition
@@ -67,9 +64,58 @@ public class JmlGenerator {
 							left.printTermSkipArg(0,mod) + " == " + right.termToString(mod,this);
 				}
 				res +=(i != matchingEqs.size()-1)? " &&" + '\n': ");"+'\n';
-
-				valOfObser.addObsValue(left, right);
-				System.out.println(valOfObser.getTransitionName() + " ####" + left.termToString(mod, this)) ;
+				
+				//TODO we have to remove the argument of the initial stae here!!!!
+				// this is what causes all the problems!!!!
+				int leftPos = TermParser.getPositionOfSystemSort(left,mod);
+				int rightPos = TermParser.getPositionOfSystemSort(left,mod);
+				
+				CafeTerm leftObs =  left;
+				CafeTerm trans;
+				
+				if(left.getArgs().get(leftPos) instanceof CafeTerm){
+					trans = (CafeTerm)left.getArgs().get(leftPos); //we retrieve the sub term that denotes the transition rule
+				}else{
+					BasicTerm t = new BasicTerm(false);
+					t.setOpName((String)left.getArgs().get(leftPos));
+					trans=t;
+				}
+				
+				int sysPos = TermParser.getPositionOfSystemSort(trans, mod); //find the system sort in the transition term
+				
+				if(sysPos > 0)trans.getArgs().remove(sysPos); //end remove it
+				
+				if(left instanceof BasicTerm){
+					BasicTerm temp = new BasicTerm(false);
+					temp.setOpName(left.getOpName());
+					int k = 0;
+					for(Object o: left.getArgs()){
+						if(k!= leftPos)temp.addArg(o);
+						k++;
+					}
+					leftObs = temp;
+				}else{
+					CompTerm temp = new CompTerm();
+					temp.setOpName(left.getOpName());
+					int k = 0;
+					for(Object o: left.getArgs()){
+						if(k!= leftPos)temp.addArg(o);
+						k++;
+					}
+					leftObs = temp; 
+				}
+				
+				
+				CafeTerm rightHS = right;
+				sysPos = TermParser.getPositionOfSystemSort(right, mod);//find the system sort in the rhs
+				if(sysPos >= 0){
+					rightHS.getArgs().remove(rightPos); //end if it exists remove it
+				}
+				
+				valOfObser.setTransition(trans); //save the CafeTerm denoting the transition
+				valOfObser.addObsValue(leftObs, rightHS); //save the CafeTerm denoting the observer and the term denoting its value
+				
+				System.out.println(valOfObser.getTransitionName() + " ####" + leftObs.termToString(mod, this) ) ;
 				
 			}//end of looping through the equations except form the last one
 			res += " @*/"+ '\n' + '\n' + '\n' +"public "+init.getName() + "(){}"  + '\n' + '\n';
@@ -180,11 +226,13 @@ public class JmlGenerator {
 			CompTerm temp = new CompTerm();
 			temp.setOpName(left.getOpName());
 			int k = 0;
+			
+			System.out.println("THE LEFT IS " + left.termToString(mod, this) + "witn" + left.getArgs().size());
 			for(Object o: left.getArgs()){
 				if(k!= leftPos)temp.addArg(o);
 				k++;
 			}
-			leftObs = temp;
+			leftObs = temp; //TODO problem here it sometimes does not parse correctly the term
 		}
 		
 		
@@ -196,15 +244,13 @@ public class JmlGenerator {
 		
 		valOfObser.setTransition(trans); //save the CafeTerm denoting the transition
 		valOfObser.addObsValue(leftObs, rightHS); //save the CafeTerm denoting the observer and the term denoting its value
-		//and we can save this information
+		System.out.println("ADDING " + leftObs.termToString(mod, this) 
+				+ " for transition " + trans.termToString(mod, this));
 		
-		jmod.addTransObsVal(valOfObser); //add the <transition, (observer, value)> pair to the jmlmod
+		//and we can save this information
 		//TODO
-		if(trans.termToString(null, null).contains("init")){
-			System.out.println("INITIAL VALUE ADDED");
-			System.out.println("for "+trans.termToString(null, null) + "with val " + rightHS.termToString(null, null));
-			
-		}
+		jmod.addTransObsVal(valOfObser); //add the <transition, (observer, value)> pair to the jmlmod
+		
 		
 		
 		if(i == transEq.size() -1){
@@ -278,7 +324,12 @@ public class JmlGenerator {
 		
 		for(ObsValPair p : obsValP){
 			CafeTerm obs = p.getObs();
+			//TODO
+			//System.out.println("$$$$$$$$$$$building list for observer " + obs.getOpName());
+			//System.out.println("$$$$$$$$$$$ which has noOfArgs " + obs.getArgs().size());
+			
 			for(Object arg : obs.getArgs()){
+				//System.out.println("Found "+ arg + "for obs "+ obs.getOpName() + "Should i ADD!!!@@@@");
 				if(arg instanceof String){
 					if(!isOperator((String)arg)){
 						res.add((String)arg);
@@ -286,6 +337,7 @@ public class JmlGenerator {
 				}else{
 					if(!isOperator( ((CafeTerm)arg).getOpName())){
 						res.add(((CafeTerm)arg).getOpName());
+						//System.out.println("added "+ ((CafeTerm)arg).getOpName() + "for obs "+ obs.getOpName());
 					}
 				}
 			}//end of looping through the arguments of the observer
@@ -411,10 +463,11 @@ public class JmlGenerator {
 						Vector<CafeTerm> chain = new Vector<CafeTerm>();
 						buildChainFromTerm(chain,rightHS, mod,projSort,project.getOpName());
 						
-						for(CafeTerm c : chain){
-							System.out.println("CHAIN ITEM " + c.termToString(projMod, this));
-						}
-						System.out.println("-------------- " );
+						//
+						//for(CafeTerm c : chain){
+						//	System.out.println("CHAIN ITEM " + c.termToString(projMod, this));
+						//}
+						//System.out.println("-------------- " );
 						
 						Vector<CafeTerm> guards = buildGuardChain(rightHS, mod, projSort,project.getOpName());
 						String  guardString = "";
@@ -431,7 +484,8 @@ public class JmlGenerator {
 						
 						Vector<ObsValPair>  obsValP = jmod.getObsValAfterTransCh(chain, getModBySort(projSort));
 						Vector<String> varList = getVarsOfObsList(obsValP);
-			
+						
+					
 						for(String var1: varList){
 							for(String arVar : arityVars){
 								if(arVar.equals(var1)){
@@ -441,8 +495,8 @@ public class JmlGenerator {
 							}
 						}//end of looping through the varList
 						
-						res += (guardString.equals(""))?"@" +guardString + "==>" +'\n':"@"+'\n';
-						res += "@ (\\forall ";
+						res += (!guardString.equals(""))?"@" +guardString + "==>" +'\n':"";
+						res += (varList.size() > 0)?"@ (\\forall ": "555";
 						BasicTerm b = new BasicTerm(false);
 						for(String var : varList){
 							b.setOpName(var);
@@ -450,6 +504,9 @@ public class JmlGenerator {
 						}
 						
 						if(res.endsWith(", ")) res = StringHelper.remLastChar(res.trim()) + "; " + '\n';
+						
+						
+						
 						
 						for(int j =0 ; j< obsValP.size(); j++){
 							ObsValPair p  = obsValP.get(j);
@@ -473,7 +530,7 @@ public class JmlGenerator {
 								+ project.termToString(mod, this) + '\n';
 						for(CafeEquation e: matchingEqs){
 							res+=  project.termToString(mod, this) + "."+
-									e.getLeftTerm().termToString(projMod, this) + " == " 
+									e.getLeftTerm().termToString(projMod, this) + " =55= " 
 									+ e.getRightTerm().termToString(projMod, this);
 							
 						}//end of looping through the matching equations

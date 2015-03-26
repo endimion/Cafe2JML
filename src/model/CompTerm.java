@@ -59,7 +59,7 @@ public class CompTerm implements CafeTerm{
 	public String termToString(Module mod, JmlGenerator gen){
 		String print="" ;  
 		
-		if(getArgs().size() == 0 && (mod.getOpSortByName(getOpName()).equals("String") 
+		if(mod!=null && getArgs().size() == 0 && (mod.getOpSortByName(getOpName()).equals("String") 
 										||
 									 mod.getOpSortByName(getOpName()).equals("Integer")
 									    ||
@@ -406,7 +406,7 @@ public class CompTerm implements CafeTerm{
 			returnTerm.addArg(arg);
 		}
 		
-		
+		//System.out.println("---<>" + returnTerm.opName + " " +returnTerm.getArgs().size() );
 		int j = 0;
 		for(Object orig : origV){
 			
@@ -443,7 +443,7 @@ public class CompTerm implements CafeTerm{
 			j++;
 		}
 		
-		return returnTerm;
+		return returnTerm ;
 	}//end of replaceTerm
 	
 	
