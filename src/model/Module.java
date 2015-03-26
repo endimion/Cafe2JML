@@ -400,8 +400,11 @@ public class Module {
 	 * @return
 	 */
 	public  boolean isOperator(String opName){
+		
 		for(CafeOperator op: getOps()){
-			if(op.getName().equals(opName)){
+			//System.out.println("Comparing " + opName +" with" + op.getName());
+			if(op.getName().trim().equals(opName.trim())){
+				//System.out.println("match found for "+ opName);
 				return true;
 			}
 		}

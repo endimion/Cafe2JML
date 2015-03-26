@@ -112,24 +112,7 @@ public class JmlModule {
 				
 				}//end of looping through the arguments of the transition rule
 
-				
-				for(ObsValPair p: returnPairs){
-					System.out.println("**0000**The value of the " + mod.getClassSort() +" " +p.getObs().termToString(mod, null) 
-							+ "with arguments size "+ p.getObs().getArgs().size() + " "
-							+ " obsrv returned is" + p.getValue().termToString(mod, null) 
-							+ " for trans " + trans.termToString(mod, null));
-					
-				}
-				//if(!trans.getOpName().contains("init"))
 				returnPairs = replaceInValues(returnPairs, origVal,replVal,mod);
-				
-				//TOOD
-				for(ObsValPair p: returnPairs){
-					System.out.println("**111**The value of the " + mod.getClassSort() +" " +p.getObs().termToString(mod, null) 
-							+ " obsrv returned is" + p.getValue().termToString(mod, null));
-					
-				}
-				
 				
 				return returnPairs;
 			
@@ -192,16 +175,7 @@ public class JmlModule {
 		replacePairs = getObsValbyTrans(chain.get(chain.size()-1),mod);
 				
 		Vector<CafeTerm> allObs =  getObFromPairVect(replacePairs); //stores all observer expressions that have appeared
-		
-		//System.out.println("ALLOBS contains:");
-		//for(CafeTerm ob: allObs){
-			//System.out.println(ob.termToString(mod, null) + "with arg no " + ob.getArgs().size());
-		//}
-		
-		
-		
-		//TODO
-		// Correct if there exists an inital state in the chain 
+
 		
 		for(int i=chain.size()-2; i >=0; i--){
 			currentTrans = chain.get(i);
@@ -217,12 +191,6 @@ public class JmlModule {
 					for(CafeTerm obs : allObs){
 						if( obs.isEqual(origObsValP.get(k).getObs())){
 							match = true;
-						}else{
-							System.out.println("!!!--> No match found betweeen " + 
-										obs.termToString(mod, null) + " and " + origObsValP.get(k).getObs().termToString(mod, null));
-							System.out.println(obs instanceof BasicTerm);
-							System.out.println("!!! " + 
-									obs.termToString(null, null) + " and " + origObsValP.get(k).getObs().termToString(null, null));
 						}
 					}//end of for loop through allObs
 					if(!match){allObs.add(origObsValP.get(k).getObs()); }
@@ -249,16 +217,13 @@ public class JmlModule {
 					}else{
 						newP = new ObsValPair(obsrv, newObsVal);
 					}
-							
-					
-					
-					//newP = new ObsValPair(obsrv, newObsVal);
+
 					newPairs.add(newP);
 					
-					System.out.println("OBSERVER Is ::: " + obsrv.termToString(mod,null) + " " +(obsrv instanceof BasicTerm));
-					if(getValOfObs(obsrv, replacePairs) != null)System.out.println("PREVIOUS VALUE IS ::: " + getValOfObs(obsrv, replacePairs).termToString(mod,null));
-					if(getValOfObs(obsrv, origObsValP) != null) System.out.println("ORIGINAL VALUE IS ::: " + getValOfObs(obsrv, origObsValP).termToString(mod,null));
-					if(newP.getValue() != null)System.out.println("NEW IS ::: " + newP.getValue().termToString(mod,null));
+					//System.out.println("OBSERVER Is ::: " + obsrv.termToString(mod,null) + " " +(obsrv instanceof BasicTerm));
+					//if(getValOfObs(obsrv, replacePairs) != null)System.out.println("PREVIOUS VALUE IS ::: " + getValOfObs(obsrv, replacePairs).termToString(mod,null));
+					//if(getValOfObs(obsrv, origObsValP) != null) System.out.println("ORIGINAL VALUE IS ::: " + getValOfObs(obsrv, origObsValP).termToString(mod,null));
+					//if(newP.getValue() != null)System.out.println("NEW IS ::: " + newP.getValue().termToString(mod,null));
 				
 				}//end of looping through the observers of the module
 				replacePairs = newPairs;
@@ -287,14 +252,7 @@ public class JmlModule {
 		 //first we add the original pairs
 		
 		 for(int i =0; i< pairs.size();i++){
-			//TODO 
-			//System.out.println("observer -----> " +pairs.get(i).getObs().termToString(mod, null) );
-			
-			CafeTerm obs = pairs.get(i).getObs().replaceTerms(orig, repl);
-			//System.out.println("replaced-----> "+pairs.get(i).getObs().replaceTerms(orig, repl).termToString(mod, null) );
-			
-			//if(obs.getOpName().equals("refersTo")){System.out.println(obs.getArgs().size() + " " + (obs instanceof BasicTerm));}
-			
+			 CafeTerm obs = pairs.get(i).getObs().replaceTerms(orig, repl);
 			CafeTerm val = pairs.get(i).getValue().replaceTerms(orig, repl);
 			
 			newPairs.add(new ObsValPair(obs, val));

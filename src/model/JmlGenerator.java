@@ -39,8 +39,6 @@ public class JmlGenerator {
 			// == with the translation of the right part of the equation)
 			
 			Vector<CafeEquation> matchingEqs = mod.getMatchingLeftEqs(init.getName());
-			//TODO
-			
 			
 			initTerm.setOpName(init.getName());
 			valOfObser.setTransition(initTerm); //save the CafeTerm denoting the transition
@@ -65,8 +63,6 @@ public class JmlGenerator {
 				}
 				res +=(i != matchingEqs.size()-1)? " &&" + '\n': ");"+'\n';
 				
-				//TODO we have to remove the argument of the initial stae here!!!!
-				// this is what causes all the problems!!!!
 				int leftPos = TermParser.getPositionOfSystemSort(left,mod);
 				int rightPos = TermParser.getPositionOfSystemSort(left,mod);
 				
@@ -115,7 +111,7 @@ public class JmlGenerator {
 				valOfObser.setTransition(trans); //save the CafeTerm denoting the transition
 				valOfObser.addObsValue(leftObs, rightHS); //save the CafeTerm denoting the observer and the term denoting its value
 				
-				System.out.println(valOfObser.getTransitionName() + " ####" + leftObs.termToString(mod, this) ) ;
+				//System.out.println(valOfObser.getTransitionName() + " ####" + leftObs.termToString(mod, this) ) ;
 				
 			}//end of looping through the equations except form the last one
 			res += " @*/"+ '\n' + '\n' + '\n' +"public "+init.getName() + "(){}"  + '\n' + '\n';
@@ -226,15 +222,12 @@ public class JmlGenerator {
 			CompTerm temp = new CompTerm();
 			temp.setOpName(left.getOpName());
 			int k = 0;
-			
-			System.out.println("THE LEFT IS " + left.termToString(mod, this) + "witn" + left.getArgs().size());
 			for(Object o: left.getArgs()){
 				if(k!= leftPos)temp.addArg(o);
 				k++;
 			}
-			leftObs = temp; //TODO problem here it sometimes does not parse correctly the term
+			leftObs = temp; 
 		}
-		
 		
 		CafeTerm rightHS = right;
 		sysPos = TermParser.getPositionOfSystemSort(right, mod);//find the system sort in the rhs
@@ -244,11 +237,7 @@ public class JmlGenerator {
 		
 		valOfObser.setTransition(trans); //save the CafeTerm denoting the transition
 		valOfObser.addObsValue(leftObs, rightHS); //save the CafeTerm denoting the observer and the term denoting its value
-		System.out.println("ADDING " + leftObs.termToString(mod, this) 
-				+ " for transition " + trans.termToString(mod, this));
-		
-		//and we can save this information
-		//TODO
+
 		jmod.addTransObsVal(valOfObser); //add the <transition, (observer, value)> pair to the jmlmod
 		
 		
@@ -324,9 +313,6 @@ public class JmlGenerator {
 		
 		for(ObsValPair p : obsValP){
 			CafeTerm obs = p.getObs();
-			//TODO
-			//System.out.println("$$$$$$$$$$$building list for observer " + obs.getOpName());
-			//System.out.println("$$$$$$$$$$$ which has noOfArgs " + obs.getArgs().size());
 			
 			for(Object arg : obs.getArgs()){
 				//System.out.println("Found "+ arg + "for obs "+ obs.getOpName() + "Should i ADD!!!@@@@");
@@ -462,12 +448,7 @@ public class JmlGenerator {
 					
 						Vector<CafeTerm> chain = new Vector<CafeTerm>();
 						buildChainFromTerm(chain,rightHS, mod,projSort,project.getOpName());
-						
-						//
-						//for(CafeTerm c : chain){
-						//	System.out.println("CHAIN ITEM " + c.termToString(projMod, this));
-						//}
-						//System.out.println("-------------- " );
+
 						
 						Vector<CafeTerm> guards = buildGuardChain(rightHS, mod, projSort,project.getOpName());
 						String  guardString = "";
@@ -505,19 +486,19 @@ public class JmlGenerator {
 						
 						if(res.endsWith(", ")) res = StringHelper.remLastChar(res.trim()) + "; " + '\n';
 						
-						
-						
-						
 						for(int j =0 ; j< obsValP.size(); j++){
 							ObsValPair p  = obsValP.get(j);
 							res += "@ " + project.termToString(mod, this)+"."+p.getObs().termToString(mod, this);
 							
+							String obVal = (! (projMod.isOperator(p.getValue().getOpName()) 
+												|| (p.getValue().getArgs().size() > 0) ))?
+									 			 p.getValue().termToString(mod, this) :
+									 	project.termToString(mod, this)+"."+p.getValue().termToString(mod, this);
+							
 							if(!isObjectByOpName(p.getObs().getOpName(), projMod)){
-								res +=  "==" +" \\old(" +project.termToString(mod, this)+"."
-												+ p.getValue().termToString(mod, this) + ")";
+								res +=  "==" +" \\old(" +obVal + ")";
 							}else{
-								res +=  ".equals(" +" \\old(" +project.termToString(mod, this)+"."
-												+ p.getValue().termToString(mod, this) + "))";
+								res +=  ".equals(" +" \\old(" +obVal + "))";
 							}//end if it is not an object		
 							if(j <  obsValP.size()-1) res += " &&"+'\n';
 						}//end of looping through  the new values of the observers

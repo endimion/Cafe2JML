@@ -267,8 +267,6 @@ public class BasicTerm implements CafeTerm{
 			}else{
 				int i = 0;
 				for(String arg: getArgs()){
-					//TODO
-					//if(t.getArgs().size()!= getArgs().size() || !arg.equals(t.getArgs().get(i))){
 					if(t.getArgs().get(i) instanceof String){
 						if(!arg.equals(t.getArgs().get(i))){	
 							return false;
@@ -306,7 +304,7 @@ public class BasicTerm implements CafeTerm{
 		for(Object arg: getArgs()){
 			returnTerm.addArg(arg);
 		}
-		System.out.println("---<>" + returnTerm.opName + " " +returnTerm.getArgs().size() );
+		//System.out.println("---<>" + returnTerm.opName + " " +returnTerm.getArgs().size() );
 		
 		
 		
