@@ -497,7 +497,7 @@ public class FileHelper {
 	public void parseEq(String line, Module mod, CafeEquation eq){
 		
 		String condition="";
-		line = line.replace(".","");
+		line = line.replace(".","").replace("==","=");
 		
 		if(line.startsWith("eq")){
 			line = line.split("(eq)\\s+")[1];

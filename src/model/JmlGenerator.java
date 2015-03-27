@@ -504,18 +504,17 @@ public class JmlGenerator {
 						}//end of looping through  the new values of the observers
 						res += ")" ;
 					}else{
-						//TODO
 						Vector<CafeEquation> matchingEqs = 
 								projMod.getMatchingLeftEqs(rightHS.getOpName());
-						res += "MUST TRANSLATE INITIAL STATE " 
-								+ project.termToString(mod, this) + '\n';
+
+						int i = 0;
 						for(CafeEquation e: matchingEqs){
-							res+=  project.termToString(mod, this) + "."+
-									e.getLeftTerm().termToString(projMod, this) + " =55= " 
+							res+=  "@ " + project.termToString(mod, this) + "."+
+									e.getLeftTerm().termToString(projMod, this) + " == " 
 									+ e.getRightTerm().termToString(projMod, this);
-							
+							if(i != matchingEqs.size() -1) res += " &&" + '\n';
+							i++;
 						}//end of looping through the matching equations
-						
 						
 					}//if it is  an initial state of the projected object
 					
