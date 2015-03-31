@@ -157,6 +157,7 @@ public class Module {
 		for(CafeOperator op: getOps()){
 			if(op.getArity().size() == 0){
 				consts.add(op);
+				//System.out.println("Added " + op.getName());
 			}
 		}//end of for loop
 		return consts;
@@ -520,6 +521,21 @@ public class Module {
 			return false;
 	}//end of is initial
 	
+	
+	/**
+	 * 
+	 * @param opName
+	 * @return true if the given opName is the name of a Constant
+	 * defined in this module
+	 */
+	public boolean isConstant(String opName){
+		for(CafeOperator op: getConstants()){
+			if(op.getName().equals(opName)){
+				return true;
+			}
+		}//end of looping through the constants
+		return false;
+	}//end isConstants
 	
 	
 	

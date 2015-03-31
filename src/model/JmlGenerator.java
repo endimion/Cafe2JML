@@ -445,67 +445,74 @@ public class JmlGenerator {
 				}else{
 					//if it is not a constant of the projected object
 					if(!projMod.isInitial(rightHS.getOpName())){
-					
-						Vector<CafeTerm> chain = new Vector<CafeTerm>();
-						buildChainFromTerm(chain,rightHS, mod,projSort,project.getOpName());
-
-						
-						Vector<CafeTerm> guards = buildGuardChain(rightHS, mod, projSort,project.getOpName());
-						String  guardString = "";
-						for(CafeTerm guard : guards){
-							guardString += guard.termToString(projMod, this) + "&& ";
-						}//end of looping through the guards
-						if(guardString.endsWith("&& ")) guardString = StringHelper.remLastChar(StringHelper.remLastChar(guardString.trim()));
-						
-						Vector<CafeTerm> temp = new Vector<CafeTerm>();
-						for(CafeTerm t : chain){
-							temp.add(removeProjectSort(projSort, t));
-						}
-						chain  = temp;
-						
-						Vector<ObsValPair>  obsValP = jmod.getObsValAfterTransCh(chain, getModBySort(projSort));
-						Vector<String> varList = getVarsOfObsList(obsValP);
-						
-					
-						for(String var1: varList){
-							for(String arVar : arityVars){
-								if(arVar.equals(var1)){
-									varList.remove(var1);
-									break;
-								}
+						if(mod.isConstant(rightHS.getOpName())){
+							res += "@ " + project.termToString(mod, this) 
+									+ " == ("+ rightHS.termToString(mod, this) +")" ;
+							//System.out.println("hey i found a constant!!!");
+						}else{
+							
+							Vector<CafeTerm> chain = new Vector<CafeTerm>();
+							buildChainFromTerm(chain,rightHS, mod,projSort,project.getOpName());
+	
+							
+							Vector<CafeTerm> guards = buildGuardChain(rightHS, mod, projSort,project.getOpName());
+							String  guardString = "";
+							for(CafeTerm guard : guards){
+								guardString += guard.termToString(projMod, this) + "&& ";
+							}//end of looping through the guards
+							if(guardString.endsWith("&& ")) guardString = StringHelper.remLastChar(StringHelper.remLastChar(guardString.trim()));
+							
+							Vector<CafeTerm> temp = new Vector<CafeTerm>();
+							for(CafeTerm t : chain){
+								temp.add(removeProjectSort(projSort, t));
 							}
-						}//end of looping through the varList
-						
-						res += (varList.size() > 0)?"@ (\\forall ": "";
-						BasicTerm b = new BasicTerm(false);
-						for(String var : varList){
-							b.setOpName(var);
-							res += TermParser.cafe2JavaSort(getTermSort(b)) + " " + var + ", ";
-						}
-						
-						if(res.endsWith(", ")) res = StringHelper.remLastChar(res.trim()) + "; " + '\n';
-						
-						
-						res += (!guardString.equals(""))?"@" +guardString + "==>" +'\n':"";
-						
-						
-						for(int j =0 ; j< obsValP.size(); j++){
-							ObsValPair p  = obsValP.get(j);
-							res += "@ " + project.termToString(mod, this)+"."+p.getObs().termToString(mod, this);
+							chain  = temp;
 							
-							String obVal = (! (projMod.isOperator(p.getValue().getOpName()) 
-												|| (p.getValue().getArgs().size() > 0) ))?
-									 			 p.getValue().termToString(mod, this) :
-									 	project.termToString(mod, this)+"."+p.getValue().termToString(mod, this);
+							Vector<ObsValPair>  obsValP = jmod.getObsValAfterTransCh(chain, getModBySort(projSort));
+							Vector<String> varList = getVarsOfObsList(obsValP);
 							
-							if(!isObjectByOpName(p.getObs().getOpName(), projMod)){
-								res +=  "==" +" \\old(" +obVal + ")";
-							}else{
-								res +=  ".equals(" +" \\old(" +obVal + "))";
-							}//end if it is not an object		
-							if(j <  obsValP.size()-1) res += " &&"+'\n';
-						}//end of looping through  the new values of the observers
-						res += ")" ;
+						
+							for(String var1: varList){
+								for(String arVar : arityVars){
+									if(arVar.equals(var1)){
+										varList.remove(var1);
+										break;
+									}
+								}
+							}//end of looping through the varList
+							
+							res += (varList.size() > 0)?"@ (\\forall ": "";
+							BasicTerm b = new BasicTerm(false);
+							for(String var : varList){
+								b.setOpName(var);
+								res += TermParser.cafe2JavaSort(getTermSort(b)) + " " + var + ", ";
+							}
+							
+							if(res.endsWith(", ")) res = StringHelper.remLastChar(res.trim()) + "; " + '\n';
+							
+							
+							res += (!guardString.equals(""))?"@" +guardString + "==>" +'\n':"";
+							
+							
+							for(int j =0 ; j< obsValP.size(); j++){
+								ObsValPair p  = obsValP.get(j);
+								res += "@ " + project.termToString(mod, this)+"."+p.getObs().termToString(mod, this);
+								
+								String obVal = (! (projMod.isOperator(p.getValue().getOpName()) 
+													|| (p.getValue().getArgs().size() > 0) ))?
+										 			 p.getValue().termToString(mod, this) :
+										 	project.termToString(mod, this)+"."+p.getValue().termToString(mod, this);
+								
+								if(!isObjectByOpName(p.getObs().getOpName(), projMod)){
+									res +=  "==" +" \\old(" +obVal + ")";
+								}else{
+									res +=  ".equals(" +" \\old(" +obVal + "))";
+								}//end if it is not an object		
+								if(j <  obsValP.size()-1) res += " &&"+'\n';
+							}//end of looping through  the new values of the observers
+							res += ")" ;
+						}//end if the rightHS is not a constant of the module it is defined in
+						
 					}else{
 						Vector<CafeEquation> matchingEqs = 
 								projMod.getMatchingLeftEqs(rightHS.getOpName());
