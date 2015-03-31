@@ -85,7 +85,7 @@ public class MainViewController {
 		JMenu filemenu, aboutMenu;
 		JMenuItem openItem, saveTransItem, aboutItem, exitItem;
 		
-		JFileChooser fc = new JFileChooser(); 
+		 
 		
 		
 		openItem = new JMenuItem("Open File");
@@ -103,6 +103,13 @@ public class MainViewController {
 		aboutMenu.add(aboutItem);
 		
 		openItem.addActionListener(event ->{
+			
+			File theDirectory = null;
+			try{
+				theDirectory = new File("/home/nikos/Dropbox/Codes/DRM");
+			}catch(Exception e){e.printStackTrace();}
+			JFileChooser fc = new JFileChooser(theDirectory);
+			
 			int choice = fc.showOpenDialog(frame);
 			if(choice == JFileChooser.APPROVE_OPTION){
 				File selectFile = fc.getSelectedFile();
@@ -123,6 +130,8 @@ public class MainViewController {
 		
 
 		saveTransItem.addActionListener(event ->{
+			JFileChooser fc = new JFileChooser();
+			
 			JTextArea athText = v.getTextArea(true);
 			//System.out.println(athText.getText());
 			int choice = fc.showSaveDialog(frame);

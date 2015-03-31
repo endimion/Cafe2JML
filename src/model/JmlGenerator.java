@@ -476,8 +476,7 @@ public class JmlGenerator {
 							}
 						}//end of looping through the varList
 						
-						res += (!guardString.equals(""))?"@" +guardString + "==>" +'\n':"";
-						res += (varList.size() > 0)?"@ (\\forall ": "555";
+						res += (varList.size() > 0)?"@ (\\forall ": "";
 						BasicTerm b = new BasicTerm(false);
 						for(String var : varList){
 							b.setOpName(var);
@@ -485,6 +484,10 @@ public class JmlGenerator {
 						}
 						
 						if(res.endsWith(", ")) res = StringHelper.remLastChar(res.trim()) + "; " + '\n';
+						
+						
+						res += (!guardString.equals(""))?"@" +guardString + "==>" +'\n':"";
+						
 						
 						for(int j =0 ; j< obsValP.size(); j++){
 							ObsValPair p  = obsValP.get(j);
@@ -677,6 +680,7 @@ public class JmlGenerator {
 			for(CafeEquation eq : transEq ){
 				CafeTerm cond = eq.getCondition();
 				if(cond != null){
+					
 					for(Object arg :cond.getArgs()){
 						if(arg instanceof CafeTerm){
 							if(((CafeTerm) arg).getOpName().equals("c-"+bop.getName())){
@@ -685,7 +689,10 @@ public class JmlGenerator {
 							
 						}//end if the argument is a CafeTerm
 					}//end of looping through the arguments of the condt of eq
-
+					
+					if(!(cond.getOpName().equals("or")|| cond.getOpName().equals("and")) ){
+						effCond = cond ;
+					}//end if the condition of the rule is not a conjuntion or disjunction of conditions
 				}//end if cond is not null
 			}// end of looping through the equations of the transition
 			//if(effCond !=null)System.out.println("the effective condition is" + effCond.termToString(mod, this));
@@ -876,10 +883,10 @@ public class JmlGenerator {
 			
 			
 			if(guardEqs.size() > 0 && mod.getVariableOfEq(guardEqs.get(0)).size() >0 ){
-				res += "public "+ guard.getSort() + " " + guard.getName().replace("c-", "c") +"(" + 
+				res += "public /*@ pure @*/ "+ guard.getSort() + " " + guard.getName().replace("c-", "c") +"(" + 
 						opArgsToString(guard, mod,mod.getVariableOfEq(guardEqs.get(0))) +"){}" + '\n' + '\n';
 			}else{
-				res += "public "+ guard.getSort() + " " + guard.getName().replace("c-", "c") +"(" + 
+				res += "public /*@ pure @*/ "+ guard.getSort() + " " + guard.getName().replace("c-", "c") +"(" + 
 						opArgsToString(guard, mod,mod.getVariableOfEq(guardEqs.get(0))) +"){}" + '\n' + '\n';
 			}
 			

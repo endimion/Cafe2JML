@@ -38,7 +38,7 @@ public class Cafe2JML extends JFrame{
 					the_frame = new Cafe2JML();
 					Dimension d = new Dimension(800,600);
 					the_frame.setMinimumSize(d);
-					the_frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+					//the_frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 					the_frame.setVisible(true); 
 					
 					MainViewController mvc = new MainViewController(the_frame);
