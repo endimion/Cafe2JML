@@ -28,7 +28,15 @@ public class TransObserValues {
 	
 	public void setTransition(CafeTerm trans){this.transition = trans;}
 	public CafeTerm getTransition(){return transition;}
-	public String getTransitionName(){return this.transition.getOpName();}
+
+	//TODO this has been changed in 15/09/2015 
+	public String getTransitionName(){
+		if(this.transition != null && this.transition.getOpName() != null){
+			return this.transition.getOpName();
+		}else{
+			return " ***";
+		}
+	}//end of getTransitionName
 	
 	
 	public Vector<?> getTransitionArgs(){ return transition.getArgs();}

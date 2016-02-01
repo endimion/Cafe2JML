@@ -106,7 +106,7 @@ public class MainViewController {
 			
 			File theDirectory = null;
 			try{
-				theDirectory = new File("/home/nikos/Dropbox/Codes/DRM");
+				theDirectory = new File("/home/nikos/Desktop/");
 			}catch(Exception e){e.printStackTrace();}
 			JFileChooser fc = new JFileChooser(theDirectory);
 			

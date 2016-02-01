@@ -118,9 +118,19 @@ public class JmlModule {
 			
 			}//end if the name of the trans is equal to that of v and they have the same number of args
 			else{
-				if(trans.getOpName().equals(v.getTransition().getOpName())){
-					System.out.println("match but not same args " + trans.termToString(mod, null)
-							+"with " + v.getTransition().termToString(mod, null)	);
+				//TODO the first if here was added at 15/09/2015
+				if(trans!= null && trans.getOpName()!= null && v!= null && v.getTransition()!=null 
+						&& v.getTransition().getOpName() != null){
+					
+					if(trans.getOpName().equals(v.getTransition().getOpName())){
+						System.out.println("match but not same args " + trans.termToString(mod, null)
+								+"with " + v.getTransition().termToString(mod, null)	);
+					}
+				}else{
+					//System.out.println("JmlModule.getObsvalbyTrans::  something went wrong here!! " + trans.termToString(mod, null) );
+					//System.out.println("JmlModule.getObsvalbyTrans::  something went wrong here!! " +  v.getTransition());
+					//System.out.println("JmlModule.getObsvalbyTrans::  something went wrong here!! " +  v.getTransitionName());
+					//System.out.println("JmlModule.getObsvalbyTrans::  something went wrong here!! " +  v.getTransition().getOpName());
 				}
 			}
 		}//end of looping through the getTransObsVals() elements v
@@ -173,6 +183,9 @@ public class JmlModule {
 		ObsValPair newP;
 
 		replacePairs = getObsValbyTrans(chain.get(chain.size()-1),mod);
+		
+		
+		
 				
 		Vector<CafeTerm> allObs =  getObFromPairVect(replacePairs); //stores all observer expressions that have appeared
 
@@ -183,7 +196,11 @@ public class JmlModule {
 			//TODO fix when there is an initial state in the chain!!!!!
 			//if(mod.isInitial(chain.get(i+1).getOpName())){
 			//}//else{
-				
+			
+				//if(chain.get(i).getOpName().equals("+")){
+				//	System.out.println("JmlModule.getObsValAfterTransCh::  " + chain.get(i).getOpName());
+				//}
+			
 				origObsValP = getObsValbyTrans(currentTrans,mod);
 				
 				for(int k=0; k < origObsValP.size();k++){

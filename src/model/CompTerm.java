@@ -119,9 +119,21 @@ public class CompTerm implements CafeTerm{
 									String argSort = gen.getTermSort((CafeTerm) o);
 									Module argMod = gen.getModBySort(argSort);
 									if(argMod != null){ //i.e. o is a projection operator
+										
+										//  if the module in which the argument is defined 
+										//  has the operator of the term, then it should be translated as
+										//  the application of the method of that object
 										String s = getOpName() ;
 										print = print.split(s)[0];
-										print += ((CafeTerm)o).termToString(mod, gen) + "."+ getOpName() +"(";
+										if(argMod.hasOperator(s)){  
+											print += ((CafeTerm)o).termToString(mod, gen) + "."+ getOpName() +"(";
+										}else{
+											// it should be translated as a method of the original module
+											// which takes as input the given (projected) object
+											print += getOpName() +"(" + ((CafeTerm)o).termToString(mod, gen)   ;
+										}//end of if argMod.hasOperator
+									
+									
 									}else{
 										
 										print +=  ((CafeTerm) o).termToString(mod, gen) + ", ";

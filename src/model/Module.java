@@ -74,6 +74,19 @@ public class Module {
 	}
 	public Vector<CafeOperator> getOps(){return ops;}
 
+	/**
+	 * 
+	 * @param opName the name of an operator
+	 * @return true if this operator is defined in this module
+	 */
+	public boolean hasOperator(String opName){
+		for(CafeOperator op : getOps()){
+			if(op.getName().equals(opName))
+				return true;
+		}
+		return false;
+	}
+	
 
 	public void addVar(CafeVariable v){
 		vars.addElement(v);

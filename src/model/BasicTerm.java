@@ -121,9 +121,16 @@ public class BasicTerm implements CafeTerm{
 			//print  += "(" + extra +")";
 			
 		}else{
-			String leftTerm =  (String)getArgs().get(0);  
-			String rightTerm =  getArgs().get(1);
-			print = " (" + leftTerm + " "+ getOpName() + " " + rightTerm + ")";
+			//TODO updated 21/09/2015
+			//if(getArgs().size() > 0){
+				String leftTerm =  (String)getArgs().get(0);  
+				String rightTerm =  getArgs().get(1);
+				print = " (" + leftTerm + " "+ getOpName() + " " + rightTerm + ")";
+			//}else{
+				//System.out.println("BasicTerm.termToString:: Error printing term " + getOpName());
+				//System.out.println("BasicTerm.termToString::" + this.toString());
+				//print ="";
+			//}
 		}
 		
 		return print;

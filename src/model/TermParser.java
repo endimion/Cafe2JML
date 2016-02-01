@@ -469,7 +469,12 @@ public class TermParser {
 					lhs = term.substring(0, eqPos).trim();
 				}else{
 					//System.out.println("TERM :" + term);
-					lhs = term.substring(0, eqPos-mainOp.getName().length()).trim();
+					try{
+						lhs = term.substring(0, eqPos-mainOp.getName().length()).trim();
+					}catch(StringIndexOutOfBoundsException e){
+						System.out.println(term+ "eqPos" + eqPos + " mainOp" + mainOp.getName().length());
+						e.printStackTrace();
+					}
 				}
 				
 				String rhs = term.substring(eqPos+1, term.length()).trim();
@@ -508,7 +513,8 @@ public class TermParser {
 				leftHS = eqTerm.substring(0, main.getPos()).trim();
 				rightHS = eqTerm.substring(main.getPos()+1, eqTerm.length()).trim();
 			}else{
-				throw new Exception("The term parsed should be an equation but " + eqTerm + "is not");
+				throw new Exception("The term parsed should be an equation but " 
+									+ eqTerm + "is not" + main.getName() );
 			}
 		}else{//the line contains only one =
 			leftHS = eqTerm.split("=")[0].trim();

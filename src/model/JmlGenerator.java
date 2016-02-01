@@ -23,7 +23,7 @@ public class JmlGenerator {
 	 * @return  a string consisting of the translation of the initial states
 	 * for the given module
 	 */
-	public String translateInitStates(Module mod, JmlModule jmod){
+	public String translateInitStates(Module mod, JmlModule jmod, String proj){
 		String res = "";
 		Vector<CafeOperator> initStates = mod.getInitialStates();
 		TransObserValues valOfObser = new TransObserValues();
@@ -53,13 +53,46 @@ public class JmlGenerator {
 				CafeTerm left = eq.getLeftTerm();
 				CafeTerm right = eq.getRightTerm();
 				CafeTerm cond = eq.getCondition();
+				
+
+				boolean foundInit = false;
+				if(mod.isProjection(modules, left.getOpName())){
+					Module projModule = getModBySort(mod.getOpSortByName(left.getOpName()));
+					if(projModule.isInitial(right.getOpName())){
+						//System.out.println("in module " + mod.getClassSort()
+						//		+ " found PROJECTION IN INIT STATE for sort " + projModule.getName()
+						//		+" to inital state " + right.getOpName());
+						
+						JmlModule projJmod = getJModBySort(projModule.getClassSort());
+						projJmod.getSort();
+						
+						String rString = translateInitStates(projModule, projJmod, left.termToString(mod, this));
+						rString = rString.replace("/*@ initially","").replace(" @*/","");
+						String fString ="";
+						for(String s : rString.split("\\r?\\n")){
+							fString += (s.trim().startsWith("@"))? s + '\n':""; 
+						}//end of loop
+						//TODO
+						System.out.println(fString);
+						foundInit = true;
+					
+					
+					
+					}
+				}//end if the lefths of the equation is a projection operator
+				
+				//TODO write what the rightHS should be when it denotes an initial state of another object
+				String righHS = (foundInit)? "hh": right.termToString(mod,this);
+				
+				proj = (proj.equals(""))?"": proj+".";
+				
 				if(cond == null){
 					res +=  forallDecl(mod, " @",eq,null);
-					res += "  @ "+ left.printTermSkipArg(0,mod) + " == " + right.termToString(mod,this);
+					res += "  @ "+proj+left.printTermSkipArg(0,mod) + " == " + proj+righHS;
 				}else{
 					res +=  forallDecl(mod, " @",eq,null);
-					res += " @" +cond.termToString(mod, this) + " ==> " +
-							left.printTermSkipArg(0,mod) + " == " + right.termToString(mod,this);
+					res += " @" + proj+cond.termToString(mod, this) + " ==> " +
+							proj+left.printTermSkipArg(0,mod) + " == " + proj+righHS;
 				}
 				res +=(i != matchingEqs.size()-1)? " &&" + '\n': ");"+'\n';
 				
@@ -207,8 +240,12 @@ public class JmlGenerator {
 		CafeTerm trans = (CafeTerm)left.getArgs().get(leftPos); //we retrieve the sub term that denotes the transition rule
 		int sysPos = TermParser.getPositionOfSystemSort(trans, mod); //find the system sort in the transition term
 		
-		trans.getArgs().remove(sysPos); //end remove it
-		
+		//TODO attention this was alterted at 15/09/2015!!!
+		if(sysPos < trans.getArgs().size() && sysPos >= 0){ 
+			//System.out.println("JmlGenerator.translateSimpleEquation:: system position less the arguments of transition " + sysPos + " " + trans.getArgs().size());
+			trans.getArgs().remove(sysPos); //end remove it
+		}
+	
 		if(left instanceof BasicTerm){
 			BasicTerm temp = new BasicTerm(false);
 			temp.setOpName(left.getOpName());
@@ -469,7 +506,10 @@ public class JmlGenerator {
 							chain  = temp;
 							
 							Vector<ObsValPair>  obsValP = jmod.getObsValAfterTransCh(chain, getModBySort(projSort));
-							Vector<String> varList = getVarsOfObsList(obsValP);
+							//TODO somehow in here + is entered as an observer!!!!!!!!
+							
+							Vector<String> varList = getVarsOfObsList(obsValP); 
+							
 							
 						
 							for(String var1: varList){
@@ -498,10 +538,30 @@ public class JmlGenerator {
 								ObsValPair p  = obsValP.get(j);
 								res += "@ " + project.termToString(mod, this)+"."+p.getObs().termToString(mod, this);
 								
-								String obVal = (! (projMod.isOperator(p.getValue().getOpName()) 
-													|| (p.getValue().getArgs().size() > 0) ))?
-										 			 p.getValue().termToString(mod, this) :
+								//TODO 21/09/15!!!!
+								String obVal ="";
+								if((! (projMod.isOperator(p.getValue().getOpName()) 
+													|| (p.getValue().getArgs().size() > 0) )
+													|| projMod.isConstant(p.getValue().getOpName() ))){
+									
+									if(TermParser.isBinary(p.getValue().getOpName())){
+										//if we enter here then inside the projection we do not have
+										// and observer but a binary, i.e. math operator so this should be treated differently!!!!
+										
+										System.out.println("JmlGenerator.translatePRojectEquation::  observer 's value is a math operator!!!! ");
+										System.out.println("JmlGenerator.translatePRojectEquation::  observer" + p.getObs().getOpName()) ;
+										System.out.println(p.getValue().getArgs().size());
+									}
+									
+								//The above is debug!!! should be changed TODO!!!!!	
+								}else{ 
+								
+									obVal = (! (projMod.isOperator(p.getValue().getOpName()) 
+													|| (p.getValue().getArgs().size() > 0) )
+													|| projMod.isConstant(p.getValue().getOpName() ))?
+										 	p.getValue().termToString(mod, this) :
 										 	project.termToString(mod, this)+"."+p.getValue().termToString(mod, this);
+								}
 								
 								if(!isObjectByOpName(p.getObs().getOpName(), projMod)){
 									res +=  "==" +" \\old(" +obVal + ")";
@@ -519,7 +579,7 @@ public class JmlGenerator {
 
 						int i = 0;
 						for(CafeEquation e: matchingEqs){
-							res+=  "@ " + project.termToString(mod, this) + "."+
+							res+=  "@" + project.termToString(mod, this) + "."+
 									e.getLeftTerm().termToString(projMod, this) + " == " 
 									+ e.getRightTerm().termToString(projMod, this);
 							if(i != matchingEqs.size() -1) res += " &&" + '\n';
@@ -596,8 +656,11 @@ public class JmlGenerator {
 	public Vector<CafeTerm> buildChainFromTerm(Vector<CafeTerm> chain, CafeTerm term, 
 			Module mod, String projModSort, String projName){
 		
+		//System.out.println("JmlGenerator.buildChainFromTerm original Term" +(term).getOpName());
+		//System.out.println("JmlGenerator.buildChainFromTerm projector name" + projName);
+		
 		if( getTermSort(term).equals(projModSort) 
-				&& !(term).getOpName().equals(projName))
+				&& !(term).getOpName().equals(projName) )
 		{ chain.add(term); }
 		
 		
@@ -617,6 +680,18 @@ public class JmlGenerator {
 				}//end if the argument denotes an initial state of the projected object
 			}//end if the argument is not a CafeTerm
 		}//end for loop
+		
+		//System.out.println("JmlGenerator.buildChainFromTerm original Term" + term.termToString(mod, this));
+		//
+	//	for(CafeTerm t : chain){
+			//System.out.println("JmlGenerator.buildChainFromTerm term name" +t.getOpName());
+		//	for(CafeTerm ar : (Vector<CafeTerm>)t.getArgs()){
+		//	System.out.println("JmlGenerator.buildChainFromTerm term " +
+			//				t.getOpName() +" arguments"+ar.termToString(mod, this));
+		//	}
+		//}
+		
+		
 		return chain;
 	}//end of buildChainFromTerm
 	
@@ -676,12 +751,12 @@ public class JmlGenerator {
 		String res ="";
 		String forallStart="";
 		
-		
+				
 		TransObserValues valOfObser ; 
 		
 		for(CafeOperator bop : actions){
 			transEq = mod.getMatchingLeftEqs(bop.getName());
-			
+			//System.out.println("action " +  bop.name);
 			CafeTerm effCond = null;
 			
 			for(CafeEquation eq : transEq ){
@@ -692,8 +767,9 @@ public class JmlGenerator {
 						if(arg instanceof CafeTerm){
 							if(((CafeTerm) arg).getOpName().equals("c-"+bop.getName())){
 								effCond = (CafeTerm)arg;
+								
 							}//end if the condition term argument contains the same String as that of the opName
-							
+							//System.out.println(effCond.termToString(mod, this));
 						}//end if the argument is a CafeTerm
 					}//end of looping through the arguments of the condt of eq
 					
@@ -724,7 +800,7 @@ public class JmlGenerator {
 				CafeTerm cond = transEq.get(i).getCondition();
 				
 				int leftPos = TermParser.getPositionOfSystemSort(left,mod);
-				int rightPos = TermParser.getPositionOfSystemSort(left,mod);
+				int rightPos = TermParser.getPositionOfSystemSort(right,mod);
 				
 				if(cond!= null){
 					if(!res.endsWith("@ ")) res +="@";
@@ -753,8 +829,15 @@ public class JmlGenerator {
 					Vector<String> arityVars = mod.getVariableOfEq(eq);
 					//System.out.println("LEEEEFFFFT " + left.getOpName()+ left.termToString(null, null));
 					
+					//System.out.println("JmlGenerator.translateTransition:: right " + right.termToString(mod, this)  + " left " 
+						//																		+ left.termToString(mod, this)  + " rightPos " + rightPos 
+						//																		+ " projSort " + projSort + " getJmlMod " +  
+						//																		getJModBySort(projSort).getSort() 
+						//																		);
+					
 					res += translateProjectEquation(right, left,rightPos,mod,projSort,left,
 							getJModBySort(projSort), arityVars);
+					
 					
 					if(cond!=null){
 						if(i != transEq.size()-1 ) res += ");" + '\n' + "@ also "+ '\n';
@@ -936,7 +1019,42 @@ public class JmlGenerator {
 	}//end of translateHiddenconstants
 	
 	
-	
+	/**
+	 * 
+	 * @return a string denoting the declaration of all the constants THAT DO NOT denote
+	 * an Object , i.e. generates the declaration
+	 * of the translation of visible constants as final data types (or Strings)
+	*/
+	public String translateVisibleConstants(Module mod){
+		String res="";
+		
+		Vector<CafeOperator> ops = mod.getConstants();
+		Vector<CafeOperator> consts = new Vector<CafeOperator>();
+		
+		for(CafeOperator op: ops){
+			if(!op.getSort().equals(mod.getClassSort()) && !isObjectByOpName(op.getName(), mod)){
+				consts.add(op);
+			}//end of if
+		}//end of looping through the operators
+		
+		for(CafeOperator con : consts){
+			if (!(con.getSort().toLowerCase().equals("int") || con.getSort().toLowerCase().equals("nat") ))
+			 {  if(!con.getSort().toLowerCase().equals("string")){   
+				 			res += "public final " + con.getSort() + " "+ con.getName() +"=" 
+					 			+ "new "+con.getSort()+"();"+ '\n' + '\n';
+				}else{
+					// strings are translated as new String objects with the same 
+					// name as the operator, i.e.  a : -> String translates to String a = new String("a");
+					res += "public final " + con.getSort() + " "+ con.getName() +"=" 
+				 			+ "new "+con.getSort()+"("+ '"'+con.getName() +'"'+");"+ '\n' + '\n';
+				}
+			 }else{
+				 res += "public final " + con.getSort() + " "+ con.getName() +"=" 
+				 			+ "...;"+ '\n' + '\n';
+			 }
+		}//end of looping throught the hidden constants
+		return res;
+	}//end of translateVisibleconstants
 	
 	
 	
@@ -1041,7 +1159,8 @@ public class JmlGenerator {
 		
 		res = "public class "+ mod.getClassSort() +"{" + '\n'
 				+ translateHiddenConstants(mod)  + '\n' + 
-				translateInitStates(mod,jmod) + '\n' + translateObservers(mod) + '\n'
+			    translateVisibleConstants(mod)  + '\n' +
+				translateInitStates(mod,jmod,"") + '\n' + translateObservers(mod) + '\n'
 				+ translateGuards(mod) + '\n'
 				+ translateTransition(mod, jmod) + '\n' + "}" + '\n'+ '\n';
 		return res;
