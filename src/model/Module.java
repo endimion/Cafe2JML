@@ -351,6 +351,7 @@ public class Module {
 	/**
 	 * takes as input the name of a CafeOperator Or Variable and returns its sort in
 	 * this module
+	 * if the operator is not found defined in this module "" is returned
 	 * @param name the name of an operator or variable of the module
 	 * @return
 	 */

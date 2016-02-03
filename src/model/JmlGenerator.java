@@ -30,6 +30,11 @@ public class JmlGenerator {
 		
 		BasicTerm initTerm = new BasicTerm(false);
 		
+		// if the name of a projection operator is given using which the translation should be constructed we clean it up
+		if(proj!= null){
+			proj= proj.replace(".","").trim();
+		}
+		
 		
 		for(CafeOperator init : initStates){
 			//1)get the equations matching that have on the left hand side the intial state operator
@@ -43,6 +48,7 @@ public class JmlGenerator {
 			initTerm.setOpName(init.getName());
 			valOfObser.setTransition(initTerm); //save the CafeTerm denoting the transition
 			
+			String projectedObjectsContracts ="";
 			
 			 //save the CafeTerm denoting the observer and the term denoting its value
 			
@@ -56,6 +62,7 @@ public class JmlGenerator {
 				
 
 				boolean foundInit = false;
+				
 				if(mod.isProjection(modules, left.getOpName())){
 					Module projModule = getModBySort(mod.getOpSortByName(left.getOpName()));
 					if(projModule.isInitial(right.getOpName())){
@@ -68,32 +75,58 @@ public class JmlGenerator {
 						
 						String rString = translateInitStates(projModule, projJmod, left.termToString(mod, this));
 						rString = rString.replace("/*@ initially","").replace(" @*/","");
+						
 						String fString ="";
 						for(String s : rString.split("\\r?\\n")){
 							fString += (s.trim().startsWith("@"))? s + '\n':""; 
 						}//end of loop
-						//TODO
-						System.out.println(fString);
+
+						System.out.println("JmlGenerator. translateInitStates :: found projected initial state :: " + fString);
+						projectedObjectsContracts = fString;
 						foundInit = true;
-					
-					
-					
+
 					}
 				}//end if the lefths of the equation is a projection operator
 				
 				//TODO write what the rightHS should be when it denotes an initial state of another object
-				String righHS = (foundInit)? "hh": right.termToString(mod,this);
+				//String righHS = (foundInit)? "hh": right.termToString(mod,this);
 				
-				proj = (proj.equals(""))?"": proj+".";
+				//proj = (proj.equals(""))?"": proj+".";
 				
-				if(cond == null){
-					res +=  forallDecl(mod, " @",eq,null);
-					res += "  @ "+proj+left.printTermSkipArg(0,mod) + " == " + proj+righHS;
-				}else{
-					res +=  forallDecl(mod, " @",eq,null);
-					res += " @" + proj+cond.termToString(mod, this) + " ==> " +
-							proj+left.printTermSkipArg(0,mod) + " == " + proj+righHS;
+				//if(!proj.equals("")){
+					//System.out.println("JmlGenerator. translateInitStates rightHS term is :: " + right.termToString(mod,this) );
+					//System.out.println("JmlGenerator. translateInitStates proj term is :: " + proj );
+				//}
+				
+				String rightHSProj = ""; // the name of the projection, empty string if no projection is given
+				String leftHSProj = "";
+				
+				if (!proj.equals("")){ //if we are translated a projected sort then the projection must be added to the equations
+					leftHSProj = proj+".";
+					if(isObjectByOpName(right.getOpName(), mod)){
+						System.out.println("JmlGenerator. translateInitStates rightHS term is :: " + right.getOpName() );
+						rightHSProj = proj+".";
+					}
 				}
+				
+				 //rightHSProj = (proj.equals("")&& ( !(right.getOpName().equals("false")  || ))? proj+".": "";
+				
+				
+				if(!foundInit){
+					if(cond == null){
+						res +=  forallDecl(mod, " @",eq,null);
+						res += "  @ "+leftHSProj+left.printTermSkipArg(0,mod) + " == " + rightHSProj+right.termToString(mod,this);;
+					}else{
+						res +=  forallDecl(mod, " @",eq,null);
+						res += " @" + leftHSProj+cond.termToString(mod, this) + " ==> " +
+								leftHSProj+left.printTermSkipArg(0,mod) + " == " + rightHSProj+right.termToString(mod,this);;
+					}
+				}else{
+					//when a projected initial state was found add the contract
+					// of that initial state
+					res += projectedObjectsContracts ;
+				}//end if not foundInitialSate
+				
 				res +=(i != matchingEqs.size()-1)? " &&" + '\n': ");"+'\n';
 				
 				int leftPos = TermParser.getPositionOfSystemSort(left,mod);
@@ -1117,8 +1150,8 @@ public class JmlGenerator {
 	public boolean isObjectByOpName(String opName, Module mod){
 		String sort = mod.getOpSortByName(opName);
 		sort = TermParser.cafe2JavaSort(sort);
-		//System.out.println("NAME" + opName + "SORT" +sort);
-		return !(sort.equals("int") || sort.equals("boolean")|| sort.equals("String"));
+		//System.out.println("JmlGenerator.isObjectByOpName:: NAME" + opName + "SORT" +sort);
+		return !(sort.equals("int") || sort.equals("boolean")|| sort.equals("String")||sort.equals(""));
 	}//end of isObjectByOpName
 	
 	
